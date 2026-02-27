@@ -11,6 +11,10 @@ import {
   Zap,
   Flame,
   ChevronRight,
+  Eye,
+  Download,
+  FileImage,
+  Database,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -23,7 +27,7 @@ interface ShareItem {
   sub: string;
   icon: React.ReactNode;
   color: string;
-  path: string;
+  basePath: string; // e.g. "concept", "services", "calc/P3A"
 }
 
 const SHARE_ITEMS: ShareItem[] = [
@@ -33,7 +37,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Complete workflow diagram with all 10 parts",
     icon: <GitBranch className="w-5 h-5" />,
     color: "#3b82f6",
-    path: "/share/concept",
+    basePath: "concept",
   },
   {
     id: "services",
@@ -41,16 +45,15 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "All service cards with expandable calculation flows",
     icon: <LayoutGrid className="w-5 h-5" />,
     color: "#8b5cf6",
-    path: "/share/services",
+    basePath: "services",
   },
-  // Individual calculations
   {
     id: "P3A",
     label: "Water Demand Calculation",
     sub: "Plumbing \u00b7 5-phase detailed SVG flow",
     icon: <Droplets className="w-5 h-5" />,
     color: "#3b82f6",
-    path: "/share/calc/P3A",
+    basePath: "calc/P3A",
   },
   {
     id: "P3B",
@@ -58,7 +61,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Electrical \u00b7 5-phase detailed SVG flow",
     icon: <Zap className="w-5 h-5" />,
     color: "#f59e0b",
-    path: "/share/calc/P3B",
+    basePath: "calc/P3B",
   },
   {
     id: "OWC",
@@ -66,7 +69,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Plumbing \u00b7 Organic Waste Converter",
     icon: <Droplets className="w-5 h-5" />,
     color: "#10b981",
-    path: "/share/calc/OWC",
+    basePath: "calc/OWC",
   },
   {
     id: "STP",
@@ -74,7 +77,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Plumbing \u00b7 Sewage Treatment Plant",
     icon: <Droplets className="w-5 h-5" />,
     color: "#06b6d4",
-    path: "/share/calc/STP",
+    basePath: "calc/STP",
   },
   {
     id: "FFP",
@@ -82,7 +85,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Firefighting \u00b7 Pump head & flow analysis",
     icon: <Flame className="w-5 h-5" />,
     color: "#dc2626",
-    path: "/share/calc/FFP",
+    basePath: "calc/FFP",
   },
   {
     id: "FTK",
@@ -90,7 +93,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Firefighting \u00b7 Tank capacity sizing",
     icon: <Flame className="w-5 h-5" />,
     color: "#dc2626",
-    path: "/share/calc/FTK",
+    basePath: "calc/FTK",
   },
   {
     id: "FJD",
@@ -98,7 +101,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Firefighting \u00b7 Jockey + drencher calcs",
     icon: <Flame className="w-5 h-5" />,
     color: "#dc2626",
-    path: "/share/calc/FJD",
+    basePath: "calc/FJD",
   },
   {
     id: "FTB",
@@ -106,7 +109,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Firefighting \u00b7 Terrace booster head",
     icon: <Flame className="w-5 h-5" />,
     color: "#dc2626",
-    path: "/share/calc/FTB",
+    basePath: "calc/FTB",
   },
   {
     id: "RWH",
@@ -114,7 +117,7 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Plumbing \u00b7 RWH calculator",
     icon: <Droplets className="w-5 h-5" />,
     color: "#3b82f6",
-    path: "/share/calc/RWH",
+    basePath: "calc/RWH",
   },
   {
     id: "SWD",
@@ -122,24 +125,25 @@ const SHARE_ITEMS: ShareItem[] = [
     sub: "Plumbing \u00b7 SWD hydraulic calc",
     icon: <Droplets className="w-5 h-5" />,
     color: "#3b82f6",
-    path: "/share/calc/SWD",
+    basePath: "calc/SWD",
   },
 ];
 
 // =====================================================================
-// SHARE MODAL
+// SHARE MODAL — Two link types
 // =====================================================================
 export function ShareModal({ onClose }: { onClose: () => void }) {
+  // copiedId stores "view:id" or "data:id" to differentiate
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchFilter, setSearchFilter] = useState("");
 
-  const getShareUrl = useCallback((path: string) => {
-    return `${window.location.origin}${path}`;
+  const getShareUrl = useCallback((mode: "view" | "data", basePath: string) => {
+    return `${window.location.origin}/share/${mode}/${basePath}`;
   }, []);
 
   const handleCopy = useCallback(
-    (item: ShareItem) => {
-      const url = getShareUrl(item.path);
+    (item: ShareItem, mode: "view" | "data") => {
+      const url = getShareUrl(mode, item.basePath);
       const ta = document.createElement("textarea");
       ta.value = url;
       ta.style.position = "fixed";
@@ -148,15 +152,15 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      setCopiedId(item.id);
+      setCopiedId(`${mode}:${item.id}`);
       setTimeout(() => setCopiedId(null), 2000);
     },
     [getShareUrl]
   );
 
   const handleOpen = useCallback(
-    (item: ShareItem) => {
-      window.open(getShareUrl(item.path), "_blank");
+    (item: ShareItem, mode: "view" | "data") => {
+      window.open(getShareUrl(mode, item.basePath), "_blank");
     },
     [getShareUrl]
   );
@@ -183,7 +187,7 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
           exit={{ scale: 0.95, opacity: 0, y: 10 }}
           transition={{ type: "spring", damping: 30, stiffness: 400 }}
           className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-          style={{ width: 560, maxHeight: "85vh" }}
+          style={{ width: 640, maxHeight: "85vh" }}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
           {/* Header */}
@@ -200,7 +204,7 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
                   Share with Team
                 </h2>
                 <p className="text-[#94a3b8] text-[12px]">
-                  Generate read-only links with download access
+                  Two separate link types &mdash; choose what your team can access
                 </p>
               </div>
             </div>
@@ -212,13 +216,44 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
             </button>
           </div>
 
-          {/* Info banner */}
-          <div className="mx-6 mt-4 mb-2 px-4 py-3 rounded-lg" style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe" }}>
-            <p className="text-[12px] text-[#1e40af]" style={{ fontWeight: 500 }}>
-              <Link2 className="w-3.5 h-3.5 inline mr-1.5" style={{ verticalAlign: "-2px" }} />
-              Team members can <strong>view</strong> and <strong>download as PNG</strong> using these links.
-              No login required.
-            </p>
+          {/* Two Link Type Info Cards */}
+          <div className="mx-6 mt-4 mb-2 grid grid-cols-2 gap-3">
+            {/* Link Type 1 */}
+            <div
+              className="px-3.5 py-3 rounded-xl"
+              style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe" }}
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center">
+                  <FileImage className="w-3.5 h-3.5 text-white" />
+                </div>
+                <span className="text-[13px] text-[#1e40af]" style={{ fontWeight: 700 }}>
+                  View + PNG
+                </span>
+              </div>
+              <p className="text-[11px] text-[#3b82f6] leading-relaxed">
+                Team can <strong>view</strong> the flowchart and <strong>download it as PNG</strong> image.
+                No clickable data nodes.
+              </p>
+            </div>
+            {/* Link Type 2 */}
+            <div
+              className="px-3.5 py-3 rounded-xl"
+              style={{ backgroundColor: "#fef3c7", border: "1px solid #fcd34d" }}
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-6 h-6 rounded-md bg-amber-600 flex items-center justify-center">
+                  <Database className="w-3.5 h-3.5 text-white" />
+                </div>
+                <span className="text-[13px] text-[#92400e]" style={{ fontWeight: 700 }}>
+                  View + Data
+                </span>
+              </div>
+              <p className="text-[11px] text-[#b45309] leading-relaxed">
+                Team can <strong>view</strong> the flowchart and <strong>click nodes</strong> to download
+                fed policy data &amp; documents.
+              </p>
+            </div>
           </div>
 
           {/* Search */}
@@ -236,7 +271,8 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
           <div className="flex-1 overflow-auto px-6 pb-4" style={{ maxHeight: "50vh" }}>
             <div className="space-y-2">
               {filtered.map((item) => {
-                const isCopied = copiedId === item.id;
+                const isViewCopied = copiedId === `view:${item.id}`;
+                const isDataCopied = copiedId === `data:${item.id}`;
                 return (
                   <div
                     key={item.id}
@@ -258,36 +294,64 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
                       <div className="text-[11px] text-[#94a3b8] truncate">{item.sub}</div>
                     </div>
 
-                    {/* Actions */}
+                    {/* Actions — Two separate link buttons */}
                     <div className="flex items-center gap-1 shrink-0">
+                      {/* View + PNG Link */}
                       <button
-                        onClick={() => handleCopy(item)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] border transition-all"
+                        onClick={() => handleCopy(item, "view")}
+                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] border transition-all"
                         style={{
                           fontWeight: 600,
-                          backgroundColor: isCopied ? "#dcfce7" : "#fff",
-                          borderColor: isCopied ? "#86efac" : "#e2e8f0",
-                          color: isCopied ? "#16a34a" : "#475569",
+                          backgroundColor: isViewCopied ? "#dcfce7" : "#eff6ff",
+                          borderColor: isViewCopied ? "#86efac" : "#bfdbfe",
+                          color: isViewCopied ? "#16a34a" : "#2563eb",
                         }}
-                        title="Copy shareable link"
+                        title="Copy View + PNG link"
                       >
-                        {isCopied ? (
+                        {isViewCopied ? (
                           <>
                             <Check className="w-3 h-3" />
                             Copied
                           </>
                         ) : (
                           <>
-                            <Copy className="w-3 h-3" />
-                            Copy Link
+                            <FileImage className="w-3 h-3" />
+                            PNG
                           </>
                         )}
                       </button>
+
+                      {/* View + Data Link */}
                       <button
-                        onClick={() => handleOpen(item)}
-                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] border border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f1f5f9] transition-colors"
+                        onClick={() => handleCopy(item, "data")}
+                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] border transition-all"
+                        style={{
+                          fontWeight: 600,
+                          backgroundColor: isDataCopied ? "#dcfce7" : "#fef3c7",
+                          borderColor: isDataCopied ? "#86efac" : "#fcd34d",
+                          color: isDataCopied ? "#16a34a" : "#92400e",
+                        }}
+                        title="Copy View + Data Download link"
+                      >
+                        {isDataCopied ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <Database className="w-3 h-3" />
+                            Data
+                          </>
+                        )}
+                      </button>
+
+                      {/* Open preview (view mode) */}
+                      <button
+                        onClick={() => handleOpen(item, "view")}
+                        className="flex items-center gap-1 px-1.5 py-1.5 rounded-lg text-[11px] border border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f1f5f9] transition-colors"
                         style={{ fontWeight: 500 }}
-                        title="Open in new tab"
+                        title="Open in new tab (view)"
                       >
                         <ChevronRight className="w-3 h-3" />
                       </button>
@@ -307,7 +371,7 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
           {/* Footer */}
           <div className="px-6 py-3 border-t border-[#e2e8f0] bg-[#f8fafc] flex items-center justify-between">
             <p className="text-[11px] text-[#94a3b8]">
-              {SHARE_ITEMS.length} items available to share
+              {SHARE_ITEMS.length} items &middot; 2 link types per item
             </p>
             <button
               onClick={onClose}

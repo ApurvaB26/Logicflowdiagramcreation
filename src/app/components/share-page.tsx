@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useLocation } from "react-router";
 import {
   Download,
   ZoomIn,
@@ -12,6 +12,9 @@ import {
   Eye,
   FileImage,
   ChevronDown,
+  Database,
+  MousePointerClick,
+  Info,
 } from "lucide-react";
 import { ConceptStageChart } from "./concept-stage";
 import { ServicesDashboard } from "./services-dashboard";
@@ -108,15 +111,21 @@ function downloadSvgAsPng(container: HTMLElement, filename: string) {
 }
 
 // =====================================================================
-// SHARE PAGE — Read-only view for team members
+// SHARE PAGE — Read-only view with two distinct modes
 // =====================================================================
 export function SharePage() {
   const { type, id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const contentRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(0.48);
   const [copied, setCopied] = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const [showDataBanner, setShowDataBanner] = useState(true);
+
+  // ============ Determine link mode from URL ============
+  const isDataMode = location.pathname.startsWith("/share/data");
+  const isViewMode = !isDataMode; // includes legacy /share/:type
 
   // Determine what we're showing
   const isConceptChart = type === "concept";
@@ -127,11 +136,11 @@ export function SharePage() {
 
   const shareUrl = window.location.href;
   const title = isConceptChart
-    ? "MEP Concept Stage — Complete Workflow"
+    ? "MEP Concept Stage \u2014 Complete Workflow"
     : isServices
     ? "MEP Services Dashboard"
     : calcMeta
-    ? `${calcMeta.title} — ${calcMeta.service}`
+    ? `${calcMeta.title} \u2014 ${calcMeta.service}`
     : "MEP Digital Ecosystem";
 
   const handleCopyLink = useCallback(() => {
@@ -167,7 +176,7 @@ export function SharePage() {
   if (!isConceptChart && !isServices && !isCalc) {
     return (
       <div className="size-full flex flex-col items-center justify-center bg-[#f8fafc] gap-4">
-        <div className="text-6xl">🔗</div>
+        <div className="text-6xl">&#128279;</div>
         <h1 className="text-[#1e293b] text-[22px]" style={{ fontWeight: 700 }}>
           Invalid Share Link
         </h1>
@@ -190,7 +199,7 @@ export function SharePage() {
   if (isCalc && !CalcComponent) {
     return (
       <div className="size-full flex flex-col items-center justify-center bg-[#f8fafc] gap-4">
-        <div className="text-6xl">📊</div>
+        <div className="text-6xl">&#128202;</div>
         <h1 className="text-[#1e293b] text-[22px]" style={{ fontWeight: 700 }}>
           Calculation Not Found
         </h1>
@@ -215,11 +224,13 @@ export function SharePage() {
     <div className="size-full flex flex-col bg-[#f8fafc]">
       {/* ========== SHARED VIEW HEADER ========== */}
       <header className="shrink-0 border-b border-[#e2e8f0] bg-white shadow-sm">
-        {/* Top accent bar */}
+        {/* Top accent bar — different color per mode */}
         <div
-          className="h-1 w-full"
+          className="h-1.5 w-full"
           style={{
-            background: isCalc
+            background: isDataMode
+              ? "linear-gradient(90deg, #f59e0b, #d97706, #b45309)"
+              : isCalc
               ? accentColor
               : "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
           }}
@@ -227,19 +238,34 @@ export function SharePage() {
         <div className="flex items-center justify-between px-5 py-3">
           {/* Left: Info */}
           <div className="flex items-center gap-3">
-            {/* Shared badge */}
-            <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]"
-              style={{
-                backgroundColor: `${accentColor}15`,
-                color: accentColor,
-                border: `1px solid ${accentColor}30`,
-                fontWeight: 600,
-              }}
-            >
-              <Eye className="w-3.5 h-3.5" />
-              Shared View
-            </div>
+            {/* Mode badge */}
+            {isViewMode ? (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]"
+                style={{
+                  backgroundColor: "#eff6ff",
+                  color: "#2563eb",
+                  border: "1px solid #bfdbfe",
+                  fontWeight: 600,
+                }}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                View + PNG
+              </div>
+            ) : (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]"
+                style={{
+                  backgroundColor: "#fef3c7",
+                  color: "#92400e",
+                  border: "1px solid #fcd34d",
+                  fontWeight: 600,
+                }}
+              >
+                <Database className="w-3.5 h-3.5" />
+                View + Data
+              </div>
+            )}
             <div className="w-px h-6 bg-[#e2e8f0]" />
             <div>
               <div className="flex items-center gap-2">
@@ -247,7 +273,10 @@ export function SharePage() {
                 <h1 className="text-[#0f172a] text-[15px] leading-tight">{title}</h1>
               </div>
               <p className="text-[#94a3b8] text-[11px] mt-0.5">
-                MEP Digital Ecosystem &middot; Read-only view &middot; Download available
+                MEP Digital Ecosystem &middot;{" "}
+                {isViewMode
+                  ? "Read-only view \u00b7 PNG download available"
+                  : "Click highlighted nodes to download data"}
               </p>
             </div>
           </div>
@@ -282,39 +311,57 @@ export function SharePage() {
               </>
             )}
 
-            {/* Download button */}
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDownloadMenu((v) => !v);
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                style={{ fontWeight: 600 }}
-              >
-                <Download className="w-4 h-4" />
-                Download
-                <ChevronDown className="w-3 h-3 ml-0.5" />
-              </button>
-              {showDownloadMenu && (
-                <div
-                  className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-xl border border-[#e2e8f0] overflow-hidden z-50"
-                  style={{ minWidth: 200 }}
-                  onClick={(e) => e.stopPropagation()}
+            {/* ============ VIEW MODE: Download PNG button ============ */}
+            {isViewMode && (
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDownloadMenu((v) => !v);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  style={{ fontWeight: 600 }}
                 >
-                  <button
-                    onClick={handleDownloadPNG}
-                    className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-[#1e293b] hover:bg-[#f1f5f9] transition-colors text-left"
+                  <Download className="w-4 h-4" />
+                  Download PNG
+                  <ChevronDown className="w-3 h-3 ml-0.5" />
+                </button>
+                {showDownloadMenu && (
+                  <div
+                    className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-xl border border-[#e2e8f0] overflow-hidden z-50"
+                    style={{ minWidth: 200 }}
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <FileImage className="w-4 h-4 text-blue-500" />
-                    <div>
-                      <div style={{ fontWeight: 600 }}>Download as PNG</div>
-                      <div className="text-[11px] text-[#94a3b8]">High-res 3× image</div>
-                    </div>
-                  </button>
-                </div>
-              )}
-            </div>
+                    <button
+                      onClick={handleDownloadPNG}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-[#1e293b] hover:bg-[#f1f5f9] transition-colors text-left"
+                    >
+                      <FileImage className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <div style={{ fontWeight: 600 }}>Download as PNG</div>
+                        <div className="text-[11px] text-[#94a3b8]">High-res 3&times; image</div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ============ DATA MODE: Info badge (no PNG download) ============ */}
+            {isDataMode && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] border"
+                style={{
+                  fontWeight: 600,
+                  backgroundColor: "#fef3c7",
+                  borderColor: "#fcd34d",
+                  color: "#92400e",
+                }}
+              >
+                <MousePointerClick className="w-4 h-4" />
+                Click Nodes to Download
+              </div>
+            )}
 
             {/* Copy link */}
             <button
@@ -347,6 +394,34 @@ export function SharePage() {
           </div>
         </div>
       </header>
+
+      {/* ========== DATA MODE: Instruction Banner ========== */}
+      {isDataMode && showDataBanner && (
+        <div
+          className="mx-6 mt-4 px-4 py-3 rounded-xl flex items-start gap-3 relative"
+          style={{ backgroundColor: "#fffbeb", border: "1px solid #fcd34d" }}
+        >
+          <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shrink-0 mt-0.5">
+            <Info className="w-4 h-4 text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[13px] text-[#92400e]" style={{ fontWeight: 700 }}>
+              Data Download Mode
+            </p>
+            <p className="text-[12px] text-[#b45309] mt-0.5 leading-relaxed">
+              Nodes with <strong>fed data</strong> are highlighted with a pulsing amber border. Click any
+              highlighted node to download its associated policy document, calculation data, or reference file.
+              Nodes without data are view-only.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowDataBanner(false)}
+            className="text-[#b45309] hover:text-[#92400e] transition-colors shrink-0 mt-1"
+          >
+            <span className="text-[16px] leading-none">&times;</span>
+          </button>
+        </div>
+      )}
 
       {/* ========== CONTENT ========== */}
       <div className="flex-1 overflow-auto" ref={contentRef}>
@@ -388,6 +463,7 @@ export function SharePage() {
                   </h2>
                   <p className="text-white" style={{ fontSize: "12px", opacity: 0.8 }}>
                     {calcMeta!.service} Service &middot; Detailed Algorithm Flow
+                    {isDataMode && " \u00b7 Click nodes with data to download"}
                   </p>
                 </div>
               </div>
@@ -403,6 +479,9 @@ export function SharePage() {
                   { label: "Formula / Calc", bg: "#ede9fe", bd: "#7c3aed" },
                   { label: "DB Fetch", bg: "#cffafe", bd: "#0891b2" },
                   { label: "Warning", bg: "#ffe4e6", bd: "#e11d48" },
+                  ...(isDataMode
+                    ? [{ label: "Has Data (click)", bg: "#fef3c7", bd: "#d97706" }]
+                    : []),
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-1.5">
                     <div
@@ -435,7 +514,9 @@ export function SharePage() {
             style={{ backgroundColor: "#f1f5f9" }}
           >
             <Share2 className="w-3 h-3" />
-            Shared via MEP Digital Ecosystem &middot; {new Date().toLocaleDateString("en-IN", {
+            Shared via MEP Digital Ecosystem &middot;{" "}
+            {isViewMode ? "View + PNG" : "View + Data"} &middot;{" "}
+            {new Date().toLocaleDateString("en-IN", {
               day: "numeric",
               month: "short",
               year: "numeric",
