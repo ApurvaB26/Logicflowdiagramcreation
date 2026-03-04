@@ -17,6 +17,9 @@ import {
   Info,
 } from "lucide-react";
 import { ConceptStageChart } from "./concept-stage";
+import { DetailedDesignStageChart } from "./detailed-design-stage";
+import { TenderStageChart } from "./tender-stage";
+import { VFCStageChart } from "./vfc-stage";
 import { ServicesDashboard } from "./services-dashboard";
 import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
@@ -129,14 +132,24 @@ export function SharePage() {
 
   // Determine what we're showing
   const isConceptChart = type === "concept";
+  const isDetailedChart = type === "detailed";
+  const isTenderChart = type === "tender";
+  const isVFCChart = type === "vfc";
   const isServices = type === "services";
   const isCalc = type === "calc" && id;
   const calcMeta = isCalc ? CALC_META[id] : null;
   const CalcComponent = isCalc ? CALC_COMPONENTS[id] : null;
+  const isStageChart = isConceptChart || isDetailedChart || isTenderChart || isVFCChart;
 
   const shareUrl = window.location.href;
   const title = isConceptChart
     ? "MEP Concept Stage \u2014 Complete Workflow"
+    : isDetailedChart
+    ? "MEP Detailed Design Stage \u2014 Complete Workflow"
+    : isTenderChart
+    ? "MEP Tender Stage \u2014 Complete Workflow"
+    : isVFCChart
+    ? "MEP VFC Stage \u2014 Validated for Construction"
     : isServices
     ? "MEP Services Dashboard"
     : calcMeta
@@ -173,7 +186,7 @@ export function SharePage() {
   }, [showDownloadMenu]);
 
   // Invalid route
-  if (!isConceptChart && !isServices && !isCalc) {
+  if (!isStageChart && !isServices && !isCalc) {
     return (
       <div className="size-full flex flex-col items-center justify-center bg-[#f8fafc] gap-4">
         <div className="text-6xl">&#128279;</div>
@@ -232,6 +245,12 @@ export function SharePage() {
               ? "linear-gradient(90deg, #f59e0b, #d97706, #b45309)"
               : isCalc
               ? accentColor
+              : isDetailedChart
+              ? "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)"
+              : isTenderChart
+              ? "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)"
+              : isVFCChart
+              ? "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #10b981, #059669)"
               : "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
           }}
         />
@@ -284,7 +303,7 @@ export function SharePage() {
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
             {/* Zoom controls for chart views */}
-            {(isConceptChart || isCalc) && (
+            {(isStageChart || isCalc) && (
               <>
                 <button
                   onClick={() => setZoom((z) => Math.min(z + 0.06, 1.2))}
@@ -437,6 +456,57 @@ export function SharePage() {
               />
               <div className="p-4" style={{ zoom }}>
                 <ConceptStageChart />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isDetailedChart && (
+          <div className="p-6">
+            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
+              <div
+                className="h-1 w-full"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)",
+                }}
+              />
+              <div className="p-4" style={{ zoom }}>
+                <DetailedDesignStageChart />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isTenderChart && (
+          <div className="p-6">
+            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
+              <div
+                className="h-1 w-full"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)",
+                }}
+              />
+              <div className="p-4" style={{ zoom }}>
+                <TenderStageChart />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isVFCChart && (
+          <div className="p-6">
+            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
+              <div
+                className="h-1 w-full"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #f97316, #10b981)",
+                }}
+              />
+              <div className="p-4" style={{ zoom }}>
+                <VFCStageChart />
               </div>
             </div>
           </div>

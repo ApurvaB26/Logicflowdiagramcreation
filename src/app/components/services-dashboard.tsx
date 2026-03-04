@@ -31,7 +31,15 @@ interface Calculation {
   title: string;
   description: string;
   status: "ready" | "coming-soon";
+  stage: "concept" | "detailed" | "tender" | "vfc";
 }
+
+const STAGE_META: Record<string, { label: string; color: string; bg: string }> = {
+  concept:  { label: "Concept Stage",         color: "#3b82f6", bg: "#dbeafe" },
+  detailed: { label: "Detailed Design Stage", color: "#8b5cf6", bg: "#ede9fe" },
+  tender:   { label: "Tender Stage",          color: "#14b8a6", bg: "#ccfbf1" },
+  vfc:      { label: "VFC Stage",             color: "#f97316", bg: "#fed7aa" },
+};
 
 interface Service {
   id: string;
@@ -48,147 +56,108 @@ const SERVICES: Service[] = [
   {
     id: "electrical",
     title: "Electrical Calculations",
-    subtitle: "Power distribution, load analysis & equipment sizing",
+    subtitle: "Power distribution, load analysis & equipment sizing \u2014 All Stages",
     icon: <Zap className="w-7 h-7" />,
     color: "#f59e0b",
     colorLight: "#fef3c7",
     colorDark: "#92400e",
     calculations: [
-      {
-        id: "P3B",
-        title: "Electrical Load Calculations",
-        description: "Supply norms, apartment/common/MLCP loads, transformer & DG sizing",
-        status: "ready",
-      },
+      // ── Concept Stage ──
+      { id: "P3B", title: "Electrical Load Calculations", description: "Supply norms, apartment/common/MLCP loads, transformer & DG sizing", status: "ready", stage: "concept" },
+      // ── Detailed Design Stage ──
+      { id: "DD_CB", title: "Cable Sizing Calculation", description: "IS 3961/IEC 60502 current rating, voltage drop & short circuit withstand", status: "coming-soon", stage: "detailed" },
+      { id: "DD_PNL", title: "Panel Schedule Design", description: "R-Y-B phase balancing, MCB/MCCB selection per circuit", status: "coming-soon", stage: "detailed" },
+      { id: "DD_SLD", title: "SLD (Single Line Diagram)", description: "Transformer to outgoing feeders, protection coordination", status: "coming-soon", stage: "detailed" },
+      { id: "DD_ERT", title: "Earthing Design", description: "IS 3043 electrode sizing, soil resistivity, earth pit layout", status: "coming-soon", stage: "detailed" },
+      { id: "DD_LTN", title: "Lightning Protection", description: "IS/IEC 62305 risk assessment, rolling sphere & mesh method", status: "coming-soon", stage: "detailed" },
+      { id: "DD_BUS", title: "Bus Bar Sizing", description: "Max demand current rating, Cu/Al selection from tables", status: "coming-soon", stage: "detailed" },
+      // ── Tender Stage ──
+      { id: "T_BOQ_EL", title: "Electrical BOQ", description: "Cable schedule, panel/DB, earthing/LP, switchgear & lighting quantities", status: "coming-soon", stage: "tender" },
+      // ── VFC Stage ──
+      { id: "V_VFC_EL", title: "Electrical VFC Update", description: "Cable schedule, panel revision, SLD & earthing updates per contractor", status: "coming-soon", stage: "vfc" },
     ],
   },
   {
     id: "plumbing",
     title: "Plumbing Calculations",
-    subtitle: "Water supply, drainage & pipe sizing",
+    subtitle: "Water supply, drainage & pipe sizing \u2014 All Stages",
     icon: <Droplets className="w-7 h-7" />,
     color: "#3b82f6",
     colorLight: "#dbeafe",
     colorDark: "#1e40af",
     calculations: [
-      {
-        id: "P3A",
-        title: "Water Demand Calculations",
-        description: "Population estimate, per capita demand, tank sizing & peak hour factor",
-        status: "ready",
-      },
-      {
-        id: "OWC",
-        title: "OWC Calculations",
-        description: "Waste generation, bin sizing, garbage room & OWC capacity (CPHEEO/NBC)",
-        status: "ready",
-      },
-      {
-        id: "STP",
-        title: "STP Calculations",
-        description: "Sewage generation (80/100 rule), STP sizing, area & treated water reuse",
-        status: "ready",
-      },
-      {
-        id: "DFP",
-        title: "Domestic & Flushing Pump Calculations",
-        description: "Pump head, flow rate & pump selection for domestic and flushing systems",
-        status: "coming-soon",
-      },
-      {
-        id: "P3E",
-        title: "External Sewer & Storm Calculations",
-        description: "Storm water flow, sewer pipe sizing, STP capacity & rainwater harvesting",
-        status: "coming-soon",
-      },
-      {
-        id: "RWH",
-        title: "Rainwater Harvesting & Tank Sizing",
-        description: "Catchment runoff, downcomer sizing, velocity guard & NBC 2016 tank sizing",
-        status: "ready",
-      },
-      {
-        id: "SWD",
-        title: "Storm Water Drainage Calculator",
-        description: "Rational method runoff, Manning's equation, velocity monitoring & pipe sizing",
-        status: "ready",
-      },
-      {
-        id: "P3T_PLUMB",
-        title: "Transfer Pipe Sizing",
-        description: "Pipe diameter, friction loss & material specification for plumbing transfers",
-        status: "coming-soon",
-      },
+      // ── Concept Stage ──
+      { id: "P3A", title: "Water Demand Calculations", description: "Population estimate, per capita demand, tank sizing & peak hour factor", status: "ready", stage: "concept" },
+      { id: "OWC", title: "OWC Calculations", description: "Waste generation, bin sizing, garbage room & OWC capacity (CPHEEO/NBC)", status: "ready", stage: "concept" },
+      { id: "STP", title: "STP Calculations", description: "Sewage generation (80/100 rule), STP sizing, area & treated water reuse", status: "ready", stage: "concept" },
+      { id: "DFP", title: "Domestic & Flushing Pump Calculations", description: "Pump head, flow rate & pump selection for domestic and flushing systems", status: "coming-soon", stage: "concept" },
+      { id: "P3E", title: "External Sewer & Storm Calculations", description: "Storm water flow, sewer pipe sizing, STP capacity & rainwater harvesting", status: "coming-soon", stage: "concept" },
+      { id: "RWH", title: "Rainwater Harvesting & Tank Sizing", description: "Catchment runoff, downcomer sizing, velocity guard & NBC 2016 tank sizing", status: "ready", stage: "concept" },
+      { id: "SWD", title: "Storm Water Drainage Calculator", description: "Rational method runoff, Manning's equation, velocity monitoring & pipe sizing", status: "ready", stage: "concept" },
+      { id: "P3T_PLUMB", title: "Transfer Pipe Sizing", description: "Pipe diameter, friction loss & material specification for plumbing transfers", status: "coming-soon", stage: "concept" },
+      // ── Detailed Design Stage ──
+      { id: "DD_PIP", title: "Pipe Sizing (Hot/Cold)", description: "Hunter's method, velocity check, IS 2065 standard pipe diameter calc", status: "coming-soon", stage: "detailed" },
+      { id: "DD_RSR", title: "Riser Diagrams", description: "Floor-wise riser layout, connection points & isolation valves", status: "coming-soon", stage: "detailed" },
+      { id: "DD_DRN", title: "Drainage Calculations", description: "Fixture unit count, drainage pipe sizing per floor", status: "coming-soon", stage: "detailed" },
+      { id: "DD_PMP", title: "Pump Selection", description: "Detailed pump curve matching, duty/standby selection", status: "coming-soon", stage: "detailed" },
+      { id: "DD_VNT", title: "Vent Pipe Sizing", description: "Vent stack sizing per drainage fixture load", status: "coming-soon", stage: "detailed" },
+      { id: "DD_WMT", title: "Water Meter Sizing", description: "Flow-based meter selection per zone/riser", status: "coming-soon", stage: "detailed" },
+      // ── Tender Stage ──
+      { id: "T_BOQ_PL", title: "Plumbing BOQ", description: "Pipe/fitting, pump, sanitary fixture, tank & valve schedule quantities", status: "coming-soon", stage: "tender" },
+      // ── VFC Stage ──
+      { id: "V_VFC_PL", title: "Plumbing VFC Update", description: "Pipe schedule, pump reselection, drainage & valve updates per contractor", status: "coming-soon", stage: "vfc" },
     ],
   },
   {
     id: "hvac",
     title: "HVAC Calculations",
-    subtitle: "Heating, ventilation & air conditioning design",
+    subtitle: "Heating, ventilation & air conditioning design \u2014 All Stages",
     icon: <Wind className="w-7 h-7" />,
     color: "#8b5cf6",
     colorLight: "#ede9fe",
     colorDark: "#5b21b6",
     calculations: [
-      {
-        id: "P3D",
-        title: "Heat Load Calculations",
-        description: "Sensible & latent heat, cooling load, TR calculation & equipment sizing",
-        status: "coming-soon",
-      },
-      {
-        id: "VENT",
-        title: "Ventilation Calculations",
-        description: "Air change rate, duct sizing & fresh air requirements",
-        status: "coming-soon",
-      },
-      {
-        id: "PRESS",
-        title: "Pressurisation Calculations",
-        description: "Stairwell & lobby pressurisation system design",
-        status: "coming-soon",
-      },
+      // ── Concept Stage ──
+      { id: "P3D", title: "Heat Load Calculations", description: "Sensible & latent heat, cooling load, TR calculation & equipment sizing", status: "coming-soon", stage: "concept" },
+      { id: "VENT", title: "Ventilation Calculations", description: "Air change rate, duct sizing & fresh air requirements", status: "coming-soon", stage: "concept" },
+      { id: "PRESS", title: "Pressurisation Calculations", description: "Stairwell & lobby pressurisation system design", status: "coming-soon", stage: "concept" },
+      // ── Detailed Design Stage ──
+      { id: "DD_DCT", title: "Duct Sizing", description: "Equal friction / velocity method, duct schedule per floor", status: "coming-soon", stage: "detailed" },
+      { id: "DD_EQP", title: "Equipment Selection", description: "Chiller/AHU/FCU selection from manufacturer data", status: "coming-soon", stage: "detailed" },
+      { id: "DD_VAV", title: "VAV/FCU Selection", description: "Variable air volume & fan coil unit sizing per zone", status: "coming-soon", stage: "detailed" },
+      { id: "DD_BMS", title: "BMS Integration", description: "Building management system points list & architecture", status: "coming-soon", stage: "detailed" },
+      { id: "DD_SMK", title: "Smoke Management", description: "Smoke extraction fan sizing & pressurisation calc", status: "coming-soon", stage: "detailed" },
+      // ── Tender Stage ──
+      { id: "T_BOQ_HV", title: "HVAC BOQ", description: "Duct/insulation, equipment, diffuser/grille, controls & refrigerant piping", status: "coming-soon", stage: "tender" },
+      // ── VFC Stage ──
+      { id: "V_VFC_HV", title: "HVAC VFC Update", description: "Duct revision, equipment confirmation, controls & diffuser updates", status: "coming-soon", stage: "vfc" },
     ],
   },
   {
     id: "firefighting",
     title: "Firefighting Calculations",
-    subtitle: "Fire protection system design & pump sizing",
+    subtitle: "Fire protection system design & pump sizing \u2014 All Stages",
     icon: <Flame className="w-7 h-7" />,
     color: "#ef4444",
     colorLight: "#fee2e2",
     colorDark: "#991b1b",
     calculations: [
-      {
-        id: "FFP",
-        title: "Fire Pump Head Calculations",
-        description: "Static head, Hazen-Williams friction, system pressure & multi-zone pump output",
-        status: "ready",
-      },
-      {
-        id: "FTK",
-        title: "Fire Tank Size Estimation",
-        description: "IS-15105/NFPA-13 standards, sprinkler/hydrant/drencher volume & 300m\u00B3 safety gate",
-        status: "ready",
-      },
-      {
-        id: "FJD",
-        title: "Jockey & Drencher Pump Calculations",
-        description: "Jockey/drencher head loss, 20% safety factor & system pressure summation",
-        status: "ready",
-      },
-      {
-        id: "FTB",
-        title: "Terrace Fire Booster Pump Head",
-        description: "Hazen-Williams friction, pipe fittings, static head & residual pressure calc",
-        status: "ready",
-      },
-      {
-        id: "P3T_FF",
-        title: "Transfer Pipe Sizing",
-        description: "Pipe diameter, friction loss & material specification for fire transfers",
-        status: "coming-soon",
-      },
+      // ── Concept Stage ──
+      { id: "FFP", title: "Fire Pump Head Calculations", description: "Static head, Hazen-Williams friction, system pressure & multi-zone pump output", status: "ready", stage: "concept" },
+      { id: "FTK", title: "Fire Tank Size Estimation", description: "IS-15105/NFPA-13 standards, sprinkler/hydrant/drencher volume & 300m\u00B3 safety gate", status: "ready", stage: "concept" },
+      { id: "FJD", title: "Jockey & Drencher Pump Calculations", description: "Jockey/drencher head loss, 20% safety factor & system pressure summation", status: "ready", stage: "concept" },
+      { id: "FTB", title: "Terrace Fire Booster Pump Head", description: "Hazen-Williams friction, pipe fittings, static head & residual pressure calc", status: "ready", stage: "concept" },
+      { id: "P3T_FF", title: "Transfer Pipe Sizing", description: "Pipe diameter, friction loss & material specification for fire transfers", status: "coming-soon", stage: "concept" },
+      // ── Detailed Design Stage ──
+      { id: "DD_SPR", title: "Sprinkler Hydraulic Calc", description: "K-factor, design density, hydraulic calc & pipe network sizing", status: "coming-soon", stage: "detailed" },
+      { id: "DD_HYD", title: "Hydrant Layout", description: "Hydrant spacing, hose reel coverage & pipe sizing", status: "coming-soon", stage: "detailed" },
+      { id: "DD_DET", title: "Detection System", description: "Smoke/heat detector spacing, zone layout & panel sizing", status: "coming-soon", stage: "detailed" },
+      { id: "DD_PAV", title: "PA/VA System", description: "Public address & voice alarm speaker layout & wiring", status: "coming-soon", stage: "detailed" },
+      { id: "DD_SMX", title: "Smoke Exhaust", description: "Smoke extraction fan sizing & exhaust duct layout", status: "coming-soon", stage: "detailed" },
+      // ── Tender Stage ──
+      { id: "T_BOQ_FF", title: "Firefighting BOQ", description: "Sprinkler, hydrant, detection/alarm, suppression & fire pump quantities", status: "coming-soon", stage: "tender" },
+      // ── VFC Stage ──
+      { id: "V_VFC_FF", title: "Firefighting VFC Update", description: "Sprinkler revision, hydrant update, detection & pump reselection", status: "coming-soon", stage: "vfc" },
     ],
   },
 ];
@@ -495,6 +464,99 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
       { from: "TF4", to: "TF5" }, { from: "TF5", to: "TF6" }, { from: "TF6", to: "TF7" },
     ],
   },
+  // ── Detailed Design Stage Calcs ──
+  DD_CB: { title: "Cable Sizing Calculation", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
+    steps: [{ id: "CB1", label: "Input: Circuit Data", sub: "Load current, cable route length, installation method", type: "input" }, { id: "CB2", label: "Current Rating Lookup", sub: "IS 3961/IEC 60502 derating factors", type: "process" }, { id: "CB3", label: "Voltage Drop Check", sub: "Max 3% for sub-main, 5% total", type: "formula" }, { id: "CB4", label: "Short Circuit Withstand", sub: "I\u00B2t check for fault duration", type: "formula" }, { id: "CB5", label: "Output: Cable Schedule", sub: "Cable size + type + route \u2192 BOQ", type: "output" }],
+    connections: [{ from: "CB1", to: "CB2" }, { from: "CB2", to: "CB3" }, { from: "CB3", to: "CB4" }, { from: "CB4", to: "CB5" }] },
+  DD_PNL: { title: "Panel Schedule Design", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
+    steps: [{ id: "PN1", label: "Input: Circuit List", sub: "All outgoing circuits per panel", type: "input" }, { id: "PN2", label: "Phase Balancing", sub: "R-Y-B load distribution", type: "process" }, { id: "PN3", label: "MCB/MCCB Selection", sub: "Rating per circuit from load data", type: "process" }, { id: "PN4", label: "Output: Panel Schedule", sub: "Complete panel schedule drawing", type: "output" }],
+    connections: [{ from: "PN1", to: "PN2" }, { from: "PN2", to: "PN3" }, { from: "PN3", to: "PN4" }] },
+  DD_SLD: { title: "SLD (Single Line Diagram)", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
+    steps: [{ id: "SL1", label: "Input: Transformer & Load Data", sub: "Incomer + all outgoing feeders", type: "input" }, { id: "SL2", label: "Protection Coordination", sub: "Relay/breaker settings per tier", type: "process" }, { id: "SL3", label: "SLD Layout", sub: "Transformer to outgoing feeders diagram", type: "process" }, { id: "SL4", label: "Output: SLD Drawing", sub: "Complete single line diagram", type: "output" }],
+    connections: [{ from: "SL1", to: "SL2" }, { from: "SL2", to: "SL3" }, { from: "SL3", to: "SL4" }] },
+  DD_ERT: { title: "Earthing Design", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
+    steps: [{ id: "ER1", label: "Input: Soil & Building Data", sub: "Soil resistivity, building footprint", type: "input" }, { id: "ER2", label: "Electrode Sizing", sub: "IS 3043 calculation for earth pits", type: "formula" }, { id: "ER3", label: "Earth Pit Layout", sub: "Spacing + ring earth conductor", type: "process" }, { id: "ER4", label: "Output: Earthing Layout", sub: "Earth pit locations + conductor sizes", type: "output" }],
+    connections: [{ from: "ER1", to: "ER2" }, { from: "ER2", to: "ER3" }, { from: "ER3", to: "ER4" }] },
+  DD_LTN: { title: "Lightning Protection", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
+    steps: [{ id: "LT1", label: "Input: Building Geometry", sub: "Height, footprint, roof type", type: "input" }, { id: "LT2", label: "Risk Assessment", sub: "IS/IEC 62305 risk calculation", type: "formula" }, { id: "LT3", label: "Protection Method", sub: "Rolling sphere / mesh / rod", type: "process" }, { id: "LT4", label: "Output: LP Layout", sub: "Air terminal + down conductor layout", type: "output" }],
+    connections: [{ from: "LT1", to: "LT2" }, { from: "LT2", to: "LT3" }, { from: "LT3", to: "LT4" }] },
+  DD_BUS: { title: "Bus Bar Sizing", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
+    steps: [{ id: "BB1", label: "Input: Max Demand Current", sub: "From electrical load calc output", type: "input" }, { id: "BB2", label: "Material Selection", sub: "Cu/Al from standard tables", type: "process" }, { id: "BB3", label: "Temperature Rise Check", sub: "Current density \u2264 limit", type: "formula" }, { id: "BB4", label: "Output: Bus Bar Schedule", sub: "Size + material + mounting", type: "output" }],
+    connections: [{ from: "BB1", to: "BB2" }, { from: "BB2", to: "BB3" }, { from: "BB3", to: "BB4" }] },
+  DD_PIP: { title: "Pipe Sizing (Hot/Cold)", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
+    steps: [{ id: "PI1", label: "Input: Fixture Unit Count", sub: "Hunter's method FU per floor", type: "input" }, { id: "PI2", label: "Flow Rate Conversion", sub: "FU \u2192 LPS from IS/NBC tables", type: "formula" }, { id: "PI3", label: "Velocity Check", sub: "1.5\u20133.0 m/s target range", type: "formula" }, { id: "PI4", label: "Pipe Diameter Calc", sub: "D = \u221A(4Q/\u03C0V) \u2192 standard size", type: "formula" }, { id: "PI5", label: "Output: Pipe Schedule", sub: "Pipe sizes per floor \u2192 BOQ", type: "output" }],
+    connections: [{ from: "PI1", to: "PI2" }, { from: "PI2", to: "PI3" }, { from: "PI3", to: "PI4" }, { from: "PI4", to: "PI5" }] },
+  DD_SPR: { title: "Sprinkler Hydraulic Calc", icon: "\uD83D\uDD25", color: "#e11d48", accentBg: "#ffe4e6",
+    steps: [{ id: "SP1", label: "Input: Hazard Class & Area", sub: "Occupancy type, design area", type: "input" }, { id: "SP2", label: "Design Density", sub: "NFPA/IS density selection (mm/min)", type: "process" }, { id: "SP3", label: "K-Factor Selection", sub: "Sprinkler head K-factor from DB", type: "process" }, { id: "SP4", label: "Hydraulic Calculation", sub: "Pipe network pressure/flow calc", type: "formula" }, { id: "SP5", label: "Output: Sprinkler Schedule", sub: "Head layout + pipe sizes \u2192 drawings", type: "output" }],
+    connections: [{ from: "SP1", to: "SP2" }, { from: "SP2", to: "SP3" }, { from: "SP3", to: "SP4" }, { from: "SP4", to: "SP5" }] },
+  DD_RSR: { title: "Riser Diagrams", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
+    steps: [{ id: "R1", label: "Input: Floor-wise Demand", sub: "FU count + pipe routes per floor", type: "input" }, { id: "R2", label: "Riser Layout", sub: "Vertical pipe routing floor-to-floor", type: "process" }, { id: "R3", label: "Connection Points", sub: "Branch takeoffs + isolation valve locations", type: "process" }, { id: "R4", label: "Output: Riser Diagram", sub: "Complete riser drawing per service", type: "output" }],
+    connections: [{ from: "R1", to: "R2" }, { from: "R2", to: "R3" }, { from: "R3", to: "R4" }] },
+  DD_DRN: { title: "Drainage Calculations", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
+    steps: [{ id: "D1", label: "Input: Fixture Units", sub: "DFU count per floor per stack", type: "input" }, { id: "D2", label: "Stack Sizing", sub: "IS 5329 / NBC drainage stack tables", type: "formula" }, { id: "D3", label: "Branch Drain Sizing", sub: "Slope + flow rate per branch", type: "formula" }, { id: "D4", label: "Output: Drainage Schedule", sub: "Stack + branch sizes per floor", type: "output" }],
+    connections: [{ from: "D1", to: "D2" }, { from: "D2", to: "D3" }, { from: "D3", to: "D4" }] },
+  DD_PMP: { title: "Pump Selection", icon: "\uD83D\uDD27", color: "#2563eb", accentBg: "#dbeafe",
+    steps: [{ id: "PM1", label: "Input: Duty Point", sub: "Flow (LPS) + Head (m) from calcs", type: "input" }, { id: "PM2", label: "Pump Curve Matching", sub: "Manufacturer catalogue lookup", type: "process" }, { id: "PM3", label: "Efficiency Check", sub: "BEP proximity & NPSH verification", type: "formula" }, { id: "PM4", label: "Duty/Standby Config", sub: "Number of pumps + VFD requirement", type: "process" }, { id: "PM5", label: "Output: Pump Schedule", sub: "Model + rating + motor kW \u2192 BOQ", type: "output" }],
+    connections: [{ from: "PM1", to: "PM2" }, { from: "PM2", to: "PM3" }, { from: "PM3", to: "PM4" }, { from: "PM4", to: "PM5" }] },
+  DD_VNT: { title: "Vent Pipe Sizing", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
+    steps: [{ id: "VN1", label: "Input: DFU Load", sub: "Drainage fixture units per vent stack", type: "input" }, { id: "VN2", label: "Vent Size Lookup", sub: "IS 5329 table for vent diameter", type: "process" }, { id: "VN3", label: "Output: Vent Schedule", sub: "Vent stack sizes per floor", type: "output" }],
+    connections: [{ from: "VN1", to: "VN2" }, { from: "VN2", to: "VN3" }] },
+  DD_WMT: { title: "Water Meter Sizing", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
+    steps: [{ id: "WM1", label: "Input: Zone Flow Data", sub: "Peak flow rate per riser/zone", type: "input" }, { id: "WM2", label: "Meter Selection", sub: "Flow range + pressure drop from DB", type: "process" }, { id: "WM3", label: "Output: Meter Schedule", sub: "Meter size + type per zone", type: "output" }],
+    connections: [{ from: "WM1", to: "WM2" }, { from: "WM2", to: "WM3" }] },
+  DD_DCT: { title: "Duct Sizing", icon: "\u2744\uFE0F", color: "#7c3aed", accentBg: "#ede9fe",
+    steps: [{ id: "DC1", label: "Input: CFM per Zone", sub: "Cooling load \u2192 air volume per zone", type: "input" }, { id: "DC2", label: "Equal Friction Method", sub: "Target friction rate (Pa/m)", type: "formula" }, { id: "DC3", label: "Duct Size Selection", sub: "Rectangular/round from duct tables", type: "process" }, { id: "DC4", label: "Velocity Check", sub: "Main 6\u20138 m/s, branch 3\u20135 m/s", type: "formula" }, { id: "DC5", label: "Output: Duct Schedule", sub: "Size + insulation per section \u2192 BOQ", type: "output" }],
+    connections: [{ from: "DC1", to: "DC2" }, { from: "DC2", to: "DC3" }, { from: "DC3", to: "DC4" }, { from: "DC4", to: "DC5" }] },
+  DD_EQP: { title: "Equipment Selection", icon: "\u2744\uFE0F", color: "#7c3aed", accentBg: "#ede9fe",
+    steps: [{ id: "EQ1", label: "Input: Cooling/Heating Load", sub: "TR per zone from heat load calc", type: "input" }, { id: "EQ2", label: "Equipment Type", sub: "Chiller / VRF / Split / AHU selection", type: "process" }, { id: "EQ3", label: "Catalogue Matching", sub: "Manufacturer model from capacity tables", type: "process" }, { id: "EQ4", label: "Output: Equipment Schedule", sub: "Model + capacity + power \u2192 BOQ", type: "output" }],
+    connections: [{ from: "EQ1", to: "EQ2" }, { from: "EQ2", to: "EQ3" }, { from: "EQ3", to: "EQ4" }] },
+  DD_VAV: { title: "VAV/FCU Selection", icon: "\u2744\uFE0F", color: "#7c3aed", accentBg: "#ede9fe",
+    steps: [{ id: "VA1", label: "Input: Zone Data", sub: "CFM + sensible load per zone", type: "input" }, { id: "VA2", label: "Unit Selection", sub: "VAV box / FCU from manufacturer data", type: "process" }, { id: "VA3", label: "Controls Integration", sub: "Thermostat + actuator + DDC points", type: "process" }, { id: "VA4", label: "Output: Terminal Unit Schedule", sub: "Model + capacity + controls \u2192 BOQ", type: "output" }],
+    connections: [{ from: "VA1", to: "VA2" }, { from: "VA2", to: "VA3" }, { from: "VA3", to: "VA4" }] },
+  DD_BMS: { title: "BMS Integration", icon: "\uD83D\uDDA5", color: "#7c3aed", accentBg: "#ede9fe",
+    steps: [{ id: "BM1", label: "Input: Equipment List", sub: "All HVAC equipment + sensors", type: "input" }, { id: "BM2", label: "Points List", sub: "AI/AO/DI/DO count per equipment", type: "process" }, { id: "BM3", label: "Architecture Design", sub: "Controller layout + network topology", type: "process" }, { id: "BM4", label: "Output: BMS Schedule", sub: "Points list + controllers \u2192 BOQ", type: "output" }],
+    connections: [{ from: "BM1", to: "BM2" }, { from: "BM2", to: "BM3" }, { from: "BM3", to: "BM4" }] },
+  DD_SMK: { title: "Smoke Management", icon: "\uD83D\uDD25", color: "#7c3aed", accentBg: "#ede9fe",
+    steps: [{ id: "SM1", label: "Input: Floor Area & Height", sub: "Smoke zone dimensions", type: "input" }, { id: "SM2", label: "Extraction Rate", sub: "6 ACH or CFD-based calc", type: "formula" }, { id: "SM3", label: "Fan Sizing", sub: "CFM + static pressure \u2192 fan model", type: "process" }, { id: "SM4", label: "Output: Smoke System Schedule", sub: "Fan + duct + damper \u2192 BOQ", type: "output" }],
+    connections: [{ from: "SM1", to: "SM2" }, { from: "SM2", to: "SM3" }, { from: "SM3", to: "SM4" }] },
+  DD_HYD: { title: "Hydrant Layout", icon: "\uD83D\uDD25", color: "#e11d48", accentBg: "#ffe4e6",
+    steps: [{ id: "HY1", label: "Input: Floor Plans", sub: "Coverage area + travel distance", type: "input" }, { id: "HY2", label: "Hydrant Spacing", sub: "30m hose reach + 6m throw = 36m", type: "formula" }, { id: "HY3", label: "Hose Reel Coverage", sub: "30m hose reel radius check", type: "process" }, { id: "HY4", label: "Pipe Sizing", sub: "Flow rate + friction \u2192 pipe dia", type: "formula" }, { id: "HY5", label: "Output: Hydrant Layout", sub: "Locations + pipe sizes \u2192 drawings", type: "output" }],
+    connections: [{ from: "HY1", to: "HY2" }, { from: "HY2", to: "HY3" }, { from: "HY3", to: "HY4" }, { from: "HY4", to: "HY5" }] },
+  DD_DET: { title: "Detection System", icon: "\uD83D\uDD25", color: "#e11d48", accentBg: "#ffe4e6",
+    steps: [{ id: "DT1", label: "Input: Room Data", sub: "Room type, area, ceiling height", type: "input" }, { id: "DT2", label: "Detector Type", sub: "Smoke / heat / beam per NBC", type: "process" }, { id: "DT3", label: "Spacing Calculation", sub: "IS 2189 detector spacing tables", type: "formula" }, { id: "DT4", label: "Zone Layout", sub: "Max 20 detectors per zone", type: "process" }, { id: "DT5", label: "Output: Detection Layout", sub: "Detector locations + panel sizing", type: "output" }],
+    connections: [{ from: "DT1", to: "DT2" }, { from: "DT2", to: "DT3" }, { from: "DT3", to: "DT4" }, { from: "DT4", to: "DT5" }] },
+  DD_PAV: { title: "PA/VA System", icon: "\uD83D\uDD0A", color: "#e11d48", accentBg: "#ffe4e6",
+    steps: [{ id: "PA1", label: "Input: Coverage Zones", sub: "Floor areas + ambient noise levels", type: "input" }, { id: "PA2", label: "Speaker Selection", sub: "Ceiling / wall / horn type + wattage", type: "process" }, { id: "PA3", label: "Wiring Calculation", sub: "100V line, cable sizing per zone", type: "formula" }, { id: "PA4", label: "Output: PA/VA Schedule", sub: "Speaker layout + amplifier sizing", type: "output" }],
+    connections: [{ from: "PA1", to: "PA2" }, { from: "PA2", to: "PA3" }, { from: "PA3", to: "PA4" }] },
+  DD_SMX: { title: "Smoke Exhaust", icon: "\uD83D\uDD25", color: "#e11d48", accentBg: "#ffe4e6",
+    steps: [{ id: "SX1", label: "Input: Basement/Atrium Data", sub: "Area, height, ventilation openings", type: "input" }, { id: "SX2", label: "Extraction Rate Calc", sub: "6 ACH (basement) or CFD-based", type: "formula" }, { id: "SX3", label: "Fan & Duct Sizing", sub: "CFM + static pressure \u2192 equipment", type: "process" }, { id: "SX4", label: "Output: Smoke Exhaust Layout", sub: "Fan + duct + damper locations", type: "output" }],
+    connections: [{ from: "SX1", to: "SX2" }, { from: "SX2", to: "SX3" }, { from: "SX3", to: "SX4" }] },
+  // ── Tender Stage BOQ Calcs ──
+  T_BOQ_EL: { title: "Electrical BOQ", icon: "\u26A1", color: "#14b8a6", accentBg: "#ccfbf1",
+    steps: [{ id: "TE1", label: "Input: Approved Drawings", sub: "All electrical drawings + schedules", type: "input" }, { id: "TE2", label: "Cable Schedule BOQ", sub: "Length \u00D7 qty per cable type", type: "process" }, { id: "TE3", label: "Panel & DB BOQ", sub: "Item-wise panel components", type: "process" }, { id: "TE4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TE5", label: "Output: Electrical BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
+    connections: [{ from: "TE1", to: "TE2" }, { from: "TE2", to: "TE3" }, { from: "TE3", to: "TE4" }, { from: "TE4", to: "TE5" }] },
+  T_BOQ_PL: { title: "Plumbing BOQ", icon: "\uD83D\uDCA7", color: "#14b8a6", accentBg: "#ccfbf1",
+    steps: [{ id: "TP1", label: "Input: Approved Drawings", sub: "All plumbing drawings + schedules", type: "input" }, { id: "TP2", label: "Pipe & Fitting BOQ", sub: "Length \u00D7 diameter per type", type: "process" }, { id: "TP3", label: "Fixture & Pump BOQ", sub: "Item-wise sanitary + pump qty", type: "process" }, { id: "TP4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TP5", label: "Output: Plumbing BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
+    connections: [{ from: "TP1", to: "TP2" }, { from: "TP2", to: "TP3" }, { from: "TP3", to: "TP4" }, { from: "TP4", to: "TP5" }] },
+  T_BOQ_HV: { title: "HVAC BOQ", icon: "\u2744\uFE0F", color: "#14b8a6", accentBg: "#ccfbf1",
+    steps: [{ id: "TH1", label: "Input: Approved Drawings", sub: "All HVAC drawings + schedules", type: "input" }, { id: "TH2", label: "Duct & Insulation BOQ", sub: "Area \u00D7 type per section", type: "process" }, { id: "TH3", label: "Equipment BOQ", sub: "AHU/FCU/chiller item-wise", type: "process" }, { id: "TH4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TH5", label: "Output: HVAC BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
+    connections: [{ from: "TH1", to: "TH2" }, { from: "TH2", to: "TH3" }, { from: "TH3", to: "TH4" }, { from: "TH4", to: "TH5" }] },
+  T_BOQ_FF: { title: "Firefighting BOQ", icon: "\uD83D\uDD25", color: "#14b8a6", accentBg: "#ccfbf1",
+    steps: [{ id: "TF1", label: "Input: Approved Drawings", sub: "All FF drawings + schedules", type: "input" }, { id: "TF2", label: "Sprinkler & Hydrant BOQ", sub: "Head count, pipe lengths, fittings", type: "process" }, { id: "TF3", label: "Detection & Alarm BOQ", sub: "Detector, MCP, panel item-wise", type: "process" }, { id: "TF4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TF5", label: "Output: FF BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
+    connections: [{ from: "TF1", to: "TF2" }, { from: "TF2", to: "TF3" }, { from: "TF3", to: "TF4" }, { from: "TF4", to: "TF5" }] },
+  // ── VFC Stage Calcs ──
+  V_VFC_EL: { title: "Electrical VFC Update", icon: "\u26A1", color: "#f97316", accentBg: "#fed7aa",
+    steps: [{ id: "VE1", label: "Input: Contractor Submittals", sub: "Shop drawings + material data sheets", type: "input" }, { id: "VE2", label: "Cable Schedule Revision", sub: "Update per actual makes/routes", type: "process" }, { id: "VE3", label: "Panel & SLD Update", sub: "Revise per contractor equipment", type: "process" }, { id: "VE4", label: "Output: VFC Electrical Set", sub: "Updated drawings for construction", type: "output" }],
+    connections: [{ from: "VE1", to: "VE2" }, { from: "VE2", to: "VE3" }, { from: "VE3", to: "VE4" }] },
+  V_VFC_PL: { title: "Plumbing VFC Update", icon: "\uD83D\uDCA7", color: "#f97316", accentBg: "#fed7aa",
+    steps: [{ id: "VP1", label: "Input: Contractor Submittals", sub: "Shop drawings + equipment selections", type: "input" }, { id: "VP2", label: "Pipe Schedule Revision", sub: "Update per actual makes/routes", type: "process" }, { id: "VP3", label: "Pump Reselection", sub: "Verify per contractor catalogue", type: "process" }, { id: "VP4", label: "Output: VFC Plumbing Set", sub: "Updated drawings for construction", type: "output" }],
+    connections: [{ from: "VP1", to: "VP2" }, { from: "VP2", to: "VP3" }, { from: "VP3", to: "VP4" }] },
+  V_VFC_HV: { title: "HVAC VFC Update", icon: "\u2744\uFE0F", color: "#f97316", accentBg: "#fed7aa",
+    steps: [{ id: "VH1", label: "Input: Contractor Submittals", sub: "Shop drawings + equipment data", type: "input" }, { id: "VH2", label: "Duct Revision", sub: "Update per actual equipment + routing", type: "process" }, { id: "VH3", label: "Equipment Confirmation", sub: "Verify capacity per actual models", type: "process" }, { id: "VH4", label: "Output: VFC HVAC Set", sub: "Updated drawings for construction", type: "output" }],
+    connections: [{ from: "VH1", to: "VH2" }, { from: "VH2", to: "VH3" }, { from: "VH3", to: "VH4" }] },
+  V_VFC_FF: { title: "Firefighting VFC Update", icon: "\uD83D\uDD25", color: "#f97316", accentBg: "#fed7aa",
+    steps: [{ id: "VF1", label: "Input: Contractor Submittals", sub: "Shop drawings + equipment data", type: "input" }, { id: "VF2", label: "Sprinkler Revision", sub: "Update per actual heads + pipe routing", type: "process" }, { id: "VF3", label: "Detection Update", sub: "Revise per actual detector models", type: "process" }, { id: "VF4", label: "Output: VFC FF Set", sub: "Updated drawings for construction", type: "output" }],
+    connections: [{ from: "VF1", to: "VF2" }, { from: "VF2", to: "VF3" }, { from: "VF3", to: "VF4" }] },
 };
 
 // =====================================================================
@@ -1045,74 +1107,74 @@ function ServiceCard({
             <div className="px-5 pb-4 pt-1">
               <div className="h-px w-full mb-3" style={{ backgroundColor: `${service.color}20` }} />
               <div className="space-y-2">
-                {service.calculations.map((calc, i) => (
-                  <motion.button
-                    key={calc.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    onClick={() => onCalcClick(calc.id)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all group"
-                    style={{
-                      backgroundColor: "#f8fafc",
-                      border: "1px solid #e2e8f0",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = service.colorLight;
-                      (e.currentTarget as HTMLElement).style.borderColor = `${service.color}50`;
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = "#f8fafc";
-                      (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0";
-                    }}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: service.colorLight, color: service.color, fontSize: "13px", fontWeight: 700 }}
-                    >
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p style={{ color: "#1e293b", fontSize: "14px", fontWeight: 600, margin: 0 }}>
-                        {calc.title}
-                      </p>
-                      <p style={{ color: "#94a3b8", fontSize: "11px", margin: "2px 0 0" }}>
-                        {calc.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {calc.status === "ready" ? (
-                        <span
-                          className="rounded-full px-2.5 py-0.5"
-                          style={{
-                            backgroundColor: "#d1fae5",
-                            color: "#065f46",
-                            fontSize: "10px",
-                            fontWeight: 600,
-                          }}
-                        >
-                          READY
-                        </span>
-                      ) : (
-                        <span
-                          className="rounded-full px-2.5 py-0.5"
-                          style={{
-                            backgroundColor: "#fef3c7",
-                            color: "#92400e",
-                            fontSize: "10px",
-                            fontWeight: 600,
-                          }}
-                        >
-                          PREVIEW
-                        </span>
-                      )}
-                      <ChevronRight
-                        className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ color: service.color }}
-                      />
-                    </div>
-                  </motion.button>
-                ))}
+                {(() => {
+                  const stages = ["concept", "detailed", "tender", "vfc"] as const;
+                  let globalIdx = 0;
+                  return stages.map((stage) => {
+                    const calcs = service.calculations.filter((c) => c.stage === stage);
+                    if (calcs.length === 0) return null;
+                    const sm = STAGE_META[stage];
+                    const stageStart = globalIdx;
+                    globalIdx += calcs.length;
+                    return (
+                      <div key={stage}>
+                        {/* Stage Section Header */}
+                        <div className="flex items-center gap-2 mt-2 mb-1.5 px-1">
+                          <div className="rounded-full px-2.5 py-0.5" style={{ backgroundColor: sm.bg, border: `1px solid ${sm.color}40` }}>
+                            <span style={{ fontSize: "10px", fontWeight: 700, color: sm.color, letterSpacing: 0.5 }}>{sm.label.toUpperCase()}</span>
+                          </div>
+                          <div className="flex-1 h-px" style={{ backgroundColor: `${sm.color}20` }} />
+                          <span style={{ fontSize: "10px", color: "#94a3b8" }}>{calcs.length} calc{calcs.length > 1 ? "s" : ""}</span>
+                        </div>
+                        {calcs.map((calc, i) => (
+                          <motion.button
+                            key={calc.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: (stageStart + i) * 0.03 }}
+                            onClick={() => onCalcClick(calc.id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all group mb-1.5"
+                            style={{
+                              backgroundColor: "#f8fafc",
+                              border: "1px solid #e2e8f0",
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = service.colorLight;
+                              (e.currentTarget as HTMLElement).style.borderColor = `${service.color}50`;
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = "#f8fafc";
+                              (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0";
+                            }}
+                          >
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                              style={{ backgroundColor: service.colorLight, color: service.color, fontSize: "13px", fontWeight: 700 }}
+                            >
+                              {stageStart + i + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p style={{ color: "#1e293b", fontSize: "14px", fontWeight: 600, margin: 0 }}>
+                                {calc.title}
+                              </p>
+                              <p style={{ color: "#94a3b8", fontSize: "11px", margin: "2px 0 0" }}>
+                                {calc.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {calc.status === "ready" ? (
+                                <span className="rounded-full px-2.5 py-0.5" style={{ backgroundColor: "#d1fae5", color: "#065f46", fontSize: "10px", fontWeight: 600 }}>READY</span>
+                              ) : (
+                                <span className="rounded-full px-2.5 py-0.5" style={{ backgroundColor: "#fef3c7", color: "#92400e", fontSize: "10px", fontWeight: 600 }}>PREVIEW</span>
+                              )}
+                              <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: service.color }} />
+                            </div>
+                          </motion.button>
+                        ))}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           </motion.div>
@@ -1157,40 +1219,54 @@ export function ServicesDashboard() {
   }, []);
 
   // Stats
-  const totalCalcs = SERVICES.reduce((sum, s) => sum + s.calculations.length, 0);
-  const readyCalcs = SERVICES.reduce(
-    (sum, s) => sum + s.calculations.filter((c) => c.status === "ready").length,
-    0
-  );
+  const allCalcs = SERVICES.flatMap((s) => s.calculations);
+  const totalCalcs = allCalcs.length;
+  const readyCalcs = allCalcs.filter((c) => c.status === "ready").length;
+  const stageCounts = {
+    concept: allCalcs.filter((c) => c.stage === "concept").length,
+    detailed: allCalcs.filter((c) => c.stage === "detailed").length,
+    tender: allCalcs.filter((c) => c.stage === "tender").length,
+    vfc: allCalcs.filter((c) => c.stage === "vfc").length,
+  };
 
   return (
     <div className="w-full max-w-[1000px] mx-auto">
       {/* Stats Bar */}
-      <div className="flex items-center gap-4 mb-6 flex-wrap">
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0]">
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0]">
           <div className="w-2 h-2 rounded-full bg-[#3b82f6]" />
-          <span style={{ color: "#64748b", fontSize: "13px" }}>
+          <span style={{ color: "#64748b", fontSize: "12px" }}>
             <strong style={{ color: "#1e293b" }}>{SERVICES.length}</strong> Services
           </span>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0]">
+        <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0]">
           <div className="w-2 h-2 rounded-full bg-[#8b5cf6]" />
-          <span style={{ color: "#64748b", fontSize: "13px" }}>
+          <span style={{ color: "#64748b", fontSize: "12px" }}>
             <strong style={{ color: "#1e293b" }}>{totalCalcs}</strong> Calculations
           </span>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#d1fae5] border border-[#10b981]/20">
+        <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#d1fae5] border border-[#10b981]/20">
           <div className="w-2 h-2 rounded-full bg-[#10b981]" />
-          <span style={{ color: "#065f46", fontSize: "13px" }}>
+          <span style={{ color: "#065f46", fontSize: "12px" }}>
             <strong>{readyCalcs}</strong> Fully Built
           </span>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#fef3c7] border border-[#f59e0b]/20">
+        <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#fef3c7] border border-[#f59e0b]/20">
           <div className="w-2 h-2 rounded-full bg-[#f59e0b]" />
-          <span style={{ color: "#92400e", fontSize: "13px" }}>
+          <span style={{ color: "#92400e", fontSize: "12px" }}>
             <strong>{totalCalcs - readyCalcs}</strong> Preview
           </span>
         </div>
+        <div className="w-px h-5 bg-[#e2e8f0]" />
+        {(["concept", "detailed", "tender", "vfc"] as const).map((stage) => {
+          const sm = STAGE_META[stage];
+          return (
+            <div key={stage} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ backgroundColor: sm.bg, border: `1px solid ${sm.color}30` }}>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sm.color }} />
+              <span style={{ color: sm.color, fontSize: "11px", fontWeight: 600 }}>{sm.label.split(" ")[0]}: {stageCounts[stage]}</span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Service Cards */}

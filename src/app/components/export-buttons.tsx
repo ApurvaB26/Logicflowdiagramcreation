@@ -226,7 +226,7 @@ const MERMAID_CODE = `flowchart TD
 // PNG EXPORT — Convert SVG to Canvas to PNG
 // =====================================================================
 function downloadPNG() {
-  const svgEl = document.querySelector(".concept-chart-svg") as SVGSVGElement | null;
+  const svgEl = document.querySelector(".stage-chart-svg") as SVGSVGElement | null;
   if (!svgEl) {
     alert("Chart SVG not found. Please ensure the diagram is visible.");
     return;

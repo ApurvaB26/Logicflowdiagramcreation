@@ -15,6 +15,9 @@ import {
   Download,
   FileImage,
   Database,
+  ClipboardCheck,
+  PenTool,
+  ShoppingCart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -38,6 +41,30 @@ const SHARE_ITEMS: ShareItem[] = [
     icon: <GitBranch className="w-5 h-5" />,
     color: "#3b82f6",
     basePath: "concept",
+  },
+  {
+    id: "detailed",
+    label: "Detailed Design Stage Flowchart",
+    sub: "Detailed Design \u2014 complete workflow with drawing production",
+    icon: <PenTool className="w-5 h-5" />,
+    color: "#f97316",
+    basePath: "detailed",
+  },
+  {
+    id: "tender",
+    label: "Tender Stage Flowchart",
+    sub: "Tender Stage \u2014 BOQ, pricing & contractor selection",
+    icon: <ShoppingCart className="w-5 h-5" />,
+    color: "#14b8a6",
+    basePath: "tender",
+  },
+  {
+    id: "vfc",
+    label: "VFC Stage Flowchart",
+    sub: "Validated for Construction \u2014 10-part flow with service tree",
+    icon: <ClipboardCheck className="w-5 h-5" />,
+    color: "#a78bfa",
+    basePath: "vfc",
   },
   {
     id: "services",

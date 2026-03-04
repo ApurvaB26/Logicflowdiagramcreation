@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { ServicesDashboard } from "./services-dashboard";
 import { ConceptStageChart } from "./concept-stage";
+import { DetailedDesignStageChart } from "./detailed-design-stage";
+import { TenderStageChart } from "./tender-stage";
+import { VFCStageChart } from "./vfc-stage";
 import { ExportButtons } from "./export-buttons";
 import { ShareModal } from "./share-modal";
 import {
@@ -10,15 +13,43 @@ import {
   Workflow,
   LayoutGrid,
   GitBranch,
+  PenTool,
+  ShoppingCart,
+  HardHat,
   Share2,
 } from "lucide-react";
 
-type View = "services" | "concept";
+type View = "services" | "concept" | "detailed" | "tender" | "vfc";
+
+const VIEW_TABS: { id: View; label: string; icon: React.ReactNode }[] = [
+  { id: "services", label: "Services", icon: <LayoutGrid className="w-3.5 h-3.5" /> },
+  { id: "concept", label: "Concept", icon: <GitBranch className="w-3.5 h-3.5" /> },
+  { id: "detailed", label: "Detailed", icon: <PenTool className="w-3.5 h-3.5" /> },
+  { id: "tender", label: "Tender", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
+  { id: "vfc", label: "VFC", icon: <HardHat className="w-3.5 h-3.5" /> },
+];
+
+const STAGE_GRADIENTS: Record<string, string> = {
+  concept:  "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
+  detailed: "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)",
+  tender:   "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)",
+  vfc:      "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #10b981, #059669)",
+};
+
+const STAGE_LABELS: Record<string, string> = {
+  services: "Concept Stage Calculations",
+  concept:  "Concept Stage Complete Workflow",
+  detailed: "Detailed Design Stage Complete Workflow",
+  tender:   "Tender Stage Complete Workflow",
+  vfc:      "VFC Stage Complete Workflow",
+};
 
 export function MainDashboard() {
   const [view, setView] = useState<View>("services");
   const [zoom, setZoom] = useState(0.48);
   const [showShare, setShowShare] = useState(false);
+
+  const isFlowView = view !== "services";
 
   return (
     <div className="size-full flex flex-col bg-[#f8fafc]">
@@ -30,7 +61,7 @@ export function MainDashboard() {
           </div>
           <div>
             <h1 className="text-[#0f172a] text-[15px] leading-tight">
-              MEP Digital Ecosystem &mdash; Concept Stage
+              MEP Digital Ecosystem
             </h1>
             <p className="text-[#94a3b8] text-[11px]">
               Service-wise Calculations &middot; Click any calculation to view detailed flowchart
@@ -39,33 +70,23 @@ export function MainDashboard() {
         </div>
 
         {/* View Toggle */}
-        <div className="flex items-center gap-1 bg-[#f1f5f9] rounded-lg p-1 border border-[#e2e8f0]">
-          <button
-            onClick={() => setView("services")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] transition-all"
-            style={{
-              backgroundColor: view === "services" ? "#fff" : "transparent",
-              color: view === "services" ? "#1e293b" : "#94a3b8",
-              boxShadow: view === "services" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-              fontWeight: view === "services" ? 600 : 400,
-            }}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            Services
-          </button>
-          <button
-            onClick={() => setView("concept")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] transition-all"
-            style={{
-              backgroundColor: view === "concept" ? "#fff" : "transparent",
-              color: view === "concept" ? "#1e293b" : "#94a3b8",
-              boxShadow: view === "concept" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-              fontWeight: view === "concept" ? 600 : 400,
-            }}
-          >
-            <GitBranch className="w-3.5 h-3.5" />
-            Concept Flow
-          </button>
+        <div className="flex items-center gap-0.5 bg-[#f1f5f9] rounded-lg p-1 border border-[#e2e8f0]">
+          {VIEW_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setView(tab.id)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] transition-all"
+              style={{
+                backgroundColor: view === tab.id ? "#fff" : "transparent",
+                color: view === tab.id ? "#1e293b" : "#94a3b8",
+                boxShadow: view === tab.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                fontWeight: view === tab.id ? 600 : 400,
+              }}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Right Controls */}
@@ -80,7 +101,7 @@ export function MainDashboard() {
             <span className="hidden sm:inline">Share</span>
           </button>
 
-          {view === "concept" && (
+          {isFlowView && (
             <>
               <div className="w-px h-5 bg-[#e2e8f0] mx-1" />
               <ExportButtons />
@@ -118,7 +139,7 @@ export function MainDashboard() {
             <ServicesDashboard />
             <div className="mt-6 text-center">
               <p className="text-[11px] text-[#cbd5e1]">
-                MEP Digital Ecosystem &middot; Concept Stage Calculations &middot;{" "}
+                MEP Digital Ecosystem &middot; {STAGE_LABELS[view]} &middot;{" "}
                 {new Date().getFullYear()}
               </p>
             </div>
@@ -128,17 +149,18 @@ export function MainDashboard() {
             <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
               <div
                 className="h-1 w-full"
-                style={{
-                  background: "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
-                }}
+                style={{ background: STAGE_GRADIENTS[view] }}
               />
               <div className="p-4" style={{ zoom }}>
-                <ConceptStageChart />
+                {view === "concept" && <ConceptStageChart />}
+                {view === "detailed" && <DetailedDesignStageChart />}
+                {view === "tender" && <TenderStageChart />}
+                {view === "vfc" && <VFCStageChart />}
               </div>
             </div>
             <div className="mt-6 text-center">
               <p className="text-[11px] text-[#cbd5e1]">
-                MEP Digital Ecosystem &middot; Concept Stage Complete Workflow &middot;{" "}
+                MEP Digital Ecosystem &middot; {STAGE_LABELS[view]} &middot;{" "}
                 {new Date().getFullYear()}
               </p>
             </div>

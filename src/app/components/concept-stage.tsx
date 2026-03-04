@@ -1706,7 +1706,7 @@ export function ConceptStageChart() {
 
   return (
     <div className="overflow-auto relative">
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }} className="concept-chart-svg">
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }} className="concept-chart-svg stage-chart-svg">
         <defs>
           <marker id="ma" viewBox="0 0 10 10" refX={10} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill={CL.arrow} />
