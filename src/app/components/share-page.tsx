@@ -454,8 +454,10 @@ export function SharePage() {
                     "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
                 }}
               />
-              <div className="p-4" style={{ zoom }}>
-                <ConceptStageChart />
+              <div className="flex justify-center">
+                <div className="p-4 w-full" style={{ zoom }}>
+                  <ConceptStageChart />
+                </div>
               </div>
             </div>
           </div>
@@ -471,8 +473,10 @@ export function SharePage() {
                     "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)",
                 }}
               />
-              <div className="p-4" style={{ zoom }}>
-                <DetailedDesignStageChart />
+              <div className="flex justify-center">
+                <div className="p-4 w-full" style={{ zoom }}>
+                  <DetailedDesignStageChart />
+                </div>
               </div>
             </div>
           </div>
@@ -488,8 +492,10 @@ export function SharePage() {
                     "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)",
                 }}
               />
-              <div className="p-4" style={{ zoom }}>
-                <TenderStageChart />
+              <div className="flex justify-center">
+                <div className="p-4 w-full" style={{ zoom }}>
+                  <TenderStageChart />
+                </div>
               </div>
             </div>
           </div>
@@ -505,8 +511,10 @@ export function SharePage() {
                     "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #f97316, #10b981)",
                 }}
               />
-              <div className="p-4" style={{ zoom }}>
-                <VFCStageChart />
+              <div className="flex justify-center">
+                <div className="p-4 w-full" style={{ zoom }}>
+                  <VFCStageChart />
+                </div>
               </div>
             </div>
           </div>

@@ -151,11 +151,13 @@ export function MainDashboard() {
                 className="h-1 w-full"
                 style={{ background: STAGE_GRADIENTS[view] }}
               />
-              <div className="p-4" style={{ zoom }}>
-                {view === "concept" && <ConceptStageChart />}
-                {view === "detailed" && <DetailedDesignStageChart />}
-                {view === "tender" && <TenderStageChart />}
-                {view === "vfc" && <VFCStageChart />}
+              <div className="flex justify-center">
+                <div className="p-4 w-full" style={{ zoom }}>
+                  {view === "concept" && <ConceptStageChart />}
+                  {view === "detailed" && <DetailedDesignStageChart />}
+                  {view === "tender" && <TenderStageChart />}
+                  {view === "vfc" && <VFCStageChart />}
+                </div>
               </div>
             </div>
             <div className="mt-6 text-center">
