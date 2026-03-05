@@ -14,6 +14,8 @@ import {
   MousePointerClick,
   Info,
   Code,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import { ConceptStageChart } from "./concept-stage";
 import { DetailedDesignStageChart } from "./detailed-design-stage";
@@ -87,114 +89,207 @@ function svgToDataUrl(svgEl: SVGSVGElement): { url: string; w: number; h: number
   return { url, w, h };
 }
 
-/** Helper: trigger download of a data URL */
-function triggerDownload(dataUrl: string, filename: string) {
-  const a = document.createElement("a");
-  a.href = dataUrl;
-  a.download = filename;
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  // Small delay before cleanup to ensure download triggers
-  setTimeout(() => {
-    document.body.removeChild(a);
-  }, 100);
-}
-
-/** Download a single SVG from container as PNG (fire-and-forget) */
-function downloadSvgAsPng(container: HTMLElement, filename: string) {
-  const svgEl = container.querySelector("svg") as SVGSVGElement | null;
-  if (!svgEl) {
-    console.error("downloadSvgAsPng: SVG not found in container");
-    return;
-  }
-  const { url, w, h } = svgToDataUrl(svgEl);
-  const scale = 3;
-  const img = new Image();
-  img.onload = () => {
-    try {
-      const canvas = document.createElement("canvas");
-      canvas.width = w * scale;
-      canvas.height = h * scale;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.scale(scale, scale);
-      ctx.drawImage(img, 0, 0, w, h);
-      const pngDataUrl = canvas.toDataURL("image/png");
-      const safeName = `${filename}-${new Date().toISOString().slice(0, 10)}.png`;
-      triggerDownload(pngDataUrl, safeName);
-    } catch (e) {
-      console.error("downloadSvgAsPng: canvas error", e);
-    }
-  };
-  img.onerror = (e) => {
-    console.error("downloadSvgAsPng: image load error", e);
-  };
-  img.src = url;
-}
-
-/** Download a single SVG from container as PNG — async version (resolves after download triggered) */
-function downloadSvgAsPngAsync(container: HTMLElement, filename: string): Promise<void> {
+/** Render a single SVG element to a PNG data URL (async, returns null on failure) */
+function renderSvgToPngDataUrl(svgEl: SVGSVGElement, scale = 3): Promise<string | null> {
   return new Promise((resolve) => {
-    const svgEl = container.querySelector("svg") as SVGSVGElement | null;
-    if (!svgEl) {
-      console.warn("downloadSvgAsPngAsync: no SVG found, skipping", filename);
-      resolve();
-      return;
-    }
     const { url, w, h } = svgToDataUrl(svgEl);
-    const scale = 3;
-    const img = new Image();
+    const img = new window.Image();
     img.onload = () => {
       try {
         const canvas = document.createElement("canvas");
         canvas.width = w * scale;
         canvas.height = h * scale;
         const ctx = canvas.getContext("2d");
-        if (!ctx) { resolve(); return; }
+        if (!ctx) { resolve(null); return; }
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale);
         ctx.drawImage(img, 0, 0, w, h);
-        const pngDataUrl = canvas.toDataURL("image/png");
-        const safeName = `${filename}-${new Date().toISOString().slice(0, 10)}.png`;
-        triggerDownload(pngDataUrl, safeName);
+        resolve(canvas.toDataURL("image/png"));
       } catch (e) {
-        console.error("downloadSvgAsPngAsync: canvas error", e);
+        console.error("renderSvgToPngDataUrl: canvas error", e);
+        resolve(null);
       }
-      resolve();
     };
-    img.onerror = (e) => {
-      console.error("downloadSvgAsPngAsync: image load error for", filename, e);
-      resolve();
-    };
+    img.onerror = () => resolve(null);
     img.src = url;
   });
 }
 
-/** Download all [data-chart-id] containers sequentially as PNGs with staggered timing */
-async function downloadAllChartPNGs(parentContainer: HTMLElement) {
+/** Collect all [data-chart-id] SVGs, render to PNG data URLs, return array */
+async function renderAllChartPNGs(parentContainer: HTMLElement): Promise<{ label: string; dataUrl: string }[]> {
+  const results: { label: string; dataUrl: string }[] = [];
   const chartWrappers = parentContainer.querySelectorAll("[data-chart-id]") as NodeListOf<HTMLElement>;
+  const targets: { el: HTMLElement; label: string }[] = [];
   if (chartWrappers.length === 0) {
-    // Fallback: try the first SVG in the entire container
-    downloadSvgAsPng(parentContainer, "MEP-Chart");
-    return;
+    // Fallback: first SVG in entire container
+    const svg = parentContainer.querySelector("svg") as SVGSVGElement | null;
+    if (svg) targets.push({ el: parentContainer, label: "MEP-Chart" });
+  } else {
+    chartWrappers.forEach((w) => {
+      targets.push({ el: w, label: w.getAttribute("data-chart-label") || "chart" });
+    });
   }
-  console.log(`downloadAllChartPNGs: found ${chartWrappers.length} charts to download`);
-  for (let i = 0; i < chartWrappers.length; i++) {
-    const wrapper = chartWrappers[i];
-    const chartLabel = wrapper.getAttribute("data-chart-label") || `chart-${i}`;
-    const safeName = chartLabel.replace(/[^a-zA-Z0-9]/g, "-").replace(/-+/g, "-");
-    console.log(`downloadAllChartPNGs: downloading ${i + 1}/${chartWrappers.length} — ${chartLabel}`);
-    await downloadSvgAsPngAsync(wrapper, safeName);
-    // Stagger downloads so browser doesn't block them
-    if (i < chartWrappers.length - 1) {
-      await new Promise((r) => setTimeout(r, 800));
+  for (const target of targets) {
+    const svgEl = target.el.querySelector("svg") as SVGSVGElement | null;
+    if (!svgEl) continue;
+    const dataUrl = await renderSvgToPngDataUrl(svgEl);
+    if (dataUrl) results.push({ label: target.label, dataUrl });
+  }
+  return results;
+}
+
+// =====================================================================
+// PNG GALLERY MODAL — opens each image in a new tab for saving
+// =====================================================================
+interface PngItem { label: string; dataUrl: string }
+
+function PngGalleryModal({ items, onClose }: { items: PngItem[]; onClose: () => void }) {
+  const handleOpenInNewTab = useCallback((dataUrl: string, label: string) => {
+    // Open the PNG in a new tab — user can right-click → Save Image As
+    const win = window.open("", "_blank");
+    if (win) {
+      const safeName = label.replace(/[^a-zA-Z0-9 _-]/g, "").trim();
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${safeName} — MEP PNG</title>
+          <style>
+            body { margin: 0; background: #f1f5f9; display: flex; flex-direction: column; align-items: center; padding: 24px; font-family: system-ui, sans-serif; }
+            h2 { color: #1e293b; font-size: 16px; margin-bottom: 8px; }
+            p { color: #64748b; font-size: 12px; margin-bottom: 16px; }
+            img { max-width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+          </style>
+        </head>
+        <body>
+          <h2>${safeName}</h2>
+          <p>Right-click the image below and select <strong>"Save image as..."</strong> to download.</p>
+          <img src="${dataUrl}" alt="${safeName}" />
+        </body>
+        </html>
+      `);
+      win.document.close();
     }
-  }
-  console.log("downloadAllChartPNGs: all downloads complete");
+  }, []);
+
+  const handleOpenAll = useCallback(() => {
+    items.forEach((item, i) => {
+      setTimeout(() => handleOpenInNewTab(item.dataUrl, item.label), i * 400);
+    });
+  }, [items, handleOpenInNewTab]);
+
+  // ESC to close
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-[95vw] max-w-[900px] max-h-[90vh] flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#e2e8f0] bg-[#f8fafc]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <Download className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h2 className="text-[14px] text-[#0f172a]" style={{ fontWeight: 700 }}>
+                PNG Gallery — {items.length} Chart{items.length !== 1 ? "s" : ""} Ready
+              </h2>
+              <p className="text-[11px] text-[#94a3b8]">
+                Click "Open in New Tab" then right-click the image → "Save image as..."
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {items.length > 1 && (
+              <button
+                onClick={handleOpenAll}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                style={{ fontWeight: 600 }}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Open All in New Tabs
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg border border-[#e2e8f0] bg-white flex items-center justify-center text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a] transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Instruction banner */}
+        <div className="px-5 py-2.5 bg-[#eff6ff] border-b border-[#bfdbfe]">
+          <p className="text-[11px] text-[#1e40af]">
+            <strong>How to save:</strong> Click "Open in New Tab" on any chart below → In the new tab,{" "}
+            <strong>right-click</strong> the image → Select <strong>"Save image as..."</strong>{" "}
+            (desktop) or <strong>long-press → Save</strong> (mobile).
+          </p>
+        </div>
+
+        {/* Gallery items */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: "65vh" }}>
+          {items.map((item, idx) => (
+            <div
+              key={idx}
+              className="rounded-xl border border-[#e2e8f0] overflow-hidden bg-white"
+            >
+              {/* Item header */}
+              <div className="flex items-center justify-between px-4 py-2.5 bg-[#f8fafc] border-b border-[#e2e8f0]">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-[11px]"
+                    style={{ fontWeight: 700 }}
+                  >
+                    {idx + 1}
+                  </span>
+                  <span className="text-[13px] text-[#1e293b]" style={{ fontWeight: 600 }}>
+                    {item.label}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleOpenInNewTab(item.dataUrl, item.label)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  style={{ fontWeight: 600 }}
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Open in New Tab
+                </button>
+              </div>
+              {/* Image preview (thumbnail) */}
+              <div className="p-3 bg-[#fafafa]">
+                <img
+                  src={item.dataUrl}
+                  alt={item.label}
+                  className="w-full rounded-lg border border-[#e2e8f0]"
+                  style={{ maxHeight: "200px", objectFit: "contain", background: "#fff" }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-2.5 border-t border-[#e2e8f0] bg-[#f8fafc] flex items-center justify-between">
+          <p className="text-[10px] text-[#94a3b8]">
+            {items.length} high-res PNG{items.length !== 1 ? "s" : ""} (3x scale) · MEP Digital Ecosystem
+          </p>
+          <p className="text-[10px] text-[#94a3b8]">
+            {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // =====================================================================
@@ -211,6 +306,7 @@ export function SharePage() {
   const [showDataBanner, setShowDataBanner] = useState(true);
   const [mermaidCopied, setMermaidCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [pngGalleryItems, setPngGalleryItems] = useState<PngItem[]>([]);
 
   // ============ Determine link mode from URL ============
   const isDataMode = location.pathname.startsWith("/share/data");
@@ -252,7 +348,10 @@ export function SharePage() {
   const handleDownloadPNG = useCallback(() => {
     if (!contentRef.current || downloading) return;
     setDownloading(true);
-    downloadAllChartPNGs(contentRef.current).finally(() => setDownloading(false));
+    renderAllChartPNGs(contentRef.current).then((items) => {
+      setPngGalleryItems(items);
+      setDownloading(false);
+    });
     setShowDownloadMenu(false);
   }, [downloading]);
 
@@ -720,6 +819,14 @@ export function SharePage() {
           </div>
         </div>
       </div>
+
+      {/* PNG Gallery Modal */}
+      {pngGalleryItems.length > 0 && (
+        <PngGalleryModal
+          items={pngGalleryItems}
+          onClose={() => setPngGalleryItems([])}
+        />
+      )}
     </div>
   );
 }

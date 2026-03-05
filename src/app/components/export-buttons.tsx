@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Download, Code, X, Copy, Check, ChevronDown, ChevronRight, FileCode2 } from "lucide-react";
+import { Download, Code, X, Copy, Check, ChevronDown, ChevronRight, FileCode2, ExternalLink } from "lucide-react";
 import {
   STAGE_MERMAID_MAP,
   CALC_MERMAID_CODES,
@@ -16,7 +16,7 @@ interface ExportButtonsProps {
 }
 
 // =====================================================================
-// PNG EXPORT — Convert SVG to Canvas to PNG (data URL approach for iframe compat)
+// PNG EXPORT — Convert SVG to Canvas to PNG, open in new tab for saving
 // =====================================================================
 function downloadAllSvgsAsPng(stage: string) {
   const svgEls = document.querySelectorAll(".stage-chart-svg") as NodeListOf<SVGSVGElement>;
@@ -40,8 +40,9 @@ function downloadAllSvgsAsPng(stage: string) {
   const dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString);
 
   const stageLabel = STAGE_LABELS[stage] || stage;
+  const safeName = `MEP-${stageLabel.replace(/\s/g, "-")}`;
 
-  const img = new Image();
+  const img = new window.Image();
   img.onload = () => {
     try {
       const canvas = document.createElement("canvas");
@@ -55,13 +56,30 @@ function downloadAllSvgsAsPng(stage: string) {
       ctx.drawImage(img, 0, 0, w, h);
 
       const pngDataUrl = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = pngDataUrl;
-      a.download = `MEP-${stageLabel.replace(/\s/g, "-")}-${new Date().toISOString().slice(0, 10)}.png`;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => document.body.removeChild(a), 100);
+      // Open in new tab so user can right-click → Save Image As
+      const win = window.open("", "_blank");
+      if (win) {
+        win.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${safeName} — MEP PNG</title>
+            <style>
+              body { margin: 0; background: #f1f5f9; display: flex; flex-direction: column; align-items: center; padding: 24px; font-family: system-ui, sans-serif; }
+              h2 { color: #1e293b; font-size: 16px; margin-bottom: 8px; }
+              p { color: #64748b; font-size: 12px; margin-bottom: 16px; }
+              img { max-width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+            </style>
+          </head>
+          <body>
+            <h2>${safeName}</h2>
+            <p>Right-click the image below and select <strong>"Save image as..."</strong> to download.</p>
+            <img src="${pngDataUrl}" alt="${safeName}" />
+          </body>
+          </html>
+        `);
+        win.document.close();
+      }
     } catch (e) {
       console.error("downloadAllSvgsAsPng: canvas error", e);
     }
