@@ -79,8 +79,8 @@ const NODES: DNode[] = [
   // ── PART 1: INITIATION ──
   hdr("DD_INIT", "DETAILED DESIGN STAGE", "Receive Concept Stage Deliverables", CL.orange),
 
-  // ── PART 2: ARCHITECT DRAWING COORDINATION ──
-  hdr("DD_P2", "PART 2: Architect Drawing List", "Auto-generate & Mail Drawing Requirements", CL.violet),
+  // ── TRACK A: ARCHITECT DRAWING COORDINATION ──
+  hdr("DD_P2", "TRACK A: Architect Drawing List", "Auto-generate & Mail Drawing Requirements", CL.violet),
   proc("DD_ADL", "Generate Drawing List", "\uD83D\uDCCB Auto-create list: Critical + Beneficial types", CL.violet),
   proc("DD_AML", "Auto-Mail to Architect", "\uD83D\uDCE7 System emails drawing list automatically", CL.violet),
   proc("DD_ARC", "Architect Shares Plans", "\uD83D\uDCE5 Architect returns requested drawings", CL.violet),
@@ -92,6 +92,23 @@ const NODES: DNode[] = [
   dec("DD_D1F", "Full List Complete?", "Critical + Beneficial both received?"),
   dec("DD_D1U", "User: Proceed Anyway?", "Only critical received \u2014 user decides"),
   proc("DD_REQ1B", "Request Beneficial Drawings", "\uD83D\uDCE8 Notify Architect \u2192 re-request beneficial", CL.rose),
+
+  // ── TRACK B: MEP DESIGN DELIVERABLES LIST (parallel, like concept Track B) ──
+  hdr("DD_TB", "TRACK B: MEP Deliverables", "Timeline & Drawing Control (Parallel)", CL.teal),
+  proc("DD_TB1", "Select Building", "\uD83D\uDCCB Dropdown: Auto-display Building List", CL.teal),
+  proc("DD_TB2", "Stage-wise Service List", "\uD83E\uDD16 Auto-generated per Stage", CL.teal),
+  proc("DD_TB3", "Service-wise Dates", "\uD83E\uDD16 Auto-generated per Service per Stage", CL.teal),
+  proc("DD_TB4", "Policy DB Lookup", "\uD83E\uDD16 System auto-generates dates from DB", CL.teal),
+  proc("DD_TB5", "Drawing Checklist", "\u2611 Checkboxes: Separate list per stage", CL.teal),
+
+  // ── TRACK C: DRAWING CHECK (parallel, like concept Part 7) ──
+  hdr("DD_DWC", "TRACK C: Drawing Check", "Verify Received Drawings Before Proceeding", CL.green),
+  chk("DD_DWC1", "Architect Plans Checklist", "\u2611 Verify all floor plans received from Architect", CL.teal),
+  dec("DD_DWCD", "All Plans Received?", "Check completeness of drawings"),
+  proc("DD_DWCR", "Request Missing Plans", "\uD83D\uDCE8 Notify Architect \u2192 loop back", CL.rose),
+
+  // ── TRACKS MERGE ──
+  hdr("DD_MRG", "TRACKS MERGE", "All Tracks Complete \u2192 Continue", CL.green),
 
   // ── PART 3: DETAILED INPUT DATA ──
   hdr("DD_P3", "PART 3: Detailed Input Data", "Floor-wise Data Collection & Validation", CL.blue),
@@ -175,10 +192,12 @@ NODES.forEach((n) => { NM[n.id] = n; });
 // CONNECTIONS
 // =====================================================================
 const CN: DConn[] = [
-  // Part 1: Initiation → Part 2
+  // Part 1: Initiation → 3 parallel tracks
   { from: "DD_INIT", to: "DD_P2", style: "normal" },
+  { from: "DD_INIT", to: "DD_TB", style: "normal" },
+  { from: "DD_INIT", to: "DD_DWC", style: "normal" },
 
-  // Part 2: Architect Drawing Coordination
+  // Track A: Architect Drawing Coordination
   { from: "DD_P2", to: "DD_ADL", style: "normal" },
   { from: "DD_ADL", to: "DD_AML", style: "normal" },
   { from: "DD_AML", to: "DD_ARC", style: "normal" },
@@ -190,11 +209,29 @@ const CN: DConn[] = [
   { from: "DD_D1", to: "DD_D1F", label: "Yes", style: "normal" },
   { from: "DD_D1", to: "DD_REQ1", label: "No \u2013 Missing", style: "reject" },
   { from: "DD_REQ1", to: "DD_ARC", label: "Re-request", style: "reject" },
-  { from: "DD_D1F", to: "DD_P3", label: "Yes \u2013 Full", style: "normal" },
+  { from: "DD_D1F", to: "DD_MRG", label: "Yes \u2013 Full", style: "normal" },
   { from: "DD_D1F", to: "DD_D1U", label: "No \u2013 Critical Only", style: "normal" },
-  { from: "DD_D1U", to: "DD_P3", label: "Yes \u2013 Proceed", style: "normal" },
+  { from: "DD_D1U", to: "DD_MRG", label: "Yes \u2013 Proceed", style: "normal" },
   { from: "DD_D1U", to: "DD_REQ1B", label: "No \u2013 Wait", style: "reject" },
   { from: "DD_REQ1B", to: "DD_ARC", label: "Re-request", style: "reject" },
+
+  // Track B: MEP Design Deliverables List
+  { from: "DD_TB", to: "DD_TB1", style: "normal" },
+  { from: "DD_TB1", to: "DD_TB2", style: "normal" },
+  { from: "DD_TB2", to: "DD_TB3", style: "normal" },
+  { from: "DD_TB3", to: "DD_TB4", style: "normal" },
+  { from: "DD_TB4", to: "DD_TB5", style: "normal" },
+  { from: "DD_TB5", to: "DD_MRG", style: "normal" },
+
+  // Track C: Drawing Check
+  { from: "DD_DWC", to: "DD_DWC1", style: "normal" },
+  { from: "DD_DWC1", to: "DD_DWCD", style: "normal" },
+  { from: "DD_DWCD", to: "DD_MRG", label: "Yes", style: "normal" },
+  { from: "DD_DWCD", to: "DD_DWCR", label: "No \u2013 Missing", style: "reject" },
+  { from: "DD_DWCR", to: "DD_DWC1", label: "Re-verify", style: "reject" },
+
+  // Merge → Part 3
+  { from: "DD_MRG", to: "DD_P3", style: "normal" },
 
   // Part 3: Detailed Input Data
   { from: "DD_P3", to: "DD_FW", style: "normal" },
@@ -265,64 +302,67 @@ const GRID: string[][] = [
   // Part 1: Initiation
   ["DD_INIT"],                                           // 0
 
-  // Part 2: Architect Drawing Coordination
-  ["DD_P2"],                                             // 1
-  ["DD_ADL"],                                            // 4 ← auto-generate drawing list
-  ["DD_AML"],                                            // 5 ← auto-mail to architect
-  ["DD_ARC"],                                            // 6 ← architect returns plans
-  ["DD_RCV"],                                            // 7 ← MEP checks received vs list
-  ["DD_CK1C", "DD_CK1B"],                               // 8 ← critical & beneficial sections
-  ["DD_D1", "DD_REQ1"],                                  // 9 ← critical complete?
-  ["DD_D1F"],                                            // 10 ← full list check
-  ["DD_D1U", "DD_REQ1B"],                                // 11 ← user proceed or wait?
+  // 3 Parallel Tracks: Architect Drawing List | MEP Deliverables | Drawing Check
+  ["DD_P2", "DD_TB", "DD_DWC"],                          // 1 ← 3 track headers
+  ["DD_ADL", "DD_TB1", "DD_DWC1"],                       // 2
+  ["DD_AML", "DD_TB2", "DD_DWCD", "DD_DWCR"],           // 3
+  ["DD_ARC", "DD_TB3"],                                  // 4
+  ["DD_RCV", "DD_TB4"],                                  // 5
+  ["DD_CK1C", "DD_CK1B", "DD_TB5"],                     // 6
+  ["DD_D1", "DD_REQ1"],                                  // 7
+  ["DD_D1F"],                                            // 8
+  ["DD_D1U", "DD_REQ1B"],                                // 9
+
+  // Tracks Merge
+  ["DD_MRG"],                                            // 10
 
   // Part 3: Detailed Input Data
-  ["DD_P3"],                                             // 12
-  ["DD_FW", "DD_EQ"],                                    // 13
-  ["DD_LD", "DD_FR"],                                    // 14
-  ["DD_SH"],                                             // 15
+  ["DD_P3"],                                             // 11
+  ["DD_FW", "DD_EQ"],                                    // 12
+  ["DD_LD", "DD_FR"],                                    // 13
+  ["DD_SH"],                                             // 14
 
   // Part 4: Detailed Calculations (Service Tree)
-  ["DD_P4"],                                             // 16
-  ["DD_SVC_E", "DD_SVC_P", "DD_SVC_H", "DD_SVC_F"],     // 17 ← service cards
-  ["DD_SVCM"],                                           // 18
-  ["DD_FMT"],                                            // 19
+  ["DD_P4"],                                             // 15
+  ["DD_SVC_E", "DD_SVC_P", "DD_SVC_H", "DD_SVC_F"],     // 16 ← service cards
+  ["DD_SVCM"],                                           // 17
+  ["DD_FMT"],                                            // 18
 
   // Part 5: Drawing Production
-  ["DD_P5"],                                             // 20
-  ["DD_ELD", "DD_PLD", "DD_HVD", "DD_FFD", "DD_PRM"],   // 21 ← parallel drawings
-  ["DD_FLR"],                                            // 22
-  ["DD_DWM"],                                            // 23
+  ["DD_P5"],                                             // 19
+  ["DD_ELD", "DD_PLD", "DD_HVD", "DD_FFD", "DD_PRM"],   // 20 ← parallel drawings
+  ["DD_FLR"],                                            // 21
+  ["DD_DWM"],                                            // 22
 
   // Part 6: Drawing Verification Checklist
-  ["DD_P6"],                                             // 24
-  ["DD_CK2"],                                            // 25
-  ["DD_D2", "DD_REQ2"],                                  // 26
+  ["DD_P6"],                                             // 23
+  ["DD_CK2"],                                            // 24
+  ["DD_D2", "DD_REQ2"],                                  // 25
 
   // Part 7: MEP Review & Detailed Review
-  ["DD_P7"],                                             // 27
-  ["DD_PR", "DD_PLK"],                                   // 28 ← parallel: review + policy
-  ["DD_RVC"],                                            // 29
-  ["DD_QC"],                                             // 30
-  ["DD_D3", "DD_RWK"],                                   // 31
+  ["DD_P7"],                                             // 26
+  ["DD_PR", "DD_PLK"],                                   // 27 ← parallel: review + policy
+  ["DD_RVC"],                                            // 28
+  ["DD_QC"],                                             // 29
+  ["DD_D3", "DD_RWK"],                                   // 30
 
   // Part 8: MEP Layout → Architect Agreement
-  ["DD_P8"],                                             // 32
-  ["DD_CK3"],                                            // 33
-  ["DD_SUB"],                                            // 34
-  ["DD_ARV"],                                            // 35
-  ["DD_D4", "DD_REV"],                                   // 36
+  ["DD_P8"],                                             // 31
+  ["DD_CK3"],                                            // 32
+  ["DD_SUB"],                                            // 33
+  ["DD_ARV"],                                            // 34
+  ["DD_D4", "DD_REV"],                                   // 35
 
   // Part 9: Final Verification & Completion
-  ["DD_P9"],                                             // 37
-  ["DD_CK4"],                                            // 38
-  ["DD_REG"],                                            // 39
-  ["DD_D5", "DD_HOLD"],                                  // 40
-  ["DD_DONE"],                                           // 41
+  ["DD_P9"],                                             // 36
+  ["DD_CK4"],                                            // 37
+  ["DD_REG"],                                            // 38
+  ["DD_D5", "DD_HOLD"],                                  // 39
+  ["DD_DONE"],                                           // 40
 ];
 
 // Service card row needs extra space
-const SERVICE_ROW_INDICES = new Set([15]);
+const SERVICE_ROW_INDICES = new Set([16]);
 const SVC_ROW_GAP = 290;
 
 // Service tree constants
@@ -715,8 +755,8 @@ function DrawConn({ c, pos, W }: { c: DConn; pos: Record<string, { x: number; y:
 // =====================================================================
 interface BandDef { label: string; firstNode: string; lastNode: string; color: string }
 const BAND_DEFS: BandDef[] = [
-  { label: "PART 1: INITIATION \u2014 Project Handover & Kickoff", firstNode: "DD_INIT", lastNode: "DD_SC", color: CL.orange.bd },
-  { label: "PART 2: ARCHITECT COORDINATION \u2014 Receive Final Drawings", firstNode: "DD_P2", lastNode: "DD_REQ1", color: CL.violet.bd },
+  { label: "INITIATION \u2014 Project Handover & Kickoff", firstNode: "DD_INIT", lastNode: "DD_INIT", color: CL.orange.bd },
+  { label: "PARALLEL TRACKS \u2014 Architect Drawing List | MEP Deliverables | Drawing Check", firstNode: "DD_P2", lastNode: "DD_MRG", color: CL.violet.bd },
   { label: "PART 3: DETAILED INPUT DATA \u2014 Floor-wise Collection", firstNode: "DD_P3", lastNode: "DD_SH", color: CL.blue.bd },
   { label: "PART 4: DETAILED CALCULATIONS \u2014 Service-wise Engineering", firstNode: "DD_P4", lastNode: "DD_FMT", color: CL.purple.bd },
   { label: "PART 5: DRAWING PRODUCTION \u2014 Floor-wise MEP Drawings", firstNode: "DD_P5", lastNode: "DD_DWM", color: CL.cyan.bd },

@@ -223,9 +223,11 @@ export const DETAILED_DESIGN_MERMAID = `flowchart TD
     CS[Concept Stage Data Loaded<br/>Input Matrix + Space Matrix + Calcs from DB]
     INIT --> CS
 
-    %% ── PART 2: ARCHITECT DRAWING COORDINATION ──
-    CS --> P2
-    P2[/PART 2: Architect Drawing Coordination<br/>Auto-list & Auto-mail System/]
+    %% ── 3 PARALLEL TRACKS ──
+    CS --> P2 & TB & DWC
+
+    %% ── TRACK A: ARCHITECT DRAWING LIST ──
+    P2[/TRACK A: Architect Drawing List<br/>Auto-list & Auto-mail System/]
     P2A[Auto-List Drawing Requirements<br/>🤖 System generates list from DB per service]
     P2B[Auto-Mail to Architect<br/>🤖 System sends mail with required drawings list]
     P2C[Architect Uploads Drawings<br/>📂 Upload portal per drawing type]
@@ -234,11 +236,36 @@ export const DETAILED_DESIGN_MERMAID = `flowchart TD
     P2F[Beneficial Missing → Warning<br/>Proceed with advisory note]
 
     P2 --> P2A --> P2B --> P2C --> P2D
-    P2D -->|All Critical Received| P3H
+    P2D -->|All Critical Received| MRG
     P2D -->|Critical Missing| P2E
     P2D -->|Only Beneficial Missing| P2F
     P2E -.->|Re-request| P2B
-    P2F --> P3H
+    P2F --> MRG
+
+    %% ── TRACK B: MEP DESIGN DELIVERABLES LIST ──
+    TB[/TRACK B: MEP Deliverables<br/>Timeline & Drawing Control/]
+    TB1[Select Building<br/>📋 Dropdown: Auto-display Building List]
+    TB2[Stage-wise Service List<br/>🤖 Auto-generated per Stage]
+    TB3[Service-wise Dates<br/>🤖 Auto-generated per Service per Stage]
+    TB4[Policy DB Lookup<br/>🤖 System auto-generates dates from DB]
+    TB5[Drawing Checklist<br/>☑ Checkboxes: Separate list per stage]
+
+    TB --> TB1 --> TB2 --> TB3 --> TB4 --> TB5 --> MRG
+
+    %% ── TRACK C: DRAWING CHECK ──
+    DWC[/TRACK C: Drawing Check<br/>Verify Received Drawings/]
+    DWC1[Architect Plans Checklist<br/>☑ Verify all floor plans received]
+    DWCD{All Plans Received?<br/>Completeness Check}
+    DWCR[Request Missing Plans<br/>📨 Notify Architect → loop back]
+
+    DWC --> DWC1 --> DWCD
+    DWCD -->|Yes| MRG
+    DWCD -->|No| DWCR
+    DWCR -.->|Re-verify| DWC1
+
+    %% ── TRACKS MERGE ──
+    MRG([TRACKS MERGE<br/>All Tracks Complete → Continue])
+    MRG --> P3H
 
     %% ── PART 3: DETAILED INPUT DATA ──
     P3H[/PART 3: Detailed Input Data<br/>Enhanced from Concept Stage/]
@@ -326,9 +353,9 @@ export const DETAILED_DESIGN_MERMAID = `flowchart TD
     classDef header fill:#f97316,stroke:#f97316,stroke-width:2px,color:#ffffff
     classDef service fill:#ede9fe,stroke:#8b5cf6,stroke-width:1.5px,color:#5b21b6
 
-    class INIT,DONE terminal
-    class P2D,P6D,P7C,P8C decision
-    class P2E,P6R,P7R,P8R reject
+    class INIT,DONE,MRG terminal
+    class P2D,P6D,P7C,P8C,DWCD decision
+    class P2E,P6R,P7R,P8R,DWCR reject
     class P4EL,P4PL,P4HV,P4FF service`;
 
 export const TENDER_STAGE_MERMAID = `flowchart TD
