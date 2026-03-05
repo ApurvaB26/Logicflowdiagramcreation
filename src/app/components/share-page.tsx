@@ -15,6 +15,7 @@ import {
   Database,
   MousePointerClick,
   Info,
+  Code,
 } from "lucide-react";
 import { ConceptStageChart } from "./concept-stage";
 import { DetailedDesignStageChart } from "./detailed-design-stage";
@@ -31,6 +32,13 @@ import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
+import {
+  STAGE_MERMAID_MAP,
+  CALC_MERMAID_CODES,
+  STAGE_CALC_IDS,
+  STAGE_LABELS as MERMAID_STAGE_LABELS,
+} from "./mermaid-codes";
+import { copyToClipboard } from "./clipboard-utils";
 
 // =====================================================================
 // CALC METADATA
@@ -125,6 +133,7 @@ export function SharePage() {
   const [copied, setCopied] = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [showDataBanner, setShowDataBanner] = useState(true);
+  const [mermaidCopied, setMermaidCopied] = useState(false);
 
   // ============ Determine link mode from URL ============
   const isDataMode = location.pathname.startsWith("/share/data");
@@ -157,16 +166,10 @@ export function SharePage() {
     : "MEP Digital Ecosystem";
 
   const handleCopyLink = useCallback(() => {
-    const ta = document.createElement("textarea");
-    ta.value = shareUrl;
-    ta.style.position = "fixed";
-    ta.style.opacity = "0";
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copyToClipboard(shareUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   }, [shareUrl]);
 
   const handleDownloadPNG = useCallback(() => {
@@ -175,6 +178,32 @@ export function SharePage() {
     downloadSvgAsPng(contentRef.current, safeName);
     setShowDownloadMenu(false);
   }, [title]);
+
+  const handleDownloadMermaid = useCallback(() => {
+    const stageId = type || "";
+    const parts: string[] = [];
+    const stageCode = STAGE_MERMAID_MAP[stageId];
+    if (stageCode) {
+      parts.push(`%% ${(MERMAID_STAGE_LABELS[stageId] || stageId).toUpperCase()} — MAIN FLOWCHART\n\n${stageCode}`);
+    }
+    const calcIds = STAGE_CALC_IDS[stageId] || [];
+    for (const cid of calcIds) {
+      const calc = CALC_MERMAID_CODES[cid];
+      if (calc) {
+        parts.push(`%% ${calc.title.toUpperCase()}\n\n${calc.code}`);
+      }
+    }
+    // For individual calc pages
+    if (isCalc && id && CALC_MERMAID_CODES[id]) {
+      const calc = CALC_MERMAID_CODES[id];
+      parts.push(`%% ${calc.title.toUpperCase()}\n\n${calc.code}`);
+    }
+    const bundle = parts.join("\n\n\n");
+    copyToClipboard(bundle).then(() => {
+      setMermaidCopied(true);
+      setTimeout(() => setMermaidCopied(false), 2000);
+    });
+  }, [type, id, isCalc]);
 
   // Close download menu on click outside
   useEffect(() => {
@@ -364,6 +393,28 @@ export function SharePage() {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* ============ Mermaid Copy (stage + calc pages) ============ */}
+            {(isStageChart || isCalc) && (
+              <button
+                onClick={handleDownloadMermaid}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] border transition-colors"
+                style={{
+                  fontWeight: 600,
+                  backgroundColor: mermaidCopied ? "#d1fae5" : "#ede9fe",
+                  borderColor: mermaidCopied ? "#10b981" : "#c4b5fd",
+                  color: mermaidCopied ? "#065f46" : "#5b21b6",
+                }}
+                title="Copy Mermaid.js code for this stage + all calculations"
+              >
+                {mermaidCopied ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Code className="w-4 h-4" />
+                )}
+                {mermaidCopied ? "Copied!" : "Mermaid"}
+              </button>
             )}
 
             {/* ============ DATA MODE: Info badge (no PNG download) ============ */}

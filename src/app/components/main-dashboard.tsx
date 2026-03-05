@@ -6,6 +6,7 @@ import { TenderStageChart } from "./tender-stage";
 import { VFCStageChart } from "./vfc-stage";
 import { ExportButtons } from "./export-buttons";
 import { ShareModal } from "./share-modal";
+import { FeedbackQRPanel } from "./feedback-qr-panel";
 import {
   ZoomIn,
   ZoomOut,
@@ -104,7 +105,7 @@ export function MainDashboard() {
           {isFlowView && (
             <>
               <div className="w-px h-5 bg-[#e2e8f0] mx-1" />
-              <ExportButtons />
+              <ExportButtons currentStage={view} />
               <div className="w-px h-5 bg-[#e2e8f0] mx-1" />
               <button
                 onClick={() => setZoom((z) => Math.min(z + 0.06, 1.2))}
@@ -172,6 +173,8 @@ export function MainDashboard() {
 
       {/* Share Modal */}
       {showShare && <ShareModal onClose={() => setShowShare(false)} />}
+      {/* Feedback QR Panel */}
+      <FeedbackQRPanel currentStage={view} />
     </div>
   );
 }

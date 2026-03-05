@@ -1,11 +1,17 @@
 import { createBrowserRouter } from "react-router";
 import { MainDashboard } from "./components/main-dashboard";
 import { SharePage } from "./components/share-page";
+import { FeedbackPage } from "./components/feedback-page";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     Component: MainDashboard,
+  },
+  // Feedback page (QR code target)
+  {
+    path: "/feedback",
+    Component: FeedbackPage,
   },
   // Link Type 1: View + PNG Download
   {
