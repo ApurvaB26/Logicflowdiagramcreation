@@ -16,7 +16,7 @@ interface ExportButtonsProps {
 }
 
 // =====================================================================
-// PNG EXPORT — Convert SVG to Canvas to PNG
+// PNG EXPORT — Convert SVG to Canvas to PNG (data URL approach for iframe compat)
 // =====================================================================
 function downloadAllSvgsAsPng(stage: string) {
   const svgEls = document.querySelectorAll(".stage-chart-svg") as NodeListOf<SVGSVGElement>;
@@ -25,7 +25,6 @@ function downloadAllSvgsAsPng(stage: string) {
     return;
   }
 
-  // Download main chart (first one found)
   const svgEl = svgEls[0];
   const clone = svgEl.cloneNode(true) as SVGSVGElement;
   const w = svgEl.viewBox.baseVal.width || svgEl.getBoundingClientRect().width;
@@ -34,40 +33,43 @@ function downloadAllSvgsAsPng(stage: string) {
   clone.setAttribute("width", String(w));
   clone.setAttribute("height", String(h));
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  clone.removeAttribute("class");
+  clone.style.cssText = "display:block";
 
-  const serializer = new XMLSerializer();
-  const svgString = serializer.serializeToString(clone);
-  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
+  const svgString = new XMLSerializer().serializeToString(clone);
+  const dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString);
 
   const stageLabel = STAGE_LABELS[stage] || stage;
 
   const img = new Image();
   img.onload = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = w * scale;
-    canvas.height = h * scale;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(scale, scale);
-    ctx.drawImage(img, 0, 0, w, h);
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, w, h);
 
-    canvas.toBlob((blob) => {
-      if (!blob) return;
+      const pngDataUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
+      a.href = pngDataUrl;
       a.download = `MEP-${stageLabel.replace(/\s/g, "-")}-${new Date().toISOString().slice(0, 10)}.png`;
+      a.style.display = "none";
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(a.href);
-    }, "image/png");
-
-    URL.revokeObjectURL(url);
+      setTimeout(() => document.body.removeChild(a), 100);
+    } catch (e) {
+      console.error("downloadAllSvgsAsPng: canvas error", e);
+    }
   };
-  img.src = url;
+  img.onerror = (e) => {
+    console.error("downloadAllSvgsAsPng: image load error", e);
+  };
+  img.src = dataUrl;
 }
 
 // =====================================================================

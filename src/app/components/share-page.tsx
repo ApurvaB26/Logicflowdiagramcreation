@@ -70,99 +70,106 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
 // =====================================================================
 // PNG DOWNLOAD UTILITY
 // =====================================================================
-function downloadSvgAsPng(container: HTMLElement, filename: string) {
-  const svgEl = container.querySelector("svg") as SVGSVGElement | null;
-  if (!svgEl) {
-    alert("SVG not found for download.");
-    return;
-  }
+
+/** Helper: serialize SVG element to a data URL for Image loading (avoids blob URL restrictions) */
+function svgToDataUrl(svgEl: SVGSVGElement): { url: string; w: number; h: number } {
   const clone = svgEl.cloneNode(true) as SVGSVGElement;
   const vb = svgEl.viewBox?.baseVal;
-  const w = vb && vb.width > 0 ? vb.width : svgEl.getBoundingClientRect().width;
-  const h = vb && vb.height > 0 ? vb.height : svgEl.getBoundingClientRect().height;
-  const scale = 3;
+  const w = vb && vb.width > 0 ? vb.width : svgEl.getBoundingClientRect().width || 1200;
+  const h = vb && vb.height > 0 ? vb.height : svgEl.getBoundingClientRect().height || 800;
   clone.setAttribute("width", String(w));
   clone.setAttribute("height", String(h));
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  clone.style.width = "";
-  clone.style.display = "block";
+  clone.removeAttribute("class");
+  clone.style.cssText = "display:block";
   const svgString = new XMLSerializer().serializeToString(clone);
-  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = w * scale;
-    canvas.height = h * scale;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(scale, scale);
-    ctx.drawImage(img, 0, 0, w, h);
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `${filename}-${new Date().toISOString().slice(0, 10)}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(a.href);
-    }, "image/png");
-    URL.revokeObjectURL(url);
-  };
-  img.onerror = () => {
-    URL.revokeObjectURL(url);
-    alert("Failed to render PNG.");
-  };
-  img.src = url;
+  const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString);
+  return { url, w, h };
 }
 
-/** Convert a single SVG container to PNG — returns a Promise that resolves after the download link is clicked */
-function downloadSvgAsPngAsync(container: HTMLElement, filename: string): Promise<void> {
-  return new Promise((resolve) => {
-    const svgEl = container.querySelector("svg") as SVGSVGElement | null;
-    if (!svgEl) { resolve(); return; }
-    const clone = svgEl.cloneNode(true) as SVGSVGElement;
-    const vb = svgEl.viewBox?.baseVal;
-    const w = vb && vb.width > 0 ? vb.width : svgEl.getBoundingClientRect().width;
-    const h = vb && vb.height > 0 ? vb.height : svgEl.getBoundingClientRect().height;
-    const scale = 3;
-    clone.setAttribute("width", String(w));
-    clone.setAttribute("height", String(h));
-    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    clone.style.width = "";
-    clone.style.display = "block";
-    const svgString = new XMLSerializer().serializeToString(clone);
-    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
-    const img = new Image();
-    img.onload = () => {
+/** Helper: trigger download of a data URL */
+function triggerDownload(dataUrl: string, filename: string) {
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  // Small delay before cleanup to ensure download triggers
+  setTimeout(() => {
+    document.body.removeChild(a);
+  }, 100);
+}
+
+/** Download a single SVG from container as PNG (fire-and-forget) */
+function downloadSvgAsPng(container: HTMLElement, filename: string) {
+  const svgEl = container.querySelector("svg") as SVGSVGElement | null;
+  if (!svgEl) {
+    console.error("downloadSvgAsPng: SVG not found in container");
+    return;
+  }
+  const { url, w, h } = svgToDataUrl(svgEl);
+  const scale = 3;
+  const img = new Image();
+  img.onload = () => {
+    try {
       const canvas = document.createElement("canvas");
       canvas.width = w * scale;
       canvas.height = h * scale;
       const ctx = canvas.getContext("2d");
-      if (!ctx) { URL.revokeObjectURL(url); resolve(); return; }
+      if (!ctx) return;
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.scale(scale, scale);
       ctx.drawImage(img, 0, 0, w, h);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = `${filename}-${new Date().toISOString().slice(0, 10)}.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(a.href);
-        }
-        URL.revokeObjectURL(url);
-        resolve();
-      }, "image/png");
+      const pngDataUrl = canvas.toDataURL("image/png");
+      const safeName = `${filename}-${new Date().toISOString().slice(0, 10)}.png`;
+      triggerDownload(pngDataUrl, safeName);
+    } catch (e) {
+      console.error("downloadSvgAsPng: canvas error", e);
+    }
+  };
+  img.onerror = (e) => {
+    console.error("downloadSvgAsPng: image load error", e);
+  };
+  img.src = url;
+}
+
+/** Download a single SVG from container as PNG — async version (resolves after download triggered) */
+function downloadSvgAsPngAsync(container: HTMLElement, filename: string): Promise<void> {
+  return new Promise((resolve) => {
+    const svgEl = container.querySelector("svg") as SVGSVGElement | null;
+    if (!svgEl) {
+      console.warn("downloadSvgAsPngAsync: no SVG found, skipping", filename);
+      resolve();
+      return;
+    }
+    const { url, w, h } = svgToDataUrl(svgEl);
+    const scale = 3;
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { resolve(); return; }
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0, w, h);
+        const pngDataUrl = canvas.toDataURL("image/png");
+        const safeName = `${filename}-${new Date().toISOString().slice(0, 10)}.png`;
+        triggerDownload(pngDataUrl, safeName);
+      } catch (e) {
+        console.error("downloadSvgAsPngAsync: canvas error", e);
+      }
+      resolve();
     };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+    img.onerror = (e) => {
+      console.error("downloadSvgAsPngAsync: image load error for", filename, e);
+      resolve();
+    };
     img.src = url;
   });
 }
@@ -171,18 +178,23 @@ function downloadSvgAsPngAsync(container: HTMLElement, filename: string): Promis
 async function downloadAllChartPNGs(parentContainer: HTMLElement) {
   const chartWrappers = parentContainer.querySelectorAll("[data-chart-id]") as NodeListOf<HTMLElement>;
   if (chartWrappers.length === 0) {
+    // Fallback: try the first SVG in the entire container
     downloadSvgAsPng(parentContainer, "MEP-Chart");
     return;
   }
+  console.log(`downloadAllChartPNGs: found ${chartWrappers.length} charts to download`);
   for (let i = 0; i < chartWrappers.length; i++) {
     const wrapper = chartWrappers[i];
     const chartLabel = wrapper.getAttribute("data-chart-label") || `chart-${i}`;
     const safeName = chartLabel.replace(/[^a-zA-Z0-9]/g, "-").replace(/-+/g, "-");
+    console.log(`downloadAllChartPNGs: downloading ${i + 1}/${chartWrappers.length} — ${chartLabel}`);
     await downloadSvgAsPngAsync(wrapper, safeName);
+    // Stagger downloads so browser doesn't block them
     if (i < chartWrappers.length - 1) {
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 800));
     }
   }
+  console.log("downloadAllChartPNGs: all downloads complete");
 }
 
 // =====================================================================
