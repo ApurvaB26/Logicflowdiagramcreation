@@ -10,8 +10,6 @@ import {
   Copy,
   Check,
   Eye,
-  FileImage,
-  ChevronDown,
   Database,
   MousePointerClick,
   Info,
@@ -121,6 +119,72 @@ function downloadSvgAsPng(container: HTMLElement, filename: string) {
   img.src = url;
 }
 
+/** Convert a single SVG container to PNG — returns a Promise that resolves after the download link is clicked */
+function downloadSvgAsPngAsync(container: HTMLElement, filename: string): Promise<void> {
+  return new Promise((resolve) => {
+    const svgEl = container.querySelector("svg") as SVGSVGElement | null;
+    if (!svgEl) { resolve(); return; }
+    const clone = svgEl.cloneNode(true) as SVGSVGElement;
+    const vb = svgEl.viewBox?.baseVal;
+    const w = vb && vb.width > 0 ? vb.width : svgEl.getBoundingClientRect().width;
+    const h = vb && vb.height > 0 ? vb.height : svgEl.getBoundingClientRect().height;
+    const scale = 3;
+    clone.setAttribute("width", String(w));
+    clone.setAttribute("height", String(h));
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.style.width = "";
+    clone.style.display = "block";
+    const svgString = new XMLSerializer().serializeToString(clone);
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { URL.revokeObjectURL(url); resolve(); return; }
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `${filename}-${new Date().toISOString().slice(0, 10)}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(a.href);
+        }
+        URL.revokeObjectURL(url);
+        resolve();
+      }, "image/png");
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+    img.src = url;
+  });
+}
+
+/** Download all [data-chart-id] containers sequentially as PNGs with staggered timing */
+async function downloadAllChartPNGs(parentContainer: HTMLElement) {
+  const chartWrappers = parentContainer.querySelectorAll("[data-chart-id]") as NodeListOf<HTMLElement>;
+  if (chartWrappers.length === 0) {
+    downloadSvgAsPng(parentContainer, "MEP-Chart");
+    return;
+  }
+  for (let i = 0; i < chartWrappers.length; i++) {
+    const wrapper = chartWrappers[i];
+    const chartLabel = wrapper.getAttribute("data-chart-label") || `chart-${i}`;
+    const safeName = chartLabel.replace(/[^a-zA-Z0-9]/g, "-").replace(/-+/g, "-");
+    await downloadSvgAsPngAsync(wrapper, safeName);
+    if (i < chartWrappers.length - 1) {
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }
+}
+
 // =====================================================================
 // SHARE PAGE — Read-only view with two distinct modes
 // =====================================================================
@@ -134,6 +198,7 @@ export function SharePage() {
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [showDataBanner, setShowDataBanner] = useState(true);
   const [mermaidCopied, setMermaidCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   // ============ Determine link mode from URL ============
   const isDataMode = location.pathname.startsWith("/share/data");
@@ -173,11 +238,11 @@ export function SharePage() {
   }, [shareUrl]);
 
   const handleDownloadPNG = useCallback(() => {
-    if (!contentRef.current) return;
-    const safeName = title.replace(/[^a-zA-Z0-9]/g, "-").replace(/-+/g, "-");
-    downloadSvgAsPng(contentRef.current, safeName);
+    if (!contentRef.current || downloading) return;
+    setDownloading(true);
+    downloadAllChartPNGs(contentRef.current).finally(() => setDownloading(false));
     setShowDownloadMenu(false);
-  }, [title]);
+  }, [downloading]);
 
   const handleDownloadMermaid = useCallback(() => {
     const stageId = type || "";
@@ -361,38 +426,19 @@ export function SharePage() {
 
             {/* ============ VIEW MODE: Download PNG button ============ */}
             {isViewMode && (
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDownloadMenu((v) => !v);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                  style={{ fontWeight: 600 }}
-                >
-                  <Download className="w-4 h-4" />
-                  Download PNG
-                  <ChevronDown className="w-3 h-3 ml-0.5" />
-                </button>
-                {showDownloadMenu && (
-                  <div
-                    className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-xl border border-[#e2e8f0] overflow-hidden z-50"
-                    style={{ minWidth: 200 }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      onClick={handleDownloadPNG}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-[#1e293b] hover:bg-[#f1f5f9] transition-colors text-left"
-                    >
-                      <FileImage className="w-4 h-4 text-blue-500" />
-                      <div>
-                        <div style={{ fontWeight: 600 }}>Download as PNG</div>
-                        <div className="text-[11px] text-[#94a3b8]">High-res 3&times; image</div>
-                      </div>
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                onClick={handleDownloadPNG}
+                disabled={downloading}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] text-white transition-colors"
+                style={{
+                  fontWeight: 600,
+                  backgroundColor: downloading ? "#93c5fd" : "#2563eb",
+                  cursor: downloading ? "wait" : "pointer",
+                }}
+              >
+                <Download className={`w-4 h-4 ${downloading ? "animate-pulse" : ""}`} />
+                {downloading ? "Downloading..." : "Download All PNGs"}
+              </button>
             )}
 
             {/* ============ Mermaid Copy (stage + calc pages) ============ */}
@@ -495,81 +541,86 @@ export function SharePage() {
 
       {/* ========== CONTENT ========== */}
       <div className="flex-1 overflow-auto" ref={contentRef}>
-        {isConceptChart && (
-          <div className="p-6">
-            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
-              <div
-                className="h-1 w-full"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
-                }}
-              />
-              <div className="flex justify-center">
-                <div className="p-4 w-full" style={{ zoom }}>
-                  <ConceptStageChart />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {isStageChart && (() => {
+          const stageId = type || "";
+          const stageLabel = MERMAID_STAGE_LABELS[stageId] || stageId;
+          const StageComponent = isConceptChart ? ConceptStageChart
+            : isDetailedChart ? DetailedDesignStageChart
+            : isTenderChart ? TenderStageChart
+            : VFCStageChart;
+          const stageGradient = isConceptChart
+            ? "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)"
+            : isDetailedChart
+            ? "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)"
+            : isTenderChart
+            ? "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)"
+            : "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #f97316, #10b981)";
+          const calcIds = STAGE_CALC_IDS[stageId] || [];
+          const readyCalcIds = calcIds.filter((cid) => CALC_COMPONENTS[cid]);
 
-        {isDetailedChart && (
-          <div className="p-6">
-            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
+          return (
+            <div className="p-6 space-y-6">
+              {/* Main stage flowchart */}
               <div
-                className="h-1 w-full"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)",
-                }}
-              />
-              <div className="flex justify-center">
-                <div className="p-4 w-full" style={{ zoom }}>
-                  <DetailedDesignStageChart />
+                data-chart-id={`stage-${stageId}`}
+                data-chart-label={`MEP-${stageLabel}-Main-Flowchart`}
+                className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden"
+              >
+                <div className="h-1 w-full" style={{ background: stageGradient }} />
+                <div className="flex justify-center">
+                  <div className="p-4 w-full" style={{ zoom }}>
+                    <StageComponent />
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {isTenderChart && (
-          <div className="p-6">
-            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
-              <div
-                className="h-1 w-full"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)",
-                }}
-              />
-              <div className="flex justify-center">
-                <div className="p-4 w-full" style={{ zoom }}>
-                  <TenderStageChart />
-                </div>
-              </div>
+              {/* Calculation flowcharts */}
+              {readyCalcIds.length > 0 && (
+                <>
+                  <div className="flex items-center gap-3 pt-2">
+                    <div className="h-px flex-1 bg-[#e2e8f0]" />
+                    <span
+                      className="text-[12px] text-[#64748b] px-3 py-1 rounded-full bg-[#f1f5f9] border border-[#e2e8f0]"
+                      style={{ fontWeight: 600 }}
+                    >
+                      {readyCalcIds.length} Calculation Flowcharts
+                    </span>
+                    <div className="h-px flex-1 bg-[#e2e8f0]" />
+                  </div>
+                  {readyCalcIds.map((calcId) => {
+                    const meta = CALC_META[calcId];
+                    const CalcComp = CALC_COMPONENTS[calcId];
+                    if (!meta || !CalcComp) return null;
+                    return (
+                      <div
+                        key={calcId}
+                        data-chart-id={`calc-${calcId}`}
+                        data-chart-label={`MEP-${meta.title.replace(/[^a-zA-Z0-9]/g, "-")}`}
+                        className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden"
+                      >
+                        <div
+                          className="px-5 py-3 flex items-center gap-2.5 border-b border-[#e2e8f0]"
+                          style={{ backgroundColor: `${meta.color}08` }}
+                        >
+                          <span style={{ fontSize: 20 }}>{meta.icon}</span>
+                          <div>
+                            <h3 className="text-[13px] text-[#1e293b]" style={{ fontWeight: 700 }}>{meta.title}</h3>
+                            <p className="text-[10px] text-[#94a3b8]">{meta.service} Service</p>
+                          </div>
+                        </div>
+                        <div className="overflow-auto" style={{ zoom }}>
+                          <div style={{ minWidth: "1600px", padding: "10px 0" }}>
+                            <CalcComp />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
-          </div>
-        )}
-
-        {isVFCChart && (
-          <div className="p-6">
-            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
-              <div
-                className="h-1 w-full"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #f97316, #10b981)",
-                }}
-              />
-              <div className="flex justify-center">
-                <div className="p-4 w-full" style={{ zoom }}>
-                  <VFCStageChart />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {isServices && (
           <div className="p-6">
@@ -579,7 +630,11 @@ export function SharePage() {
 
         {isCalc && CalcComponent && (
           <div className="p-6">
-            <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
+            <div
+              data-chart-id={`calc-${id}`}
+              data-chart-label={`MEP-${calcMeta?.title || id}`}
+              className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden"
+            >
               {/* Calc header */}
               <div
                 className="px-6 py-4 flex items-center gap-3"

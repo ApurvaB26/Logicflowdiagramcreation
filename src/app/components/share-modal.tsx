@@ -230,7 +230,7 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
                 </span>
               </div>
               <p className="text-[10px] text-[#3b82f6] leading-relaxed">
-                Team can view &amp; download all charts as PNG
+                View &amp; download stage + all calc flowcharts as PNG
               </p>
             </div>
             <div
