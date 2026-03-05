@@ -11,9 +11,7 @@ import {
   ClipboardCheck,
   Download,
   FileImage,
-  Database,
   Code,
-  Package,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -214,7 +212,7 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
           </div>
 
           {/* Link Type Legend */}
-          <div className="mx-6 mt-4 mb-2 grid grid-cols-3 gap-3">
+          <div className="mx-6 mt-4 mb-2 grid grid-cols-2 gap-3">
             <div
               className="px-3 py-2.5 rounded-xl"
               style={{
@@ -232,27 +230,7 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
                 </span>
               </div>
               <p className="text-[10px] text-[#3b82f6] leading-relaxed">
-                View &amp; download all charts as PNG
-              </p>
-            </div>
-            <div
-              className="px-3 py-2.5 rounded-xl"
-              style={{
-                backgroundColor: "#fef3c7",
-                border: "1px solid #fcd34d",
-              }}
-            >
-              <div className="flex items-center gap-1.5 mb-1">
-                <Database className="w-3.5 h-3.5 text-amber-600" />
-                <span
-                  className="text-[12px] text-[#92400e]"
-                  style={{ fontWeight: 700 }}
-                >
-                  View + Data
-                </span>
-              </div>
-              <p className="text-[10px] text-[#b45309] leading-relaxed">
-                Click nodes to download fed data
+                Team can view &amp; download all charts as PNG
               </p>
             </div>
             <div
@@ -382,19 +360,6 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
                                 <FileImage className="w-3.5 h-3.5" />
                               }
                             />
-                            <CopyLinkButton
-                              label="View + Data Link"
-                              url={getShareUrl("data", "services")}
-                              id="data:services"
-                              copiedId={copiedId}
-                              onCopy={handleCopy}
-                              bg="#fef3c7"
-                              border="#fcd34d"
-                              color="#92400e"
-                              icon={
-                                <Database className="w-3.5 h-3.5" />
-                              }
-                            />
                           </div>
                         ) : (
                           /* Stage — full bundle */
@@ -418,19 +383,6 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
                                 color="#2563eb"
                                 icon={
                                   <FileImage className="w-3.5 h-3.5" />
-                                }
-                              />
-                              <CopyLinkButton
-                                label="View + Data"
-                                url={getShareUrl("data", stage.id)}
-                                id={`data:${stage.id}`}
-                                copiedId={copiedId}
-                                onCopy={handleCopy}
-                                bg="#fef3c7"
-                                border="#fcd34d"
-                                color="#92400e"
-                                icon={
-                                  <Database className="w-3.5 h-3.5" />
                                 }
                               />
                             </div>
@@ -528,23 +480,6 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
                                             color="#2563eb"
                                             icon={
                                               <FileImage className="w-3 h-3" />
-                                            }
-                                            small
-                                          />
-                                          <CopyLinkButton
-                                            label="Data"
-                                            url={getShareUrl(
-                                              "data",
-                                              `calc/${calcId}`
-                                            )}
-                                            id={`data:${calcId}`}
-                                            copiedId={copiedId}
-                                            onCopy={handleCopy}
-                                            bg="#fef3c7"
-                                            border="#fcd34d"
-                                            color="#92400e"
-                                            icon={
-                                              <Database className="w-3 h-3" />
                                             }
                                             small
                                           />
