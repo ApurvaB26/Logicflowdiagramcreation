@@ -11,6 +11,7 @@ import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
+import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 import {
   Zap,
   Droplets,
@@ -97,7 +98,7 @@ const SERVICES: Service[] = [
       { id: "SWD", title: "Storm Water Drainage Calculator", description: "Rational method runoff, Manning's equation, velocity monitoring & pipe sizing", status: "ready", stage: "concept" },
       { id: "P3T_PLUMB", title: "Transfer Pipe Sizing", description: "Pipe diameter, friction loss & material specification for plumbing transfers", status: "coming-soon", stage: "concept" },
       // ── Detailed Design Stage ──
-      { id: "DD_PIP", title: "Pipe Sizing (Hot/Cold)", description: "Hunter's method, velocity check, IS 2065 standard pipe diameter calc", status: "coming-soon", stage: "detailed" },
+      { id: "DD_PIP", title: "Pipe Sizing (Hot/Cold)", description: "Hunter's method, velocity check, IS 2065 standard pipe diameter calc", status: "ready", stage: "detailed" },
       { id: "DD_RSR", title: "Riser Diagrams", description: "Floor-wise riser layout, connection points & isolation valves", status: "coming-soon", stage: "detailed" },
       { id: "DD_DRN", title: "Drainage Calculations", description: "Fixture unit count, drainage pipe sizing per floor", status: "coming-soon", stage: "detailed" },
       { id: "DD_PMP", title: "Pump Selection", description: "Detailed pump curve matching, duty/standby selection", status: "coming-soon", stage: "detailed" },
@@ -632,7 +633,7 @@ function CalcDetailOverlay({
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB","DD_PIP"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
@@ -644,6 +645,7 @@ function CalcDetailOverlay({
   const isCustomRWH = calcId === "RWH";
   const isCustomSWD = calcId === "SWD";
   const isCustomDDCB = calcId === "DD_CB";
+  const isCustomDDPIP = calcId === "DD_PIP";
   const isCustom = CUSTOM_IDS.has(calcId);
 
   // For generic flows
@@ -661,6 +663,7 @@ function CalcDetailOverlay({
     RWH: { title: "Rainwater Harvesting & Tank Sizing", icon: "\uD83C\uDF27\uFE0F", color: "#3b82f6" },
     SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6" },
     DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706" },
+    DD_PIP: { title: "Transfer Pipe Sizing Calculation", icon: "\uD83D\uDCA7", color: "#2563eb" },
   };
   const meta = CUSTOM_META[calcId];
   const flowTitle = meta?.title ?? flow?.title ?? "Calculation";
@@ -710,7 +713,7 @@ function CalcDetailOverlay({
           { label: "Sizing Output", bg: "#ffe4e6", bd: "#f43f5e", icon: "\u26A1" },
           { label: "Dashboard", bg: "#d1fae5", bd: "#10b981", icon: "\uD83D\uDCCA" },
         ]
-      : isCustomOWC || isCustomSTP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomRWH || isCustomSWD || isCustomDDCB
+      : isCustomOWC || isCustomSTP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP
       ? [
           { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
           { label: "Database", bg: "#ede9fe", bd: "#8b5cf6", icon: "\uD83D\uDDC3" },
@@ -921,6 +924,10 @@ function CalcDetailOverlay({
           ) : isCustomDDCB ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <CableSizingCalcSVG />
+            </div>
+          ) : isCustomDDPIP ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <PipeSizingCalcSVG />
             </div>
           ) : flow ? (
             <svg

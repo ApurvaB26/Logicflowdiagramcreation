@@ -1109,6 +1109,90 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class ALERT reject
     class DB1,DB2 db`,
   },
+
+  DD_PIP: {
+    title: "Transfer Pipe Sizing Calculation",
+    code: `flowchart TD
+    %% ═══ STAGE 1: INPUT & DEFINITION ═══
+    INIT([🏗️ Transfer Pipe Sizing — START])
+    INIT --> P1
+
+    P1[/Input 1: Building Profile<br/>Number of Floors, Floor Height, Building Type/]
+    P1 --> P2
+
+    P2[/Input 2: Fixture Count per Toilet Type<br/>e.g., Type-1: 1 WB + 1 WC + 1 Shower/]
+    P2 --> DB1
+
+    DB1[(Assign Fixture Units — WSFU & DFU<br/>📋 From Toilet Types Sheet)]
+    DB1 --> FU1
+
+    FU1[WB: 1.5 WSFU / 1 DFU<br/>WC Flush Tank: 3 WSFU / 3 DFU<br/>Shower: 2 WSFU / 2 DFU]
+    FU1 --> LOOP
+
+    %% ═══ STAGE 2: THE RISER LOGIC ═══
+    LOOP[🔄 Loop Init: Floor N — Top to Bottom]
+    LOOP --> SUM
+
+    SUM[Sum WSFU for Floor N<br/>Sub Riser FU = Fixtures × Count]
+    SUM --> CUM
+
+    CUM[Cumulative Main Riser FU<br/>Main Riser FU = Sub Riser FU + FU above]
+    CUM --> D1
+
+    D1{Combined Hot/Cold Line?}
+    D1 -->|YES| ADJ[Adjusted FU = Main Riser FU × 1.4]
+    D1 -->|NO| DIR[Use Direct WSFU]
+
+    ADJ --> MRG1[Final FU for Floor N]
+    DIR --> MRG1
+
+    MRG1 --> D2{More Floors Below?}
+    D2 -->|YES| LOOP
+    D2 -->|NO| HUNT
+
+    %% ═══ STAGE 3: FLOW CONVERSION ═══
+    HUNT[(Hunter's Curve Lookup<br/>📋 FU → GPM Database — Flush Tank type)]
+    HUNT --> GPM
+
+    GPM[GPM Value for Each Floor Segment<br/>Interpolated from FU–GPM table]
+    GPM --> THR
+
+    %% ═══ STAGE 4: FINAL SIZING DECISION ═══
+    THR{GPM Threshold Check}
+    THR -->|≤ 45| S50[→ 50 mm Pipe]
+    THR -->|45–70| S65[→ 65 mm Pipe]
+    THR -->|70–130| S80[→ 80 mm Pipe]
+    THR -->|130–250| S100[→ 100 mm Pipe]
+    THR -->|> 250| S125[→ 125 mm Pipe]
+
+    S50 --> VEL
+    S65 --> VEL
+    S80 --> VEL
+    S100 --> VEL
+    S125 --> VEL
+
+    VEL{V ≤ 3.0 m/s?}
+    VEL -->|YES| PASS[✅ Pipe Size Confirmed]
+    VEL -->|NO| ALERT[⬆️ Upsize Pipe — Re-select]
+    ALERT --> THR
+
+    %% ═══ STAGE 5: OUTPUT DETAILS ═══
+    PASS --> SCHED[Final Pipe Schedule — All Floor Segments]
+    SCHED --> PCHK[Velocity & Pressure Drop Verification<br/>Hazen-Williams: ΔP check]
+    PCHK --> VENT[Vent Pipe Diameters<br/>Soil Stack: 100 mm | Waste Stack: 80 mm]
+    VENT --> DONE
+
+    DONE([🏁 Transfer Pipe Sizing — COMPLETE])
+
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    classDef reject fill:#ffe4e6,stroke:#f43f5e,stroke-width:1.5px,color:#9f1239
+    classDef db fill:#cffafe,stroke:#06b6d4,stroke-width:2px,color:#155e75
+    class INIT,DONE,MRG1 terminal
+    class D1,D2,THR,VEL decision
+    class ALERT reject
+    class DB1,HUNT db`,
+  },
 };
 
 // ── STAGE → MERMAID CODE MAP ──
@@ -1122,7 +1206,7 @@ export const STAGE_MERMAID_MAP: Record<string, string> = {
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
   concept: ["P3A", "P3B", "OWC", "STP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
-  detailed: ["DD_CB"], // Cable Sizing is ready; others coming soon
+  detailed: ["DD_CB", "DD_PIP"], // Cable Sizing + Pipe Sizing ready; others coming soon
   tender: [],
   vfc: [],
 };

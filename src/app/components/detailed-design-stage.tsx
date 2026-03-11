@@ -2,6 +2,7 @@ import React from "react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
+import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 
 // =====================================================================
 // DETAILED DESIGN STAGE — COMPLETE FLOW CHART
@@ -907,6 +908,44 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
           <div className="overflow-auto flex-1">
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
               <CableSizingCalcSVG />
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // ── Full custom SVG for DD_PIP (Pipe Sizing) ──
+  if (calcId === "DD_PIP") {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+          transition={{ type: "spring", damping: 28, stiffness: 300 }}
+          className="absolute rounded-xl shadow-2xl overflow-hidden flex flex-col"
+          style={{ top: "1vh", left: "1vw", right: "1vw", bottom: "1vh", backgroundColor: "#fff", border: "3px solid #2563eb" }}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ backgroundColor: "#2563eb" }}>
+            <div className="flex items-center gap-3">
+              <span style={{ fontSize: 24 }}>{"\uD83D\uDCA7"}</span>
+              <div>
+                <h2 className="text-white" style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Transfer Pipe Sizing Calculation</h2>
+                <p className="text-white" style={{ fontSize: 12, opacity: 0.75, margin: 0 }}>Hunter{"'"}s Method — FU {"→"} GPM {"→"} Pipe {"Ø"} — IS 2065 / NBC</p>
+              </div>
+            </div>
+            <button onClick={onClose}
+              className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+              style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
+              <span className="text-xl">&times;</span>
+            </button>
+          </div>
+          <div className="overflow-auto flex-1">
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
+              <PipeSizingCalcSVG />
             </div>
           </div>
         </motion.div>
