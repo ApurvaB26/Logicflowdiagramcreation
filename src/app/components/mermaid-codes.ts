@@ -1242,6 +1242,73 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class ALERT reject
     class DB1,HUNT db`,
   },
+
+  DD_PRV: {
+    title: "PRV Calculations",
+    code: `flowchart TD
+    %% ═══ PHASE 1: PROJECT & STRUCTURAL INITIALIZATION ═══
+    INIT["🏗️ Project & Structural Initialization"]
+    S11["1.1 Building Geometry<br/>Fetch Floors, Podiums, Building Name"]
+    S12["1.2 Vertical Height Mapping<br/>Typ 3.35m, Ground 4.2m, Service 2m"]
+    S12M["⌨️ Manual Override<br/>User can type specific floor heights"]
+    S13["1.3 Reference Levels<br/>OHT Bottom Level & UGT Depth"]
+    S14["1.4 Design Constraints<br/>P_min=1.5 Bar | P_max=3.5 Bar"]
+
+    INIT --> S11 --> S12 --> S12M --> S13 --> S14
+
+    %% ═══ PHASE 2: PRESSURE GRADIENT ENGINE ═══
+    S21["2.1 Raw Static Head Calculation<br/>P = (Elev_Tank − Elev_Floor) / 10.2"]
+    S22["2.2 Correction Factor<br/>IF Floor>4m: −0.3 Bar ELSE −0.2 Bar"]
+    S23{"2.3 Zone Logic Gate"}
+    Z1["🚀 Booster Pump Line<br/>P < 1.5 Bar"]
+    Z2["✅ Direct Gravity<br/>1.5 ≤ P ≤ 3.5 Bar"]
+    Z3["⚠️ TRIGGER PRV<br/>P > 3.5 Bar"]
+    ZMERGE["Zone Classification Complete"]
+
+    S14 --> S21 --> S22 --> S23
+    S23 -->|P < 1.5| Z1
+    S23 -->|1.5-3.5| Z2
+    S23 -->|P > 3.5| Z3
+    Z1 --> ZMERGE
+    Z2 --> ZMERGE
+    Z3 --> ZMERGE
+
+    %% ═══ PHASE 3: PRV RESET & MAPPING ═══
+    S31["3.1 PRV Station Placement<br/>Identify floors where P > 3.5 Bar"]
+    S32["3.2 Pressure Reset Logic<br/>Reset to 1.5 Bar at PRV floor"]
+    S32F["P_next = 1.5 + (Floor Drop / 10.2)"]
+    S33["3.3 PRV Schedule Output<br/>Floor# | Inlet P | Outlet P | PRV Model"]
+
+    ZMERGE --> S31 --> S32 --> S32F --> S33
+
+    %% ═══ PHASE 4: RISER SIZING & WSFU ═══
+    S41["4.1 Flat Type Unit Mapping<br/>Type-1 through Type-19 per floor"]
+    S42["4.2 WSFU Accumulation<br/>Top-Down Cumulative Sum"]
+    S43["4.3 Hunter's Curve Conversion<br/>Σ WSFU → GPM"]
+
+    S33 --> S41 --> S42 --> S43
+
+    %% ═══ PHASE 5: PIPE VALIDATION & BOM ═══
+    S51["5.1 Pipe Diameter Selection<br/>25, 32, 40, 50, 65, 80, 100mm"]
+    S52["5.2 Velocity Check<br/>V = Q / A"]
+    VCHK{"V > 2.4 m/s ?"}
+    VFLAG["🔴 FLAG: Upsize Pipe"]
+    S53["5.3 Output: Riser Schedule + BOM<br/>PRVs, Pipe lengths, Pump Duty"]
+    DONE["🏁 PRV Calculation Complete"]
+
+    S43 --> S51 --> S52 --> VCHK
+    VCHK -->|Yes| VFLAG --> S52
+    VCHK -->|No| S53 --> DONE
+
+    classDef terminal fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#065f46
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef reject fill:#ffe4e6,stroke:#f43f5e,stroke-width:1.5px,color:#9f1239
+    classDef zone fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#5b21b6
+    class INIT,DONE terminal
+    class S23,VCHK decision
+    class VFLAG reject
+    class Z1,Z2,Z3 zone`,
+  },
 };
 
 // ── STAGE → MERMAID CODE MAP ──
@@ -1255,7 +1322,7 @@ export const STAGE_MERMAID_MAP: Record<string, string> = {
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
   concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
-  detailed: ["DD_CB", "DD_PIP"], // Cable Sizing + Pipe Sizing ready; others coming soon
+  detailed: ["DD_CB", "DD_PIP", "DD_PRV"], // Cable Sizing + Pipe Sizing + PRV ready; others coming soon
   tender: [],
   vfc: [],
 };

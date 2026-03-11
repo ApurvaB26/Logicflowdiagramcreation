@@ -200,6 +200,7 @@ function FormulaBox({ x, y, w, h, formula, note, color }: {
 export function DomesticFlushingPumpCalcSVG() {
   // Y-cursor — everything flows downward from here
   let Y = 20;
+  const AG = 48; // arrow gap — vertical space for arrows between elements
 
   // ═══════════════════════════════════════════════════
   // TITLE
@@ -214,28 +215,28 @@ export function DomesticFlushingPumpCalcSVG() {
   Y += 48;
 
   // Step 1: Entry
-  const entryY = Y; Y += BH + 20;
+  const entryY = Y; Y += BH + AG;
 
   // Step 2: Strategy Diamond
-  const stratDiaY = Y + 38; Y += 80;
+  const stratDiaY = Y + 38; Y += 80 + 6;
 
   // 3 strategy columns
-  const stratColY = Y; Y += 90;
+  const stratColY = Y; Y += 90 + AG;
 
   // Merge
-  const stratMergeY = Y; Y += 60 + 18;
+  const stratMergeY = Y; Y += 60 + AG;
 
   // Step 3: Capacity Diamond
-  const capDiaY = Y + 38; Y += 80;
+  const capDiaY = Y + 38; Y += 80 + 6;
 
   // 3 capacity columns
-  const capColY = Y; Y += 200;
+  const capColY = Y; Y += 200 + AG;
 
   // Merge
-  const capMergeY = Y; Y += 56 + 18;
+  const capMergeY = Y; Y += 56 + AG;
 
   // Q output
-  const qOutY = Y; Y += BH + 20;
+  const qOutY = Y; Y += BH + AG;
 
   const p1H = Y - p1Y - 8;
 
@@ -246,26 +247,26 @@ export function DomesticFlushingPumpCalcSVG() {
   Y += 48;
 
   // Step A: Static Head
-  const stepAY = Y; Y += BH + 16;
-  const formulaAY = Y; Y += 60 + 16;
+  const stepAY = Y; Y += BH + AG;
+  const formulaAY = Y; Y += 60 + AG;
 
   // Step B: Friction
-  const stepBY = Y; Y += BH + 16;
-  const diaMatY = Y + 32; Y += 68;
-  const formulaBY = Y; Y += 120;
+  const stepBY = Y; Y += BH + AG;
+  const diaMatY = Y + 32; Y += 68 + 6;
+  const formulaBY = Y; Y += 120 + AG;
 
   // Step C: Minor losses
-  const stepCY = Y; Y += BH + 16;
-  const formulaCY = Y; Y += 60 + 16;
+  const stepCY = Y; Y += BH + AG;
+  const formulaCY = Y; Y += 60 + AG;
 
   // Step D: Residual
-  const stepDY = Y; Y += BH + 16;
-  const tableDY = Y; Y += 120;
+  const stepDY = Y; Y += BH + AG;
+  const tableDY = Y; Y += 120 + AG;
 
   // TDH big formula
-  const tdhFormulaY = Y; Y += 74 + 16;
+  const tdhFormulaY = Y; Y += 74 + AG;
   // TDH output
-  const tdhOutY = Y; Y += BH + 20;
+  const tdhOutY = Y; Y += BH + AG;
 
   const p2H = Y - p2Y - 8;
 
@@ -276,19 +277,19 @@ export function DomesticFlushingPumpCalcSVG() {
   Y += 48;
 
   // Config diamond
-  const cfgDiaY = Y + 38; Y += 80;
+  const cfgDiaY = Y + 38; Y += 80 + 6;
   // 3 config columns
-  const cfgColY = Y; Y += 160;
+  const cfgColY = Y; Y += 160 + AG;
   // Merge
-  const cfgMergeY = Y; Y += 56 + 18;
+  const cfgMergeY = Y; Y += 56 + AG;
 
   // Steps 5-6-7 linear
-  const step5Y = Y; Y += BH + 16;
-  const step6Y = Y; Y += BH + 16;
-  const step7Y = Y; Y += BH + 20;
+  const step5Y = Y; Y += BH + AG;
+  const step6Y = Y; Y += BH + AG;
+  const step7Y = Y; Y += BH + AG;
 
   // Output table
-  const outTblY = Y; Y += 170;
+  const outTblY = Y; Y += 170 + AG;
 
   // Done
   const doneY = Y; Y += 64;

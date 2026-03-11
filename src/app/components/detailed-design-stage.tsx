@@ -3,6 +3,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
+import { PRVCalcSVG } from "./prv-calc";
 
 // =====================================================================
 // DETAILED DESIGN STAGE — COMPLETE FLOW CHART
@@ -128,8 +129,8 @@ const NODES: DNode[] = [
     ["DD_CB", "DD_PNL", "DD_SLD", "DD_ERT", "DD_LTN", "DD_BUS"],
     CL.amber),
   svc("DD_SVC_P", "Plumbing", "\uD83D\uDCA7 Detailed Calcs",
-    ["Transfer Pipe Sizing"],
-    ["DD_PIP"],
+    ["Transfer Pipe Sizing", "PRV Calculations"],
+    ["DD_PIP", "DD_PRV"],
     CL.blue),
   svc("DD_SVC_H", "HVAC", "\u2744\uFE0F Detailed Calcs",
     ["Duct Sizing", "Equipment Selection", "VAV/FCU Selection", "BMS Integration", "Smoke Management"],
@@ -857,6 +858,19 @@ const DD_CALC_FLOWS: Record<string, CalcFlow> = {
     ],
     connections: [{ from: "PS1", to: "PS2" }, { from: "PS2", to: "PS3" }, { from: "PS3", to: "PS4" }, { from: "PS4", to: "PS5" }],
   },
+  DD_PRV: {
+    title: "PRV Calculations",
+    icon: "\uD83D\uDD27", color: "#7c3aed", accentBg: "#ede9fe",
+    steps: [
+      { id: "PRV1", label: "Building Geometry & Heights", sub: "Floors, podiums, OHT/UGT levels", type: "input" },
+      { id: "PRV2", label: "Pressure Gradient Calc", sub: "P_static = (Elev_Tank − Elev_Floor) / 10.2", type: "formula" },
+      { id: "PRV3", label: "Zone Logic Gate", sub: "Booster / Gravity / PRV classification", type: "decision" },
+      { id: "PRV4", label: "PRV Reset & Mapping", sub: "Reset to 1.5 Bar, re-accumulate", type: "process" },
+      { id: "PRV5", label: "Riser Sizing & WSFU", sub: "Hunter's curve WSFU → GPM", type: "formula" },
+      { id: "PRV6", label: "Output: Riser Schedule + BOM", sub: "PRV schedule, pipe sizes, pump duty", type: "output" },
+    ],
+    connections: [{ from: "PRV1", to: "PRV2" }, { from: "PRV2", to: "PRV3" }, { from: "PRV3", to: "PRV4" }, { from: "PRV4", to: "PRV5" }, { from: "PRV5", to: "PRV6" }],
+  },
   DD_SPR: {
     title: "Sprinkler Hydraulic Calc",
     icon: "\uD83D\uDD25", color: "#e11d48", accentBg: "#ffe4e6",
@@ -908,6 +922,44 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
           <div className="overflow-auto flex-1">
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
               <CableSizingCalcSVG />
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // ── Full custom SVG for DD_PRV (PRV Calculations) ──
+  if (calcId === "DD_PRV") {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+          transition={{ type: "spring", damping: 28, stiffness: 300 }}
+          className="absolute rounded-xl shadow-2xl overflow-hidden flex flex-col"
+          style={{ top: "1vh", left: "1vw", right: "1vw", bottom: "1vh", backgroundColor: "#fff", border: "3px solid #7c3aed" }}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ backgroundColor: "#7c3aed" }}>
+            <div className="flex items-center gap-3">
+              <span style={{ fontSize: 24 }}>{"\uD83D\uDD27"}</span>
+              <div>
+                <h2 className="text-white" style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>PRV Calculations</h2>
+                <p className="text-white" style={{ fontSize: 12, opacity: 0.75, margin: 0 }}>Pressure Gradient {"→"} Zone Logic {"→"} PRV Mapping {"→"} Riser Sizing {"→"} BOM</p>
+              </div>
+            </div>
+            <button onClick={onClose}
+              className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+              style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
+              <span className="text-xl">&times;</span>
+            </button>
+          </div>
+          <div className="overflow-auto flex-1">
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
+              <PRVCalcSVG />
             </div>
           </div>
         </motion.div>

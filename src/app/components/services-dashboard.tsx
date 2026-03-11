@@ -13,6 +13,7 @@ import { SWDCalcSVG } from "./swd-calc";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
+import { PRVCalcSVG } from "./prv-calc";
 import {
   Zap,
   Droplets,
@@ -99,6 +100,7 @@ const SERVICES: Service[] = [
       { id: "SWD", title: "Storm Water Drainage Calculator", description: "Rational method runoff, Manning's equation, velocity monitoring & pipe sizing", status: "ready", stage: "concept" },
       // ── Detailed Design Stage ──
       { id: "DD_PIP", title: "Transfer Pipe Sizing", description: "Hunter's method, velocity check, IS 2065 standard pipe diameter calc", status: "ready", stage: "detailed" },
+      { id: "DD_PRV", title: "PRV Calculations", description: "Pressure gradient, zone logic, PRV reset mapping, riser sizing & WSFU diversity", status: "ready", stage: "detailed" },
       // ── Tender Stage ──
       { id: "T_BOQ_PL", title: "Plumbing BOQ", description: "Pipe/fitting, pump, sanitary fixture, tank & valve schedule quantities", status: "coming-soon", stage: "tender" },
       // ── VFC Stage ──
@@ -557,7 +559,7 @@ function CalcDetailOverlay({
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB","DD_PIP"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB","DD_PIP","DD_PRV"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
@@ -571,6 +573,7 @@ function CalcDetailOverlay({
   const isCustomSWD = calcId === "SWD";
   const isCustomDDCB = calcId === "DD_CB";
   const isCustomDDPIP = calcId === "DD_PIP";
+  const isCustomDDPRV = calcId === "DD_PRV";
   const isCustom = CUSTOM_IDS.has(calcId);
 
   // For generic flows
@@ -590,6 +593,7 @@ function CalcDetailOverlay({
     SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6" },
     DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706" },
     DD_PIP: { title: "Transfer Pipe Sizing", icon: "\uD83D\uDCA7", color: "#2563eb" },
+    DD_PRV: { title: "PRV Calculations", icon: "\uD83D\uDD27", color: "#7c3aed" },
   };
   const meta = CUSTOM_META[calcId];
   const flowTitle = meta?.title ?? flow?.title ?? "Calculation";
@@ -858,6 +862,10 @@ function CalcDetailOverlay({
           ) : isCustomDDPIP ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <PipeSizingCalcSVG />
+            </div>
+          ) : isCustomDDPRV ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <PRVCalcSVG />
             </div>
           ) : flow ? (
             <svg

@@ -35,6 +35,7 @@ import { SWDCalcSVG } from "./swd-calc";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
+import { PRVCalcSVG } from "./prv-calc";
 import {
   STAGE_MERMAID_MAP,
   CALC_MERMAID_CODES,
@@ -60,6 +61,7 @@ const CALC_META: Record<string, { title: string; icon: string; color: string; se
   SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6", service: "Plumbing" },
   DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706", service: "Electrical" },
   DD_PIP: { title: "Transfer Pipe Sizing Calculation", icon: "\uD83D\uDCA7", color: "#2563eb", service: "Plumbing" },
+  DD_PRV: { title: "PRV Calculations", icon: "\uD83D\uDD27", color: "#7c3aed", service: "Plumbing" },
 };
 
 const CALC_COMPONENTS: Record<string, React.FC> = {
@@ -76,6 +78,7 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
   SWD: SWDCalcSVG,
   DD_CB: CableSizingCalcSVG,
   DD_PIP: PipeSizingCalcSVG,
+  DD_PRV: PRVCalcSVG,
 };
 
 // =====================================================================
