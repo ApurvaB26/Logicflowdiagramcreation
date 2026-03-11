@@ -34,6 +34,7 @@ import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
+import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
 import {
   STAGE_MERMAID_MAP,
   CALC_MERMAID_CODES,
@@ -50,6 +51,7 @@ const CALC_META: Record<string, { title: string; icon: string; color: string; se
   P3B: { title: "Electrical Load Calculation", icon: "\u26A1", color: "#f59e0b", service: "Electrical" },
   OWC: { title: "OWC Calculations", icon: "\u267B\uFE0F", color: "#10b981", service: "Plumbing" },
   STP: { title: "STP Calculations", icon: "\uD83C\uDFED", color: "#06b6d4", service: "Plumbing" },
+  DFP: { title: "Domestic & Flushing Pump Calculations", icon: "\uD83D\uDD27", color: "#06b6d4", service: "Plumbing" },
   FFP: { title: "Fire Pump Head Calculation", icon: "\uD83D\uDE92", color: "#dc2626", service: "Firefighting" },
   FTK: { title: "Fire Tank Size Estimation", icon: "\uD83D\uDEA8", color: "#dc2626", service: "Firefighting" },
   FJD: { title: "Jockey & Drencher Pump", icon: "\uD83D\uDD27", color: "#dc2626", service: "Firefighting" },
@@ -65,6 +67,7 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
   P3B: ElectricalLoadCalcSVG,
   OWC: OWCCalcSVG,
   STP: STPCalcSVG,
+  DFP: DomesticFlushingPumpCalcSVG,
   FFP: FirePumpHeadCalcSVG,
   FTK: FireTankCalcSVG,
   FJD: FireJockeyDrencherCalcSVG,

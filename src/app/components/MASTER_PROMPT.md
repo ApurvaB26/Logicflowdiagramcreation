@@ -11,6 +11,7 @@ Build a comprehensive **MEP (Mechanical, Electrical, Plumbing) Construction Indu
 - **5 tabbed views**: Services Dashboard, Concept Stage, Detailed Design Stage, Tender Stage, VFC Stage
 - **4 multi-part SVG stage flowcharts** with serpentine grid layout, color-coded nodes, decision diamonds, reject loops, service tree fan-out/fan-in
 - **10 fully-built calculation SVG flowcharts** (Water Demand, Electrical Load, OWC, STP, Fire Pump Head, Fire Tank, Jockey & Drencher, Terrace Booster, RWH, SWD)
+- **2 Detailed Design custom calculation SVGs** (Cable Sizing DD_CB, Transfer Pipe Sizing DD_PIP)
 - **40+ coming-soon calculations** with generic placeholder flows
 - **Share system** with per-stage share links, PNG gallery, Mermaid code export
 - **Team feedback system** with floating QR code panel and Supabase-backed feedback page
@@ -124,10 +125,9 @@ Floating: ShareModal overlay + FeedbackQRPanel (React portal)
 - P3E: External Sewer & Storm Calculations — Storm water flow, sewer pipe sizing, STP capacity & RWH
 - RWH: Rainwater Harvesting & Tank Sizing — Catchment runoff, downcomer sizing, velocity guard & NBC 2016 tank sizing [READY]
 - SWD: Storm Water Drainage Calculator — Rational method runoff, Manning's equation, velocity monitoring & pipe sizing [READY]
-- P3T_PLUMB: Transfer Pipe Sizing — Pipe diameter, friction loss & material specification
 
 **Detailed Design Stage:**
-- DD_PIP: Pipe Sizing (Hot/Cold) — Hunter's method, velocity check, IS 2065 standard pipe diameter
+- DD_PIP: Transfer Pipe Sizing — Hunter's method, velocity check, IS 2065 standard pipe diameter [READY]
 - DD_RSR: Riser Diagrams — Floor-wise riser layout, connection points & isolation valves
 - DD_DRN: Drainage Calculations — Fixture unit count, drainage pipe sizing per floor
 - DD_PMP: Pump Selection — Detailed pump curve matching, duty/standby selection
@@ -165,7 +165,6 @@ Floating: ShareModal overlay + FeedbackQRPanel (React portal)
 - FTK: Fire Tank Size Estimation — IS-15105/NFPA-13 standards, sprinkler/hydrant/drencher volume & 300m3 safety gate [READY]
 - FJD: Jockey & Drencher Pump Calculations — Jockey/drencher head loss, 20% safety factor & system pressure summation [READY]
 - FTB: Terrace Fire Booster Pump Head — Hazen-Williams friction, pipe fittings, static head & residual pressure calc [READY]
-- P3T_FF: Transfer Pipe Sizing (Firefighting)
 
 **Detailed Design Stage:**
 - DD_SPR: Sprinkler Hydraulic Calc — K-factor, design density, hydraulic calc & pipe network sizing
@@ -245,11 +244,11 @@ When service cards (SVC_E, SVC_P, SVC_H, SVC_F) appear in a row:
 - TRACK B (Design Deliverables): B1-B5 (Building selection, service list, dates, policy DB, drawing checklist)
 - Height >90m decision → Fire Break Floor
 - TRACKS MERGE (MRG)
-- PART 2: MEP Policy Study — 5 parallel policies (Electrical, Plumbing, Firefighting, Plantroom, Backup)
-- PART 3: Calculations — 4 service cards (Electrical[P3B], Plumbing[P3A,OWC,STP,DFP,P3E,RWH,SWD,P3T], HVAC[P3D,VENT,PRESS], Firefighting[FFP,FTK,FJD,FTB,P3T]) → merge → Location-Based Formatting → Download Format Options
+- PART 2: MEP Policy Study — Single consolidated policy block (Electrical | Plumbing | Firefighting | Plantroom | Backup)
+- PART 3: Calculations — 4 service cards (Electrical[P3B], Plumbing[P3A,OWC,STP,DFP,P3E,RWH,SWD], HVAC[P3D,VENT,PRESS], Firefighting[FFP,FTK,FJD,FTB]) → merge → Location-Based Formatting → Download Format Options
 - PART 4: Space Matrix — Table + Display + Editable inputs
-- PART 5: Detailed Space Planning — 5 parallel layouts (UGT, STP, OWC, Substation/DG, Lifts) → Commercial check → Chiller → Toilet/Vent/Pressure
-- PART 6: Architect Convergence — Architect receives → shares master → MEP reviews → Plan Finalized? decision (reject loop) → Detailed Space Plan → Concept Plans
+- PART 5: Detailed Space Planning — 5 parallel layouts (UGT, OWC Block, Substation & DG, Lifts, Toilet Vent & Pressurize) → Commercial check → Chiller → Master Plan Integration
+- PART 6: Master Plan Integration — Architect receives → shares master → MEP reviews → Plan Finalized? decision (reject loop) → Detailed Space Plan → Concept Plans
 - PART 7: Plans Verification — Checklist → All Plans Received? (reject loop)
 - PART 8: MEP Review & Calcs — parallel: Reviews + Policy DB → Calculations → Download → Floor Layouts
 - PART 9: Layout Sharing — Checklist → Share → Architect Reviews → Agreement? (reject loop)
@@ -427,9 +426,6 @@ Steps: Input (Building Height & Demand) → Static Head → Friction & Minor Los
 ### P3E — External Sewer & Storm
 Steps: Site Data → Rainfall Intensity → Runoff Coefficient → Storm Water Flow (Q=C×I×A/360) → Drain Sizing (Manning's) → Sewer Load → Sewer Pipe Sizing → STP Capacity → RWH Check → Output
 
-### P3T_PLUMB — Transfer Pipe Sizing (Plumbing)
-Steps: Pump Data → Flow Rate → Velocity (1.5-3.0 m/s) → Pipe Diameter (D=√(4Q/πV)) → Friction Loss (Hazen-Williams) → Head Loss Verification → Output: Pipe Schedule
-
 ### P3D — Heat Load
 Steps: Area + Location → Climate Data → Sensible Heat → Latent Heat → Total Cooling Load → TR Calculation (÷3024) → Equipment Sizing → Output
 
@@ -438,9 +434,6 @@ Steps: Room Data → ACH (NBC/ASHRAE) → Fresh Air (CFM=Volume×ACH/60) → Duc
 
 ### PRESS — Pressurisation
 Steps: Stairwell Data → Pressure Differential (25-50 Pa) → Leakage Air (Q=C×A×ΔP^n) → Door Open Velocity (0.75 m/s) → Total Air Flow → Fan Selection → Output
-
-### P3T_FF — Transfer Pipe Sizing (Firefighting)
-Steps: Fire Pump Data → Flow Rate → Velocity (max 3.0 m/s) → Pipe Diameter → Friction Loss (C=120) → Head Loss Verification → Output
 
 ### DD_CB through DD_SMX — All Detailed Design calculations (compact 3-5 step flows)
 ### T_BOQ_EL through T_BOQ_FF — All Tender BOQ calculations (5-step flows: Drawings → BOQ categories → Rate Analysis → Output)

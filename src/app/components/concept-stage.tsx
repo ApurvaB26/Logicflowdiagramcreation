@@ -11,6 +11,7 @@ import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
+import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
 
 // =====================================================================
 // CONCEPT STAGE — COMPLETE DETAILED FLOW CHART
@@ -119,11 +120,7 @@ const NODES: CNode[] = [
 
   // ── PART 2: MEP POLICY STUDY ──
   hdr("P2",  "PART 2: MEP Policy Study",  "Database Studies Required Policies", CL.green),
-  proc("P2A", "Electrical Policy",        "Electrical Design Standards", CL.green),
-  proc("P2B", "Plumbing Policy",          "Plumbing Design Standards", CL.green),
-  proc("P2C", "Firefighting Policy",      "Fire Protection Standards", CL.green),
-  proc("P2D", "Plantroom Policy",         "Plant Room Requirements", CL.green),
-  proc("P2E", "Backup Policy",            "Backup Systems Standards", CL.green),
+  proc("P2S", "MEP Policies (All Services)", "Electrical | Plumbing | Firefighting | Plantroom | Backup", CL.green),
 
   // ── PART 3: CALCULATIONS (Service-wise) ──
   hdr("P3",  "PART 3: Calculations",      "Service-wise Calculations — Click any item to view flow", CL.purple),
@@ -132,16 +129,16 @@ const NODES: CNode[] = [
     ["P3B"],
     CL.amber),
   svc("SVC_P", "Plumbing", "\uD83D\uDCA7 Calculations",
-    ["Water Demand Calc", "OWC Calculations", "STP Calculations", "Dom. & Flush Pump", "Ext. Sewer & Storm", "RWH Calculator", "SWD Calculator", "Transfer Pipe Sizing"],
-    ["P3A", "OWC", "STP", "DFP", "P3E", "RWH", "SWD", "P3T"],
+    ["Water Demand Calc", "OWC Calculations", "STP Calculations", "Dom. & Flush Pump", "Ext. Sewer & Storm", "RWH Calculator", "SWD Calculator"],
+    ["P3A", "OWC", "STP", "DFP", "P3E", "RWH", "SWD"],
     CL.blue),
   svc("SVC_H", "HVAC", "\u2744\uFE0F Calculations",
     ["Heat Load Calc", "Ventilation Calc", "Pressurisation Calc"],
     ["P3D", "VENT", "PRESS"],
     CL.purple),
   svc("SVC_F", "Firefighting", "\uD83D\uDD25 Calculations",
-    ["Fire Pump Head", "Fire Tank Sizing", "Jockey & Drencher", "Terrace Booster", "Transfer Pipe Sizing"],
-    ["FFP", "FTK", "FJD", "FTB", "P3T"],
+    ["Fire Pump Head", "Fire Tank Sizing", "Jockey & Drencher", "Terrace Booster"],
+    ["FFP", "FTK", "FJD", "FTB"],
     CL.rose),
   hdr("SVCM", "All Service Calcs Complete", "Results merge \u2192 Formatting & Download", CL.purple),
   proc("P3L", "Location-Based Formatting", "GPS \u2192 Region \u2192 MSEDCL/KSEDCL etc.", CL.purple),
@@ -156,22 +153,21 @@ const NODES: CNode[] = [
   // ── PART 5: DETAILED SPACE PLANNING ──
   hdr("P5",  "PART 5: Detailed Space Planning", "MEP Shares Layout with Space Matrix", CL.orange),
   proc("S1",  "UGT Layout (Detailed)",    "Pump Room + Tanks + Pump Blocks", CL.orange),
-  proc("S2",  "STP Layout (Blocks)",      "Total Area Shown in Block Only", CL.orange),
-  proc("S3",  "OWC Layout (Detailed)",    "Machine Room + Wet Storage Area", CL.orange),
-  proc("S4",  "Substation & DG (Detail)", "Detailed Substation + DG Layout", CL.orange),
+  proc("S3",  "OWC Layout (Block)",       "Machine Room + Wet Storage Area", CL.orange),
+  proc("S4",  "Substation & DG Layout",   "Generator Room + Transformer + Panel", CL.orange),
   proc("S5",  "Lifts Space Planning",     "No. of Lifts + Size + Space (DB data)", CL.orange),
-  dec("SD1",  "Commercial Project?",      "Check Project Type"),
-  proc("S6",  "Chiller Space Planning",   "Only for Commercial Projects", CL.orange),
   proc("S7",  "Toilet Vent & Pressurize", "Ventilation + Pressurization (DB data)", CL.orange),
   nt("SN1",  "Data Source",               "Ventilation, Pressurization & Lifts data from DB", CL.orange),
+  dec("SD1",  "Commercial Project?",      "Check Project Type"),
+  proc("S6",  "Chiller Space Planning",   "Only for Commercial Projects", CL.orange),
   dec("SD2",  "Height > 90m?",            "Fire Break Floor Check"),
   dec("SD3",  "User Wants Plan?",         "Optional: UGT + Fire Break"),
   dec("SD4",  "As Per CFO or NBC?",       "Standard Selection"),
   proc("S8",  "Fire Break Floor + UGT",   "As per selected standard (CFO/NBC)", CL.rose),
   proc("SSK", "Skip Fire Plan",           "Height \u226490m or User Declined", CL.orange),
 
-  // ── PART 6: ARCHITECT CONVERGENCE ──
-  hdr("P6",  "PART 6: Architect Convergence", "Master Plan Integration", CL.violet),
+  // ── PART 6: MASTER PLAN INTEGRATION ──
+  hdr("P6",  "PART 6: Master Plan Integration", "Architect + MEP Convergence", CL.violet),
   proc("P6A", "Architect Receives",       "Space Matrix + Space Planning Layout", CL.violet),
   proc("P6B", "Architect Shares Master",  "Includes MEP: UGT/STP locations etc.", CL.violet),
   proc("P6C", "MEP Reviews Master Plan",  "Review Architect's Incorporation", CL.violet),
@@ -255,20 +251,10 @@ const CN: CConn[] = [
   { from: "B4",  to: "B5",  style: "normal" },
   { from: "B5",  to: "MRG", style: "normal" },
 
-  // Merge → Policies
+  // Merge → Policies → Calculations
   { from: "MRG", to: "P2", style: "normal" },
-  { from: "P2",  to: "P2A", style: "normal" },
-  { from: "P2",  to: "P2B", style: "normal" },
-  { from: "P2",  to: "P2C", style: "normal" },
-  { from: "P2",  to: "P2D", style: "normal" },
-  { from: "P2",  to: "P2E", style: "normal" },
-
-  // Policies → Calculations
-  { from: "P2A", to: "P3", style: "normal" },
-  { from: "P2B", to: "P3", style: "normal" },
-  { from: "P2C", to: "P3", style: "normal" },
-  { from: "P2D", to: "P3", style: "normal" },
-  { from: "P2E", to: "P3", style: "normal" },
+  { from: "P2",  to: "P2S", style: "normal" },
+  { from: "P2S", to: "P3", style: "normal" },
 
   // Calculations — Service tree handles P3 → SVC_* → SVCM
   { from: "SVCM", to: "P3L", style: "normal" },
@@ -281,23 +267,22 @@ const CN: CConn[] = [
   { from: "P4B", to: "P4C", style: "normal" },
   { from: "P4C", to: "P5",  style: "normal" },
 
-  // Space Planning
+  // Space Planning — all parallel, then converge
   { from: "P5", to: "S1", style: "normal" },
-  { from: "P5", to: "S2", style: "normal" },
   { from: "P5", to: "S3", style: "normal" },
   { from: "P5", to: "S4", style: "normal" },
   { from: "P5", to: "S5", style: "normal" },
-  { from: "S1", to: "S7", style: "normal" },
-  { from: "S2", to: "S7", style: "normal" },
-  { from: "S3", to: "S7", style: "normal" },
-  { from: "S4", to: "S7", style: "normal" },
-  { from: "S5",  to: "SD1", style: "normal" },
+  { from: "P5", to: "S7", style: "normal" },
+  { from: "S1", to: "SD1", style: "normal" },
+  { from: "S3", to: "SD1", style: "normal" },
+  { from: "S4", to: "SD1", style: "normal" },
+  { from: "S5", to: "SD1", style: "normal" },
+  { from: "S7", to: "SD1", style: "normal" },
   { from: "SD1", to: "S6",  label: "Yes", style: "normal" },
-  { from: "SD1", to: "S7",  label: "No", style: "normal" },
-  { from: "S6",  to: "S7",  style: "normal" },
-  { from: "S7",  to: "P6",  style: "normal" },
+  { from: "SD1", to: "P6",  label: "No", style: "normal" },
+  { from: "S6",  to: "P6",  style: "normal" },
 
-  // Architect Convergence (Part 6)
+  // Master Plan Integration (Part 6)
   { from: "P6",  to: "P6A", style: "normal" },
   { from: "P6A", to: "P6B", style: "normal" },
   { from: "P6B", to: "P6C", style: "normal" },
@@ -362,7 +347,7 @@ const GRID: string[][] = [
   ["S8"],                                // 15
   ["MRG"],                               // 16
   ["P2"],                                // 17
-  ["P2A", "P2B", "P2C", "P2D", "P2E"],  // 18
+  ["P2S"],                               // 18
   ["P3"],                                // 19
   ["SVC_E", "SVC_P", "SVC_H", "SVC_F"],  // 20 ← service cards
   ["SVCM"],                              // 21 ← services merged
@@ -370,9 +355,8 @@ const GRID: string[][] = [
   ["P4"],                                // 23
   ["P4A", "P4B", "P4C"],                // 23
   ["P5"],                                // 24
-  ["S1", "S2", "S3", "S4", "S5"],       // 25
+  ["S1", "S3", "S4", "S5", "S7"],         // 25  ← all parallel space planning
   ["SD1", "S6"],                         // 26
-  ["S7"],                                // 27
   ["P6"],                                // 28
   ["P6A", "P6B"],                        // 29
   ["P6C"],                               // 30
@@ -432,7 +416,8 @@ const SEG_NH = 110;
 const SVC_NH = 235;
 const RGAP = 96;
 const CGAP = 40;
-const PX = 120;
+const PLX = 120;   // left padding
+const PRX = 340;   // right padding (extra room for SN1 annotation on rightmost column)
 const PY = 36;
 
 // Note annotations
@@ -467,11 +452,11 @@ function computeLayout() {
     rowY.push(y);
     const row = GRID[ri];
     const rw = row.length * NW + (row.length - 1) * CGAP;
-    const sx = PX + (maxW - rw) / 2;
+    const sx = PLX + (maxW - rw) / 2;
     row.forEach((id, i) => { pos[id] = { x: sx + i * (NW + CGAP), y }; });
     y += SEGMENT_ROW_INDICES.has(ri) ? SEG_ROW_GAP : SERVICE_ROW_INDICES.has(ri) ? SVC_ROW_GAP : RGAP;
   }
-  return { pos, rowY, H: y + 60, W: maxW + PX * 2 };
+  return { pos, rowY, H: y + 60, W: maxW + PLX + PRX };
 }
 
 function nodeH(n: CNode): number {
@@ -975,11 +960,11 @@ const BAND_DEFS: BandDef[] = [
   { label: "INITIATION", firstNode: "INIT", lastNode: "DATA", color: CL.blue.bd },
   { label: "PARALLEL TRACKS \u2014 Part 1: Input Matrix + Design Deliverables", firstNode: "TA", lastNode: "A14", color: CL.teal.bd },
   { label: "BUILDING HEIGHT CHECK \u2014 Fire Break Floor Decision", firstNode: "SD2", lastNode: "S8", color: CL.rose.bd },
-  { label: "PART 2: MEP POLICY STUDY", firstNode: "P2", lastNode: "P2E", color: CL.green.bd },
+  { label: "PART 2: MEP POLICY STUDY", firstNode: "P2", lastNode: "P2S", color: CL.green.bd },
   { label: "PART 3: SERVICE-WISE CALCULATIONS", firstNode: "P3", lastNode: "P3F", color: CL.purple.bd },
   { label: "PART 4: SPACE MATRIX", firstNode: "P4", lastNode: "P4C", color: CL.cyan.bd },
-  { label: "PART 5: DETAILED SPACE PLANNING", firstNode: "P5", lastNode: "S7", color: CL.orange.bd },
-  { label: "PART 6: ARCHITECT CONVERGENCE \u2192 CONCEPT PLAN", firstNode: "P6", lastNode: "P6F", color: CL.violet.bd },
+  { label: "PART 5: DETAILED SPACE PLANNING", firstNode: "P5", lastNode: "S6", color: CL.orange.bd },
+  { label: "PART 6: MASTER PLAN INTEGRATION \u2192 CONCEPT PLAN", firstNode: "P6", lastNode: "P6F", color: CL.violet.bd },
   { label: "PART 7: ARCHITECT PLANS DRAWING CHECKLIST", firstNode: "P7", lastNode: "CK1R", color: CL.teal.bd },
   { label: "PART 8: MEP REVIEW & CALCULATIONS", firstNode: "P8", lastNode: "R5", color: CL.purple.bd },
   { label: "PART 9: MEP LAYOUT \u2192 ARCHITECT AGREEMENT", firstNode: "P9", lastNode: "R7R", color: CL.orange.bd },
@@ -1113,29 +1098,7 @@ const CALC_FLOWS: Record<string, CalcFlow> = {
       { from: "SW7", to: "SW8" }, { from: "SW8", to: "SW9" }, { from: "SW9", to: "SW10" },
     ],
   },
-  P3T: {
-    title: "Transfer Pipe Sizing Calculation",
-    icon: "🔧",
-    color: "#7c3aed",
-    accentBg: "#ede9fe",
-    steps: [
-      { id: "TP1", label: "Input: Pump Selection Data", sub: "Selected Pump Model + Flow Rate + Head", type: "input" },
-      { id: "TP2", label: "Equipment Schedule Review", sub: "All MEP Equipment Locations + Connections", type: "input" },
-      { id: "TP3", label: "Flow Rate per Transfer Line", sub: "GPM / LPS from Pump Duty Point", type: "process" },
-      { id: "TP4", label: "Velocity Constraint Check", sub: "Target: 1.5–3.0 m/s (Pressure) / 0.6–1.2 m/s (Gravity)", type: "formula" },
-      { id: "TP5", label: "Pipe Diameter Calculation", sub: "D = √(4Q / πV) → Round to Standard Size", type: "formula" },
-      { id: "TP6", label: "Friction Loss Calculation", sub: "Hazen-Williams / Darcy-Weisbach Method", type: "formula" },
-      { id: "TP7", label: "Fitting & Valve Losses", sub: "Equivalent Length Method → Total Minor Losses", type: "formula" },
-      { id: "TP8", label: "Total Head Loss Verification", sub: "Static + Friction + Minor ≤ Pump Available Head", type: "decision" },
-      { id: "TP9", label: "Material & Insulation Spec", sub: "GI / CPVC / HDPE + Insulation Type per Code", type: "process" },
-      { id: "TP10", label: "Output: Pipe Schedule", sub: "Pipe Sizes + Material + Route → BOQ & Drawings", type: "output" },
-    ],
-    connections: [
-      { from: "TP1", to: "TP2" }, { from: "TP2", to: "TP3" }, { from: "TP3", to: "TP4" },
-      { from: "TP4", to: "TP5" }, { from: "TP5", to: "TP6" }, { from: "TP6", to: "TP7" },
-      { from: "TP7", to: "TP8" }, { from: "TP8", to: "TP9" }, { from: "TP9", to: "TP10" },
-    ],
-  },
+
   OWC: {
     title: "OWC Calculations",
     icon: "\u267B\uFE0F",
@@ -1543,7 +1506,7 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
                 </div>
               ))}
             </>
-          ) : ["OWC","STP","FFP","FTK","FJD","FTB","RWH","SWD"].includes(calcId) ? (
+          ) : ["OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD"].includes(calcId) ? (
             <>
               {[
                 { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
@@ -1587,6 +1550,10 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
           ) : calcId === "STP" ? (
             <div style={{ minWidth: "1600px", padding: "10px 0" }}>
               <STPCalcSVG />
+            </div>
+          ) : calcId === "DFP" ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
+              <DomesticFlushingPumpCalcSVG />
             </div>
           ) : calcId === "FFP" ? (
             <div style={{ minWidth: "1600px", padding: "10px 0" }}>

@@ -128,8 +128,8 @@ const NODES: DNode[] = [
     ["DD_CB", "DD_PNL", "DD_SLD", "DD_ERT", "DD_LTN", "DD_BUS"],
     CL.amber),
   svc("DD_SVC_P", "Plumbing", "\uD83D\uDCA7 Detailed Calcs",
-    ["Pipe Sizing (H/C)", "Riser Diagrams", "Drainage Calcs", "Pump Selection", "Vent Pipe Sizing", "Water Meter Sizing"],
-    ["DD_PIP", "DD_RSR", "DD_DRN", "DD_PMP", "DD_VNT", "DD_WMT"],
+    ["Transfer Pipe Sizing"],
+    ["DD_PIP"],
     CL.blue),
   svc("DD_SVC_H", "HVAC", "\u2744\uFE0F Detailed Calcs",
     ["Duct Sizing", "Equipment Selection", "VAV/FCU Selection", "BMS Integration", "Smoke Management"],
@@ -846,7 +846,7 @@ const DD_CALC_FLOWS: Record<string, CalcFlow> = {
     connections: [{ from: "B1", to: "B2" }, { from: "B2", to: "B3" }, { from: "B3", to: "B4" }],
   },
   DD_PIP: {
-    title: "Pipe Sizing (Hot/Cold)",
+    title: "Transfer Pipe Sizing",
     icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
     steps: [
       { id: "PS1", label: "Input: Fixture Units", sub: "FU count per floor per riser", type: "input" },

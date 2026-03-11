@@ -77,7 +77,15 @@ export const CONCEPT_STAGE_MERMAID = `flowchart TD
     %% ══════════════════════════════════════
     %% TRACKS MERGE
     %% ══════════════════════════════════════
-    A14 --> MRG
+    A14 --> SD2{Height > 90m?<br/>Fire Break Floor Check}
+    SD2 -->|"Yes (>90m)"| SD3{User Wants Plan?<br/>Optional: UGT + Fire Break}
+    SD2 -->|"No (≤90m)"| SSK[Skip Fire Plan<br/>Height ≤90m or User Declined]
+    SD3 -->|Yes| SD4{As Per CFO or NBC?<br/>Standard Selection}
+    SD3 -->|No| SSK
+    SD4 --> S8[Fire Break Floor + UGT<br/>As per selected standard CFO/NBC]
+    S8 --> MRG
+    SSK --> MRG
+
     MRG([TRACKS MERGE<br/>Both Tracks Complete → Continue])
 
     %% ══════════════════════════════════════
@@ -85,18 +93,14 @@ export const CONCEPT_STAGE_MERMAID = `flowchart TD
     %% ══════════════════════════════════════
     MRG --> P2
     P2[/PART 2: MEP Policy Study<br/>Database Studies Required Policies/]
-    P2A[Electrical Policy<br/>Electrical Design Standards]
-    P2B[Plumbing Policy<br/>Plumbing Design Standards]
-    P2C[Firefighting Policy<br/>Fire Protection Standards]
-    P2D[Plantroom Policy<br/>Plant Room Requirements]
-    P2E[Backup Policy<br/>Backup Systems Standards]
+    P2S[MEP Policies All Services<br/>Electrical | Plumbing | Firefighting | Plantroom | Backup]
 
-    P2 --> P2A & P2B & P2C & P2D & P2E
+    P2 --> P2S
 
     %% ══════════════════════════════════════
     %% PART 3: CALCULATIONS
     %% ══════════════════════════════════════
-    P2A & P2B & P2C & P2D & P2E --> P3
+    P2S --> P3
     P3[/PART 3: Calculations<br/>Generated from Policies + Input Data/]
     P3A[Water Demand Calc<br/>Refer to Calculations Page]
     P3B[Electrical Load Calc<br/>Refer to Calculations Page]
@@ -132,45 +136,24 @@ export const CONCEPT_STAGE_MERMAID = `flowchart TD
     P4C --> P5
     P5[/PART 5: Detailed Space Planning<br/>MEP Shares Layout with Space Matrix/]
     S1[UGT Layout Detailed<br/>Pump Room + Tanks + Pump Blocks]
-    S2[STP Layout Blocks<br/>Total Area Shown in Block Only]
-    S3[OWC Layout Detailed<br/>Machine Room + Wet Storage Area]
-    S4[Substation & DG Detail<br/>Detailed Substation + DG Layout]
+    S3[OWC Layout Block<br/>Machine Room + Wet Storage Area]
+    S4[Substation & DG Layout<br/>Generator Room + Transformer + Panel]
     S5[Lifts Space Planning<br/>No. of Lifts + Size + Space from DB]
+    S7[Toilet Vent & Pressurize<br/>Ventilation + Pressurization from DB]
 
-    P5 --> S1 & S2 & S3 & S4 & S5
+    P5 --> S1 & S3 & S4 & S5 & S7
 
     SD1{Commercial Project?<br/>Check Project Type}
     S6[Chiller Space Planning<br/>Only for Commercial Projects]
 
-    S5 --> SD1
-    SD1 -->|Yes| S6
-    SD1 -->|No| S7
-    S6 --> S7
-
-    S7[Toilet Vent & Pressurize<br/>Ventilation + Pressurization from DB]
-    S1 & S2 & S3 & S4 --> S7
-
-    SD2{Height > 90m?<br/>Fire Break Floor Check}
-    S7 --> SD2
-
-    SD3{User Wants Plan?<br/>Optional: UGT + Fire Break}
-    SSK[Skip Fire Plan<br/>Height ≤90m or User Declined]
-
-    SD2 -->|"Yes (>90m)"| SD3
-    SD2 -->|"No (≤90m)"| SSK
-
-    SD4{As Per CFO or NBC?<br/>Standard Selection}
-    SD3 -->|Yes| SD4
-    SD3 -->|No| SSK
-
-    S8[Fire Break Floor + UGT<br/>As per selected standard CFO/NBC]
-    SD4 --> S8
+    S1 & S3 & S4 & S5 & S7 --> SD1
+    SD1 -->|Yes| S6 --> P6
+    SD1 -->|No| P6
 
     %% ══════════════════════════════════════
-    %% PART 6: ARCHITECT CONVERGENCE
+    %% PART 6: MASTER PLAN INTEGRATION
     %% ══════════════════════════════════════
-    S8 & SSK --> P6
-    P6[/PART 6: Architect Convergence<br/>Master Plan Integration/]
+    P6[/PART 6: Master Plan Integration<br/>Architect + MEP Convergence/]
     P6A[Architect Receives<br/>Space Matrix + Space Planning Layout]
     P6B[Architect Shares Master<br/>Includes MEP: UGT/STP locations etc.]
     P6C[MEP Reviews Master Plan<br/>Review Architect Incorporation]
@@ -206,10 +189,10 @@ export const CONCEPT_STAGE_MERMAID = `flowchart TD
     class B6 reject
     class BD1,SD1,SD2,SD3,SD4,P6D decision
     class MRG merge
-    class P2,P2A,P2B,P2C,P2D,P2E policy
+    class P2,P2S policy
     class P3,P3A,P3B,P3C,P3D,P3L,P3F,P3P calc
     class P4,P4A,P4B,P4C space
-    class P5,S1,S2,S3,S4,S5,S6,S7,SSK plan
+    class P5,S1,S3,S4,S5,S6,S7,SSK plan
     class S8 reject
     class P6,P6A,P6B,P6C,P6E,P6F converge`;
 
@@ -779,6 +762,72 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class INIT,DONE terminal
     class P3A decision`,
   },
+  DFP: {
+    title: "Domestic & Flushing Pump Calculations",
+    code: `flowchart TD
+    INIT([🟢 Domestic & Flushing Pump Calc<br/>Start])
+
+    %% ═══ PHASE 1: PROJECT DATA & CAPACITY ═══
+    P1[/PHASE 1: Project Data & Capacity Inputs/]
+    INIT --> P1
+    P1 --> ENT[📥 Project Data Entry<br/>Building type, height, floors, population]
+    ENT --> STRAT{System Strategy Selection}
+
+    STRAT -->|Type 1| GRV[Gravity System<br/>Pressure from elevation only]
+    STRAT -->|Type 2| PRV[PRV System<br/>High-pressure pump + PRVs]
+    STRAT -->|Type 3| MSMO[MSMO System<br/>Multi-stage multi-outlet]
+
+    GRV --> SM[Strategy Selected]
+    PRV --> SM
+    MSMO --> SM
+
+    SM --> CAT{Pump Category?}
+    CAT -->|Fire| FIRE[🔥 Fire System<br/>Main 2850 LPM / Booster 900 / Jockey 180]
+    CAT -->|Domestic| DOM[💧 Domestic/Transfer<br/>Q = V / t]
+    CAT -->|Sump| SUMP[🔧 Sump Pump<br/>max of sprinkler burst or tank drain]
+
+    FIRE --> QM[Flow Rate Q Determined]
+    DOM --> QM
+    SUMP --> QM
+    QM --> QOUT[📊 Phase 1 Output: Q in m³/hr or LPM]
+
+    %% ═══ PHASE 2: TDH CALCULATIONS ═══
+    P2[/PHASE 2: Hydraulic Head - TDH/]
+    QOUT --> P2
+    P2 --> HS[Step A: Static Head Hs<br/>Height ÷ 10.2 = bar]
+    HS --> HF[Step B: Frictional Loss Hf<br/>Hazen-Williams, 4 ft/100 ft]
+    HF --> MAT{Pipe Material?}
+    MAT -->|Steel C=120| HFC[Friction Calculated]
+    MAT -->|Copper C=140| HFC
+    MAT -->|PVC C=150| HFC
+    HFC --> HM[Step C: Minor Losses Hm<br/>Hm = 0.30 × Hf]
+    HM --> HR[Step D: Residual Pressure Hr<br/>Fire 3.5 bar / Domestic 0.5 bar]
+    HR --> TDH[✅ TDH = Hs + Hf + Hm + Hr]
+    TDH --> TOUT[📊 Phase 2 Output: TDH in m or bar]
+
+    %% ═══ PHASE 3: SELECTION & OUTPUT ═══
+    P3[/PHASE 3: Pump Selection & Output/]
+    TOUT --> P3
+    P3 --> CFG{Pump Configuration}
+    CFG -->|Fire| FCFG[1 Electric + 1 Diesel + 1 Jockey]
+    CFG -->|Domestic| DCFG[1 Working + 1 Standby]
+    CFG -->|Sump| SCFG[3 Nos Duty Sharing]
+
+    FCFG --> CLK[Config Locked]
+    DCFG --> CLK
+    SCFG --> CLK
+
+    CLK --> HDR[Header Size<br/>V ≤ 3.0 m/s]
+    HDR --> PWR[Power: P = ρgQH / η×1000]
+    PWR --> VOL[Tank/Sump Volume L×W×D]
+    VOL --> SCHED[📋 Final Pump Schedule]
+    SCHED --> DONE([🏁 Domestic & Flushing Pump — COMPLETE])
+
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    class INIT,DONE terminal
+    class STRAT,CAT,MAT,CFG decision`,
+  },
   FFP: {
     title: "Fire Pump Head Calculation",
     code: `flowchart TD
@@ -1205,7 +1254,7 @@ export const STAGE_MERMAID_MAP: Record<string, string> = {
 
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
-  concept: ["P3A", "P3B", "OWC", "STP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
+  concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
   detailed: ["DD_CB", "DD_PIP"], // Cable Sizing + Pipe Sizing ready; others coming soon
   tender: [],
   vfc: [],

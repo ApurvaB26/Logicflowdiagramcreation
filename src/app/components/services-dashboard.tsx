@@ -12,6 +12,7 @@ import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
+import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
 import {
   Zap,
   Droplets,
@@ -92,18 +93,12 @@ const SERVICES: Service[] = [
       { id: "P3A", title: "Water Demand Calculations", description: "Population estimate, per capita demand, tank sizing & peak hour factor", status: "ready", stage: "concept" },
       { id: "OWC", title: "OWC Calculations", description: "Waste generation, bin sizing, garbage room & OWC capacity (CPHEEO/NBC)", status: "ready", stage: "concept" },
       { id: "STP", title: "STP Calculations", description: "Sewage generation (80/100 rule), STP sizing, area & treated water reuse", status: "ready", stage: "concept" },
-      { id: "DFP", title: "Domestic & Flushing Pump Calculations", description: "Pump head, flow rate & pump selection for domestic and flushing systems", status: "coming-soon", stage: "concept" },
+      { id: "DFP", title: "Domestic & Flushing Pump Calculations", description: "Pump head, flow rate & pump selection for domestic and flushing systems", status: "ready", stage: "concept" },
       { id: "P3E", title: "External Sewer & Storm Calculations", description: "Storm water flow, sewer pipe sizing, STP capacity & rainwater harvesting", status: "coming-soon", stage: "concept" },
       { id: "RWH", title: "Rainwater Harvesting & Tank Sizing", description: "Catchment runoff, downcomer sizing, velocity guard & NBC 2016 tank sizing", status: "ready", stage: "concept" },
       { id: "SWD", title: "Storm Water Drainage Calculator", description: "Rational method runoff, Manning's equation, velocity monitoring & pipe sizing", status: "ready", stage: "concept" },
-      { id: "P3T_PLUMB", title: "Transfer Pipe Sizing", description: "Pipe diameter, friction loss & material specification for plumbing transfers", status: "coming-soon", stage: "concept" },
       // ── Detailed Design Stage ──
-      { id: "DD_PIP", title: "Pipe Sizing (Hot/Cold)", description: "Hunter's method, velocity check, IS 2065 standard pipe diameter calc", status: "ready", stage: "detailed" },
-      { id: "DD_RSR", title: "Riser Diagrams", description: "Floor-wise riser layout, connection points & isolation valves", status: "coming-soon", stage: "detailed" },
-      { id: "DD_DRN", title: "Drainage Calculations", description: "Fixture unit count, drainage pipe sizing per floor", status: "coming-soon", stage: "detailed" },
-      { id: "DD_PMP", title: "Pump Selection", description: "Detailed pump curve matching, duty/standby selection", status: "coming-soon", stage: "detailed" },
-      { id: "DD_VNT", title: "Vent Pipe Sizing", description: "Vent stack sizing per drainage fixture load", status: "coming-soon", stage: "detailed" },
-      { id: "DD_WMT", title: "Water Meter Sizing", description: "Flow-based meter selection per zone/riser", status: "coming-soon", stage: "detailed" },
+      { id: "DD_PIP", title: "Transfer Pipe Sizing", description: "Hunter's method, velocity check, IS 2065 standard pipe diameter calc", status: "ready", stage: "detailed" },
       // ── Tender Stage ──
       { id: "T_BOQ_PL", title: "Plumbing BOQ", description: "Pipe/fitting, pump, sanitary fixture, tank & valve schedule quantities", status: "coming-soon", stage: "tender" },
       // ── VFC Stage ──
@@ -149,7 +144,7 @@ const SERVICES: Service[] = [
       { id: "FTK", title: "Fire Tank Size Estimation", description: "IS-15105/NFPA-13 standards, sprinkler/hydrant/drencher volume & 300m\u00B3 safety gate", status: "ready", stage: "concept" },
       { id: "FJD", title: "Jockey & Drencher Pump Calculations", description: "Jockey/drencher head loss, 20% safety factor & system pressure summation", status: "ready", stage: "concept" },
       { id: "FTB", title: "Terrace Fire Booster Pump Head", description: "Hazen-Williams friction, pipe fittings, static head & residual pressure calc", status: "ready", stage: "concept" },
-      { id: "P3T_FF", title: "Transfer Pipe Sizing", description: "Pipe diameter, friction loss & material specification for fire transfers", status: "coming-soon", stage: "concept" },
+
       // ── Detailed Design Stage ──
       { id: "DD_SPR", title: "Sprinkler Hydraulic Calc", description: "K-factor, design density, hydraulic calc & pipe network sizing", status: "coming-soon", stage: "detailed" },
       { id: "DD_HYD", title: "Hydrant Layout", description: "Hydrant spacing, hose reel coverage & pipe sizing", status: "coming-soon", stage: "detailed" },
@@ -213,25 +208,6 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
       { from: "ST7", to: "ST8" },
     ],
   },
-  DFP: {
-    title: "Domestic & Flushing Pump Calculations",
-    icon: "\uD83D\uDD27",
-    color: "#06b6d4",
-    accentBg: "#cffafe",
-    steps: [
-      { id: "DF1", label: "Input: Building Height & Demand", sub: "Floor count, water demand per floor", type: "input" },
-      { id: "DF2", label: "Static Head Calculation", sub: "Height difference: sump to highest outlet", type: "formula" },
-      { id: "DF3", label: "Friction & Minor Losses", sub: "Pipe routing, fittings, valves", type: "formula" },
-      { id: "DF4", label: "Total Dynamic Head (TDH)", sub: "Static + Friction + Minor + Residual", type: "formula" },
-      { id: "DF5", label: "Flow Rate Calculation", sub: "Peak demand per system (domestic / flushing)", type: "process" },
-      { id: "DF6", label: "Pump Selection", sub: "TDH + Flow \u2192 Pump model from DB", type: "process" },
-      { id: "DF7", label: "Output: Pump Schedule", sub: "Pump size, motor rating, no. of pumps \u2192 Space Matrix", type: "output" },
-    ],
-    connections: [
-      { from: "DF1", to: "DF2" }, { from: "DF2", to: "DF3" }, { from: "DF3", to: "DF4" },
-      { from: "DF4", to: "DF5" }, { from: "DF5", to: "DF6" }, { from: "DF6", to: "DF7" },
-    ],
-  },
   P3E: {
     title: "External Sewer & Storm Calculations",
     icon: "\uD83C\uDF27\uFE0F",
@@ -255,25 +231,7 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
       { from: "SW7", to: "SW8" }, { from: "SW8", to: "SW9" }, { from: "SW9", to: "SW10" },
     ],
   },
-  P3T_PLUMB: {
-    title: "Transfer Pipe Sizing (Plumbing)",
-    icon: "\uD83D\uDD27",
-    color: "#7c3aed",
-    accentBg: "#ede9fe",
-    steps: [
-      { id: "TP1", label: "Input: Pump Selection Data", sub: "Selected Pump + Flow Rate + Head", type: "input" },
-      { id: "TP2", label: "Flow Rate per Transfer Line", sub: "GPM / LPS from Pump Duty Point", type: "process" },
-      { id: "TP3", label: "Velocity Constraint Check", sub: "Target: 1.5\u20133.0 m/s (Pressure) / 0.6\u20131.2 m/s (Gravity)", type: "formula" },
-      { id: "TP4", label: "Pipe Diameter Calculation", sub: "D = \u221A(4Q / \u03C0V) \u2192 Round to Standard Size", type: "formula" },
-      { id: "TP5", label: "Friction Loss Calculation", sub: "Hazen-Williams / Darcy-Weisbach Method", type: "formula" },
-      { id: "TP6", label: "Total Head Loss Verification", sub: "Static + Friction + Minor \u2264 Pump Head", type: "decision" },
-      { id: "TP7", label: "Output: Pipe Schedule", sub: "Pipe Sizes + Material + Route \u2192 BOQ", type: "output" },
-    ],
-    connections: [
-      { from: "TP1", to: "TP2" }, { from: "TP2", to: "TP3" }, { from: "TP3", to: "TP4" },
-      { from: "TP4", to: "TP5" }, { from: "TP5", to: "TP6" }, { from: "TP6", to: "TP7" },
-    ],
-  },
+
   P3D: {
     title: "Heat Load Calculations",
     icon: "\uD83C\uDF21\uFE0F",
@@ -447,25 +405,6 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
       { from: "SW4", to: "SW5" }, { from: "SW5", to: "SW6" }, { from: "SW6", to: "SW7" },
     ],
   },
-  P3T_FF: {
-    title: "Transfer Pipe Sizing (Firefighting)",
-    icon: "\uD83D\uDD27",
-    color: "#dc2626",
-    accentBg: "#fee2e2",
-    steps: [
-      { id: "TF1", label: "Input: Fire Pump Data", sub: "Selected pump + flow rate + head", type: "input" },
-      { id: "TF2", label: "Flow Rate per Transfer Line", sub: "Hydrant / Sprinkler line duty", type: "process" },
-      { id: "TF3", label: "Velocity Constraint", sub: "Max 3.0 m/s for fire mains", type: "formula" },
-      { id: "TF4", label: "Pipe Diameter Calculation", sub: "D = \u221A(4Q / \u03C0V) \u2192 Standard size", type: "formula" },
-      { id: "TF5", label: "Friction & Minor Losses", sub: "C=120 for fire pipes (Hazen-Williams)", type: "formula" },
-      { id: "TF6", label: "Head Loss Verification", sub: "Total loss \u2264 Pump available head", type: "decision" },
-      { id: "TF7", label: "Output: Fire Pipe Schedule", sub: "Pipe sizes + material \u2192 BOQ & Drawings", type: "output" },
-    ],
-    connections: [
-      { from: "TF1", to: "TF2" }, { from: "TF2", to: "TF3" }, { from: "TF3", to: "TF4" },
-      { from: "TF4", to: "TF5" }, { from: "TF5", to: "TF6" }, { from: "TF6", to: "TF7" },
-    ],
-  },
   // ── Detailed Design Stage Calcs ──
   DD_CB: { title: "Cable Sizing Calculation", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
     steps: [{ id: "CB1", label: "Input: Circuit Data", sub: "Load current, cable route length, installation method", type: "input" }, { id: "CB2", label: "Current Rating Lookup", sub: "IS 3961/IEC 60502 derating factors", type: "process" }, { id: "CB3", label: "Voltage Drop Check", sub: "Max 3% for sub-main, 5% total", type: "formula" }, { id: "CB4", label: "Short Circuit Withstand", sub: "I\u00B2t check for fault duration", type: "formula" }, { id: "CB5", label: "Output: Cable Schedule", sub: "Cable size + type + route \u2192 BOQ", type: "output" }],
@@ -485,27 +424,12 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
   DD_BUS: { title: "Bus Bar Sizing", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
     steps: [{ id: "BB1", label: "Input: Max Demand Current", sub: "From electrical load calc output", type: "input" }, { id: "BB2", label: "Material Selection", sub: "Cu/Al from standard tables", type: "process" }, { id: "BB3", label: "Temperature Rise Check", sub: "Current density \u2264 limit", type: "formula" }, { id: "BB4", label: "Output: Bus Bar Schedule", sub: "Size + material + mounting", type: "output" }],
     connections: [{ from: "BB1", to: "BB2" }, { from: "BB2", to: "BB3" }, { from: "BB3", to: "BB4" }] },
-  DD_PIP: { title: "Pipe Sizing (Hot/Cold)", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
+  DD_PIP: { title: "Transfer Pipe Sizing", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
     steps: [{ id: "PI1", label: "Input: Fixture Unit Count", sub: "Hunter's method FU per floor", type: "input" }, { id: "PI2", label: "Flow Rate Conversion", sub: "FU \u2192 LPS from IS/NBC tables", type: "formula" }, { id: "PI3", label: "Velocity Check", sub: "1.5\u20133.0 m/s target range", type: "formula" }, { id: "PI4", label: "Pipe Diameter Calc", sub: "D = \u221A(4Q/\u03C0V) \u2192 standard size", type: "formula" }, { id: "PI5", label: "Output: Pipe Schedule", sub: "Pipe sizes per floor \u2192 BOQ", type: "output" }],
     connections: [{ from: "PI1", to: "PI2" }, { from: "PI2", to: "PI3" }, { from: "PI3", to: "PI4" }, { from: "PI4", to: "PI5" }] },
   DD_SPR: { title: "Sprinkler Hydraulic Calc", icon: "\uD83D\uDD25", color: "#e11d48", accentBg: "#ffe4e6",
     steps: [{ id: "SP1", label: "Input: Hazard Class & Area", sub: "Occupancy type, design area", type: "input" }, { id: "SP2", label: "Design Density", sub: "NFPA/IS density selection (mm/min)", type: "process" }, { id: "SP3", label: "K-Factor Selection", sub: "Sprinkler head K-factor from DB", type: "process" }, { id: "SP4", label: "Hydraulic Calculation", sub: "Pipe network pressure/flow calc", type: "formula" }, { id: "SP5", label: "Output: Sprinkler Schedule", sub: "Head layout + pipe sizes \u2192 drawings", type: "output" }],
     connections: [{ from: "SP1", to: "SP2" }, { from: "SP2", to: "SP3" }, { from: "SP3", to: "SP4" }, { from: "SP4", to: "SP5" }] },
-  DD_RSR: { title: "Riser Diagrams", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
-    steps: [{ id: "R1", label: "Input: Floor-wise Demand", sub: "FU count + pipe routes per floor", type: "input" }, { id: "R2", label: "Riser Layout", sub: "Vertical pipe routing floor-to-floor", type: "process" }, { id: "R3", label: "Connection Points", sub: "Branch takeoffs + isolation valve locations", type: "process" }, { id: "R4", label: "Output: Riser Diagram", sub: "Complete riser drawing per service", type: "output" }],
-    connections: [{ from: "R1", to: "R2" }, { from: "R2", to: "R3" }, { from: "R3", to: "R4" }] },
-  DD_DRN: { title: "Drainage Calculations", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
-    steps: [{ id: "D1", label: "Input: Fixture Units", sub: "DFU count per floor per stack", type: "input" }, { id: "D2", label: "Stack Sizing", sub: "IS 5329 / NBC drainage stack tables", type: "formula" }, { id: "D3", label: "Branch Drain Sizing", sub: "Slope + flow rate per branch", type: "formula" }, { id: "D4", label: "Output: Drainage Schedule", sub: "Stack + branch sizes per floor", type: "output" }],
-    connections: [{ from: "D1", to: "D2" }, { from: "D2", to: "D3" }, { from: "D3", to: "D4" }] },
-  DD_PMP: { title: "Pump Selection", icon: "\uD83D\uDD27", color: "#2563eb", accentBg: "#dbeafe",
-    steps: [{ id: "PM1", label: "Input: Duty Point", sub: "Flow (LPS) + Head (m) from calcs", type: "input" }, { id: "PM2", label: "Pump Curve Matching", sub: "Manufacturer catalogue lookup", type: "process" }, { id: "PM3", label: "Efficiency Check", sub: "BEP proximity & NPSH verification", type: "formula" }, { id: "PM4", label: "Duty/Standby Config", sub: "Number of pumps + VFD requirement", type: "process" }, { id: "PM5", label: "Output: Pump Schedule", sub: "Model + rating + motor kW \u2192 BOQ", type: "output" }],
-    connections: [{ from: "PM1", to: "PM2" }, { from: "PM2", to: "PM3" }, { from: "PM3", to: "PM4" }, { from: "PM4", to: "PM5" }] },
-  DD_VNT: { title: "Vent Pipe Sizing", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
-    steps: [{ id: "VN1", label: "Input: DFU Load", sub: "Drainage fixture units per vent stack", type: "input" }, { id: "VN2", label: "Vent Size Lookup", sub: "IS 5329 table for vent diameter", type: "process" }, { id: "VN3", label: "Output: Vent Schedule", sub: "Vent stack sizes per floor", type: "output" }],
-    connections: [{ from: "VN1", to: "VN2" }, { from: "VN2", to: "VN3" }] },
-  DD_WMT: { title: "Water Meter Sizing", icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",
-    steps: [{ id: "WM1", label: "Input: Zone Flow Data", sub: "Peak flow rate per riser/zone", type: "input" }, { id: "WM2", label: "Meter Selection", sub: "Flow range + pressure drop from DB", type: "process" }, { id: "WM3", label: "Output: Meter Schedule", sub: "Meter size + type per zone", type: "output" }],
-    connections: [{ from: "WM1", to: "WM2" }, { from: "WM2", to: "WM3" }] },
   DD_DCT: { title: "Duct Sizing", icon: "\u2744\uFE0F", color: "#7c3aed", accentBg: "#ede9fe",
     steps: [{ id: "DC1", label: "Input: CFM per Zone", sub: "Cooling load \u2192 air volume per zone", type: "input" }, { id: "DC2", label: "Equal Friction Method", sub: "Target friction rate (Pa/m)", type: "formula" }, { id: "DC3", label: "Duct Size Selection", sub: "Rectangular/round from duct tables", type: "process" }, { id: "DC4", label: "Velocity Check", sub: "Main 6\u20138 m/s, branch 3\u20135 m/s", type: "formula" }, { id: "DC5", label: "Output: Duct Schedule", sub: "Size + insulation per section \u2192 BOQ", type: "output" }],
     connections: [{ from: "DC1", to: "DC2" }, { from: "DC2", to: "DC3" }, { from: "DC3", to: "DC4" }, { from: "DC4", to: "DC5" }] },
@@ -633,11 +557,12 @@ function CalcDetailOverlay({
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB","DD_PIP"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB","DD_PIP"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
   const isCustomSTP = calcId === "STP";
+  const isCustomDFP = calcId === "DFP";
   const isCustomFFP = calcId === "FFP";
   const isCustomFTK = calcId === "FTK";
   const isCustomFJD = calcId === "FJD";
@@ -656,6 +581,7 @@ function CalcDetailOverlay({
     P3B: { title: "Electrical Load Calculation", icon: "\u26A1", color: "#f59e0b" },
     OWC: { title: "OWC Calculations", icon: "\u267B\uFE0F", color: "#10b981" },
     STP: { title: "STP Calculations", icon: "\uD83C\uDFED", color: "#06b6d4" },
+    DFP: { title: "Domestic & Flushing Pump Calculations", icon: "\uD83D\uDD27", color: "#06b6d4" },
     FFP: { title: "Fire Pump Head Calculation", icon: "\uD83D\uDE92", color: "#dc2626" },
     FTK: { title: "Fire Tank Size Estimation", icon: "\uD83D\uDEA8", color: "#dc2626" },
     FJD: { title: "Jockey & Drencher Pump", icon: "\uD83D\uDD27", color: "#dc2626" },
@@ -663,7 +589,7 @@ function CalcDetailOverlay({
     RWH: { title: "Rainwater Harvesting & Tank Sizing", icon: "\uD83C\uDF27\uFE0F", color: "#3b82f6" },
     SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6" },
     DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706" },
-    DD_PIP: { title: "Transfer Pipe Sizing Calculation", icon: "\uD83D\uDCA7", color: "#2563eb" },
+    DD_PIP: { title: "Transfer Pipe Sizing", icon: "\uD83D\uDCA7", color: "#2563eb" },
   };
   const meta = CUSTOM_META[calcId];
   const flowTitle = meta?.title ?? flow?.title ?? "Calculation";
@@ -713,7 +639,7 @@ function CalcDetailOverlay({
           { label: "Sizing Output", bg: "#ffe4e6", bd: "#f43f5e", icon: "\u26A1" },
           { label: "Dashboard", bg: "#d1fae5", bd: "#10b981", icon: "\uD83D\uDCCA" },
         ]
-      : isCustomOWC || isCustomSTP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP
+      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP
       ? [
           { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
           { label: "Database", bg: "#ede9fe", bd: "#8b5cf6", icon: "\uD83D\uDDC3" },
@@ -896,6 +822,10 @@ function CalcDetailOverlay({
           ) : isCustomSTP ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <STPCalcSVG />
+            </div>
+          ) : isCustomDFP ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <DomesticFlushingPumpCalcSVG />
             </div>
           ) : isCustomFFP ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
