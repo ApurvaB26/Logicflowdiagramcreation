@@ -1028,6 +1028,87 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class INIT,DONE terminal
     class P3C,P4D decision`,
   },
+  DD_CB: {
+    title: "Cable Sizing & Voltage Drop Calculation",
+    code: `flowchart TD
+    %% CABLE SIZING & VOLTAGE DROP — 19-Step Workflow
+    INIT([🟢 Cable Sizing Calculation<br/>Start])
+
+    %% Phase 1: User Inputs
+    P1[/Col 1 — Load Description<br/>Col 2 — Total Load (kW)<br/>📝 Manual Entry/]
+    INIT --> P1
+
+    P2[/Col 3 — Supply Voltage<br/>📋 Dropdown: 415 V | 230 V/]
+    P1 --> P2
+
+    P3[/Col 4 — Power Factor (PF)<br/>Col 5 — Length of Cable (m)<br/>📝 Manual Entry/]
+    P2 --> P3
+
+    %% Phase 2: Full Load Current
+    P3 --> D1
+    D1{Col 6 — Full Load Current<br/>Decision: Supply Voltage?}
+    D1 -->|415 V| F1[I = TotalLoad / 1.732×415×PF × 1000<br/>Three Phase Formula]
+    D1 -->|230 V| F2[I = TotalLoad / 230×PF × 1000<br/>Single Phase Formula]
+    F1 --> MRG1([Col 6: FLC Calculated])
+    F2 --> MRG1
+
+    %% Phase 3: Demand
+    MRG1 --> P6
+    P6[/Col 7 — Demand Factor<br/>Col 8 — Diversity Factor<br/>📝 Manual Entry/]
+    P7[Col 9 — Demand Load<br/>= Col 7 × Col 8]
+    P6 --> P7
+
+    %% Phase 4: Cable Selection & DB Fetch
+    P7 --> P8
+    P8[/Col 10 — Cable Type<br/>Col 11 — Cable Material<br/>Col 12 — Cable Core Type<br/>Col 13 — Installation Method<br/>📋 Dropdown Selections/]
+    DB1[(Fetch from Cable Database<br/>Col 14: Cable Size<br/>Col 15: Current Capacity<br/>Col 16: Resistance R)]
+    P8 --> DB1
+
+    %% Phase 5: Derating
+    DB1 --> P10
+    P10[/Col 17 — No. of Cable / Run<br/>📝 Manual Entry/]
+    DB2[(Fetch Derating from Cable DB<br/>Col 18: k1 Ambient Temp<br/>Col 19: k2 Grouping<br/>Col 20: k3 Soil Thermal<br/>Col 21: k4 Depth<br/>Col 22: k5 Other<br/>Col 23: Reactance X)]
+    P10 --> DB2
+
+    P12[Col 27 — Total Derating Factor<br/>Kt = k1×k2×k3×k4×k5]
+    DB2 --> P12
+
+    %% Phase 6: Capacity
+    P13[Col 28 — Derated Capacity<br/>= Col 15 × Col 27]
+    P12 --> P13
+    P14[Col 29 — Effective Capacity<br/>= Col 28 × Col 17]
+    P13 --> P14
+
+    %% Phase 7: Voltage Drop
+    P14 --> D2
+    D2{Col 30 — Voltage Drop<br/>Decision: Supply Voltage?}
+    D2 -->|230 V| VD1[VD = FLC×L×N×(R×0.8+X×0.6) / 1000]
+    D2 -->|415 V| VD2[VD = 1.732×FLC×L×N×(R×0.8+X×0.6) / 1000]
+    VD1 --> MRG2([Col 30: VD Calculated])
+    VD2 --> MRG2
+
+    P16[Col 31 — % Voltage Drop<br/>= VD / Voltage × 100]
+    MRG2 --> P16
+
+    %% Phase 8: Validation
+    P16 --> D3
+    D3{Is % VD < 6%?<br/>Validation Gate}
+    D3 -->|YES| P18[Col 32 — Total Cable<br/>= 2 × Col 17]
+    D3 -->|NO| ALERT[⚠️ VD Exceeds Limit!<br/>Re-select Cable Size]
+    ALERT -.->|Re-select| P8
+
+    DONE([🏁 Cable Sizing Complete])
+    P18 --> DONE
+
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    classDef reject fill:#ffe4e6,stroke:#f43f5e,stroke-width:1.5px,color:#9f1239
+    classDef db fill:#cffafe,stroke:#06b6d4,stroke-width:2px,color:#155e75
+    class INIT,DONE,MRG1,MRG2 terminal
+    class D1,D2,D3 decision
+    class ALERT reject
+    class DB1,DB2 db`,
+  },
 };
 
 // ── STAGE → MERMAID CODE MAP ──
@@ -1041,7 +1122,7 @@ export const STAGE_MERMAID_MAP: Record<string, string> = {
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
   concept: ["P3A", "P3B", "OWC", "STP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
-  detailed: [], // coming-soon calcs only
+  detailed: ["DD_CB"], // Cable Sizing is ready; others coming soon
   tender: [],
   vfc: [],
 };

@@ -10,6 +10,7 @@ import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
+import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import {
   Zap,
   Droplets,
@@ -65,7 +66,7 @@ const SERVICES: Service[] = [
       // ── Concept Stage ──
       { id: "P3B", title: "Electrical Load Calculations", description: "Supply norms, apartment/common/MLCP loads, transformer & DG sizing", status: "ready", stage: "concept" },
       // ── Detailed Design Stage ──
-      { id: "DD_CB", title: "Cable Sizing Calculation", description: "IS 3961/IEC 60502 current rating, voltage drop & short circuit withstand", status: "coming-soon", stage: "detailed" },
+      { id: "DD_CB", title: "Cable Sizing Calculation", description: "IS 3961/IEC 60502 current rating, voltage drop & short circuit withstand", status: "ready", stage: "detailed" },
       { id: "DD_PNL", title: "Panel Schedule Design", description: "R-Y-B phase balancing, MCB/MCCB selection per circuit", status: "coming-soon", stage: "detailed" },
       { id: "DD_SLD", title: "SLD (Single Line Diagram)", description: "Transformer to outgoing feeders, protection coordination", status: "coming-soon", stage: "detailed" },
       { id: "DD_ERT", title: "Earthing Design", description: "IS 3043 electrode sizing, soil resistivity, earth pit layout", status: "coming-soon", stage: "detailed" },
@@ -631,7 +632,7 @@ function CalcDetailOverlay({
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","FFP","FTK","FJD","FTB","RWH","SWD"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
@@ -642,6 +643,7 @@ function CalcDetailOverlay({
   const isCustomFTB = calcId === "FTB";
   const isCustomRWH = calcId === "RWH";
   const isCustomSWD = calcId === "SWD";
+  const isCustomDDCB = calcId === "DD_CB";
   const isCustom = CUSTOM_IDS.has(calcId);
 
   // For generic flows
@@ -658,6 +660,7 @@ function CalcDetailOverlay({
     FTB: { title: "Terrace Fire Booster Pump", icon: "\uD83C\uDFD7\uFE0F", color: "#dc2626" },
     RWH: { title: "Rainwater Harvesting & Tank Sizing", icon: "\uD83C\uDF27\uFE0F", color: "#3b82f6" },
     SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6" },
+    DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706" },
   };
   const meta = CUSTOM_META[calcId];
   const flowTitle = meta?.title ?? flow?.title ?? "Calculation";
@@ -707,7 +710,7 @@ function CalcDetailOverlay({
           { label: "Sizing Output", bg: "#ffe4e6", bd: "#f43f5e", icon: "\u26A1" },
           { label: "Dashboard", bg: "#d1fae5", bd: "#10b981", icon: "\uD83D\uDCCA" },
         ]
-      : isCustomOWC || isCustomSTP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomRWH || isCustomSWD
+      : isCustomOWC || isCustomSTP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomRWH || isCustomSWD || isCustomDDCB
       ? [
           { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
           { label: "Database", bg: "#ede9fe", bd: "#8b5cf6", icon: "\uD83D\uDDC3" },
@@ -914,6 +917,10 @@ function CalcDetailOverlay({
           ) : isCustomSWD ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <SWDCalcSVG />
+            </div>
+          ) : isCustomDDCB ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <CableSizingCalcSVG />
             </div>
           ) : flow ? (
             <svg

@@ -32,6 +32,7 @@ import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
+import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import {
   STAGE_MERMAID_MAP,
   CALC_MERMAID_CODES,
@@ -54,6 +55,7 @@ const CALC_META: Record<string, { title: string; icon: string; color: string; se
   FTB: { title: "Terrace Fire Booster Pump", icon: "\uD83C\uDFD7\uFE0F", color: "#dc2626", service: "Firefighting" },
   RWH: { title: "Rainwater Harvesting & Tank Sizing", icon: "\uD83C\uDF27\uFE0F", color: "#3b82f6", service: "Plumbing" },
   SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6", service: "Plumbing" },
+  DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706", service: "Electrical" },
 };
 
 const CALC_COMPONENTS: Record<string, React.FC> = {
@@ -67,6 +69,7 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
   FTB: TerraceBoosterCalcSVG,
   RWH: RWHCalcSVG,
   SWD: SWDCalcSVG,
+  DD_CB: CableSizingCalcSVG,
 };
 
 // =====================================================================

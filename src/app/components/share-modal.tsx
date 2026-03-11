@@ -50,7 +50,7 @@ const STAGE_ITEMS: StageItem[] = [
   {
     id: "detailed",
     label: "Detailed Design Stage",
-    sub: "Complete workflow + Mermaid code",
+    sub: "Complete workflow + 1 calculation flowchart + Mermaid codes",
     icon: <PenTool className="w-5 h-5" />,
     color: "#f97316",
     gradient: "linear-gradient(135deg, #f97316, #f59e0b)",
