@@ -127,7 +127,7 @@ const NODES: DNode[] = [
   // ── PART 4: DETAILED CALCULATIONS ──
   hdr("DD_P4", "PART 4: Detailed Calculations", "Service-wise Detailed Engineering Calculations", CL.purple),
   svc("DD_SVC_E", "Electrical", "\u26A1 Detailed Calcs",
-    ["Cable Sizing", "Panel Schedules", "SLD Diagrams", "Earthing Design", "Lightning Protection", "Bus Bar Sizing"],
+    ["Cable Sizing", "Panel Schedules", "SLD Diagrams", "SC & Earthing Design", "Lightning Protection", "Bus Bar Sizing"],
     ["DD_CB", "DD_PNL", "DD_SLD", "DD_ERT", "DD_LTN", "DD_BUS"],
     CL.amber),
   svc("DD_SVC_P", "Plumbing", "\uD83D\uDCA7 Detailed Calcs",

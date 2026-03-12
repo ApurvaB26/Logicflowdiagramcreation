@@ -39,6 +39,7 @@ import { FireTankCalcSVG } from "./fire-tank-calc";
 import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { FireTerraceBoosterCalcSVG } from "./fire-terrace-booster-calc";
 import { HeatLoadCalcSVG } from "./heat-load-calc";
+import { EarthingCalcSVG } from "./earthing-calc";
 import {
   STAGE_MERMAID_MAP,
   CALC_MERMAID_CODES,
@@ -65,6 +66,7 @@ const CALC_META: Record<string, { title: string; icon: string; color: string; se
   DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706", service: "Electrical" },
   DD_PIP: { title: "Transfer Pipe Sizing Calculation", icon: "\uD83D\uDCA7", color: "#2563eb", service: "Plumbing" },
   DD_PRV: { title: "PRV Calculations", icon: "\uD83D\uDD27", color: "#7c3aed", service: "Plumbing" },
+  DD_ERT: { title: "Short Circuit & Earthing Design", icon: "⚡", color: "#d97706", service: "Electrical" },
   P3D: { title: "Building Thermal Cooling Load", icon: "\uD83C\uDF21\uFE0F", color: "#ef4444", service: "HVAC" },
 };
 
@@ -81,6 +83,7 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
   DD_CB: CableSizingCalcSVG,
   DD_PIP: PipeSizingCalcSVG,
   DD_PRV: PRVCalcSVG,
+  DD_ERT: EarthingCalcSVG,
   FFP: FirePumpHeadCalcSVG,
   FTK: FireTankCalcSVG,
   FJD: FireJockeyDrencherCalcSVG,

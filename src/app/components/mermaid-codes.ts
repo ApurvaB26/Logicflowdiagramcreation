@@ -1658,6 +1658,82 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class S10Y,S10N alert
     class S10,S14 decision`,
   },
+
+  DD_ERT: {
+    title: "Short Circuit & Earthing Design Calculation",
+    code: `flowchart TD
+    %% ══════════════════════════════════════════════════════
+    %% SHORT CIRCUIT & EARTHING DESIGN — IS 3043 / IEC 60909
+    %% ══════════════════════════════════════════════════════
+
+    START([⚡ Short Circuit & Earthing Design]) --> S1
+
+    %% ── PHASE 1: SOURCE FAULT LEVEL ──
+    subgraph PH1[Phase 1 — Source Fault Level]
+      S1[§1 Transformer Input Data<br/>1000kVA, 433V, Z%=5.0, Tol=-10%]
+      S1 --> S2[§2 Ohmic Impedance Conversion<br/>Z = %Z×10×kV² / Base kVA]
+      S2 --> S2R[Z_tr = 0.00844 Ω]
+      S2R --> S3[§3 Fault Current Calc<br/>If = V×c / √3×Z]
+      S3 --> S3R[I_f TR = 32,578 A ≈ 32.6 kA]
+      S3R --> S3D{Round to Std Rating?}
+      S3D -->|Yes| S3STD[36 kA Standard]
+      S1 --> S4[§4 DG Fault Level<br/>500kVA, X''d=15%]
+      S4 --> S4R[I_f DG = 4,941 A ≈ 5.0 kA]
+      S4R --> S4STD[10 kA Standard]
+      S3STD --> S5[§5 Combined Source Fault<br/>I_total = I_TR + I_DG + I_motor]
+      S4STD --> S5
+      S5 --> S5R[42.5 kA → Design: 50 kA]
+      S5R --> S5D{TR & DG Parallel?}
+      S5D -->|Yes| S5Y[Use 50 kA]
+      S5D -->|No| S5N[Use 36 kA TR only]
+    end
+
+    %% ── PHASE 2: DISTRIBUTION FAULT ──
+    subgraph PH2[Phase 2 — Distribution Panel Fault Level]
+      S5Y --> S6[§6 Cable Impedance Data<br/>Al/Cu XLPE — R & X from IS 694]
+      S5N --> S6
+      S6 --> S7[§7 Cable Z Calculation<br/>Zc = √R²+X² × L/1000 / Runs]
+      S7 --> S7R[Z_cable per feeder computed]
+      S7R --> S8[§8 Downstream Panel Fault<br/>Z_total = Z_source + Z_cable]
+      S8 --> S8T[Panel Fault Table:<br/>MDB=32.6kA, SMDB=25kA<br/>CDB=16kA, LDB=10kA]
+      S8T --> S9{§9 Panel Rating ≥ Fault?}
+      S9 -->|Yes| S9Y[✅ All Panels Pass]
+      S9 -->|No| S9N[❌ Upgrade Breaker/Cable]
+      S9N --> S8
+    end
+
+    %% ── PHASE 3: EARTHING CONDUCTOR SIZING ──
+    subgraph PH3[Phase 3 — Earthing Conductor Sizing]
+      S9Y --> S10[§10 Adiabatic Equation<br/>A = I×√t / k]
+      S10 --> S10K[Material Constants:<br/>Cu k=205, GI k=80, Al k=126]
+      S10K --> S11[§11 Equipment-wise Sizing<br/>TR: 2×50×6 GI = 600mm²<br/>DG: 1×40×6 GI = 240mm²]
+      S11 --> S11D{A_provided ≥ A_required?}
+      S11D -->|Yes| S11Y[✅ Pass]
+      S11D -->|No| S11N[Upgrade Strip → Recalculate]
+      S11N --> S11
+      S11Y --> S12[Earth Pit Resistance<br/>R = ρ/2πL × ln 8L/d − 1]
+      S12 --> S12R[8 pits → R_net = 1.79 Ω < 2 Ω ✓]
+    end
+
+    %% ── DASHBOARD ──
+    S12R --> DASH[📊 Dashboard<br/>TR: 36kA, DG: 10kA, Combined: 50kA<br/>Earth: 1.79Ω, 8 pits, 14 BOQ items]
+
+    %% Styles
+    classDef input fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+    classDef formula fill:#fef3c7,stroke:#f59e0b,color:#92400e
+    classDef result fill:#d1fae5,stroke:#10b981,color:#065f46
+    classDef decision fill:#ede9fe,stroke:#8b5cf6,color:#5b21b6
+    classDef alert fill:#ffe4e6,stroke:#f43f5e,color:#9f1239
+    classDef dashboard fill:#ccfbf1,stroke:#14b8a6,color:#134e4a
+
+    class S1,S4,S6 input
+    class S2,S3,S7,S10,S12 formula
+    class S2R,S3R,S4R,S5R,S7R,S8T,S10K,S11,S12R result
+    class S3STD,S4STD,S5Y,S5N,S9Y,S11Y dashboard
+    class S9N,S11N alert
+    class S3D,S5D,S9,S11D decision
+    class DASH dashboard`,
+  },
 };
 
 // ── STAGE → MERMAID CODE MAP ──
@@ -1671,7 +1747,7 @@ export const STAGE_MERMAID_MAP: Record<string, string> = {
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
   concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD", "P3D"],
-  detailed: ["DD_CB", "DD_PIP", "DD_PRV"], // Cable Sizing + Pipe Sizing + PRV ready; others coming soon
+  detailed: ["DD_CB", "DD_PIP", "DD_PRV", "DD_ERT"], // Cable Sizing + Pipe Sizing + PRV + Earthing ready; others coming soon
   tender: [],
   vfc: [],
 };

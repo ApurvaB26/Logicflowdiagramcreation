@@ -17,6 +17,7 @@ import { FireTankCalcSVG } from "./fire-tank-calc";
 import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { FireTerraceBoosterCalcSVG } from "./fire-terrace-booster-calc";
 import { HeatLoadCalcSVG } from "./heat-load-calc";
+import { EarthingCalcSVG } from "./earthing-calc";
 import {
   Zap,
   Droplets,
@@ -81,7 +82,7 @@ const SERVICES: Service[] = [
       { id: "DD_CB", title: "Cable Sizing Calculation", description: "IS 3961/IEC 60502 current rating, voltage drop & short circuit withstand", status: "ready", stage: "detailed" },
       { id: "DD_PNL", title: "Panel Schedule Design", description: "R-Y-B phase balancing, MCB/MCCB selection per circuit", status: "coming-soon", stage: "detailed" },
       { id: "DD_SLD", title: "SLD (Single Line Diagram)", description: "Transformer to outgoing feeders, protection coordination", status: "coming-soon", stage: "detailed" },
-      { id: "DD_ERT", title: "Earthing Design", description: "IS 3043 electrode sizing, soil resistivity, earth pit layout", status: "coming-soon", stage: "detailed" },
+      { id: "DD_ERT", title: "Short Circuit & Earthing Design", description: "Fault level analysis, adiabatic conductor sizing, earth pit resistance per IS 3043 / IEC 60909", status: "ready", stage: "detailed" },
       { id: "DD_LTN", title: "Lightning Protection", description: "IS/IEC 62305 risk assessment, rolling sphere & mesh method", status: "coming-soon", stage: "detailed" },
       { id: "DD_BUS", title: "Bus Bar Sizing", description: "Max demand current rating, Cu/AL selection from tables", status: "coming-soon", stage: "detailed" },
     ],
@@ -407,9 +408,6 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
   DD_SLD: { title: "SLD (Single Line Diagram)", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
     steps: [{ id: "SL1", label: "Input: Transformer & Load Data", sub: "Incomer + all outgoing feeders", type: "input" }, { id: "SL2", label: "Protection Coordination", sub: "Relay/breaker settings per tier", type: "process" }, { id: "SL3", label: "SLD Layout", sub: "Transformer to outgoing feeders diagram", type: "process" }, { id: "SL4", label: "Output: SLD Drawing", sub: "Complete single line diagram", type: "output" }],
     connections: [{ from: "SL1", to: "SL2" }, { from: "SL2", to: "SL3" }, { from: "SL3", to: "SL4" }] },
-  DD_ERT: { title: "Earthing Design", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
-    steps: [{ id: "ER1", label: "Input: Soil & Building Data", sub: "Soil resistivity, building footprint", type: "input" }, { id: "ER2", label: "Electrode Sizing", sub: "IS 3043 calculation for earth pits", type: "formula" }, { id: "ER3", label: "Earth Pit Layout", sub: "Spacing + ring earth conductor", type: "process" }, { id: "ER4", label: "Output: Earthing Layout", sub: "Earth pit locations + conductor sizes", type: "output" }],
-    connections: [{ from: "ER1", to: "ER2" }, { from: "ER2", to: "ER3" }, { from: "ER3", to: "ER4" }] },
   DD_LTN: { title: "Lightning Protection", icon: "\u26A1", color: "#d97706", accentBg: "#fef3c7",
     steps: [{ id: "LT1", label: "Input: Building Geometry", sub: "Height, footprint, roof type", type: "input" }, { id: "LT2", label: "Risk Assessment", sub: "IS/IEC 62305 risk calculation", type: "formula" }, { id: "LT3", label: "Protection Method", sub: "Rolling sphere / mesh / rod", type: "process" }, { id: "LT4", label: "Output: LP Layout", sub: "Air terminal + down conductor layout", type: "output" }],
     connections: [{ from: "LT1", to: "LT2" }, { from: "LT2", to: "LT3" }, { from: "LT3", to: "LT4" }] },
@@ -527,7 +525,7 @@ function CalcDetailOverlay({
   }, [calcId]);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","EBR","RWH","SWD","DD_CB","DD_PIP","DD_PRV","FFP","FTK","FJD","FTB","P3D"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","EBR","RWH","SWD","DD_CB","DD_PIP","DD_PRV","FFP","FTK","FJD","FTB","P3D","DD_ERT"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
@@ -544,6 +542,7 @@ function CalcDetailOverlay({
   const isCustomFJD = calcId === "FJD";
   const isCustomFTB = calcId === "FTB";
   const isCustomP3D = calcId === "P3D";
+  const isCustomDDERT = calcId === "DD_ERT";
   const isCustom = CUSTOM_IDS.has(calcId);
 
   // For generic flows
@@ -566,6 +565,7 @@ function CalcDetailOverlay({
     FJD: { title: "Jockey & Drencher Pump Calculation", icon: "\uD83D\uDD27", color: "#dc2626" },
     FTB: { title: "Terrace Fire Booster Pump Head", icon: "\uD83C\uDFD7\uFE0F", color: "#dc2626" },
     P3D: { title: "Building Thermal Cooling Load", icon: "\uD83C\uDF21\uFE0F", color: "#ef4444" },
+    DD_ERT: { title: "Short Circuit & Earthing Design", icon: "⚡", color: "#d97706" },
   };
   const meta = CUSTOM_META[calcId];
   const flowTitle = meta?.title ?? flow?.title ?? "Calculation";
@@ -615,7 +615,7 @@ function CalcDetailOverlay({
           { label: "Sizing Output", bg: "#ffe4e6", bd: "#f43f5e", icon: "\u26A1" },
           { label: "Dashboard", bg: "#d1fae5", bd: "#10b981", icon: "\uD83D\uDCCA" },
         ]
-      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomEBR || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomP3D
+      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomEBR || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomP3D || isCustomDDERT
       ? [
           { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
           { label: "Database", bg: "#ede9fe", bd: "#8b5cf6", icon: "\uD83D\uDDC3" },
@@ -868,6 +868,10 @@ function CalcDetailOverlay({
           ) : isCustomP3D ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <HeatLoadCalcSVG />
+            </div>
+          ) : isCustomDDERT ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <EarthingCalcSVG />
             </div>
           ) : flow ? (
             <svg
