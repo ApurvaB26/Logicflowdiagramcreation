@@ -214,29 +214,30 @@ export function CoolingVentilationCalcSVG() {
             ].map((row, i) => (
               <g key={i}>
                 {row.map((v, j) => (
-                  <text key={j} x={xs[j]} y={808 + i * 18} fill={C.purple.tx} fontSize={9}>{v}</text>
+                  <text key={j} x={xs[j]} y={796 + i * 14} fill={C.purple.tx} fontSize={9}>{v}</text>
                 ))}
               </g>
             ))}
-            <rect x={CX + 130} y={808 + 6 * 18 - 2} width={230} height={20} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
-            <text x={CX + 245} y={808 + 6 * 18 + 12} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Conduction = 182,494 BTU/hr</text>
           </g>
         );
       })()}
 
+      <rect x={CX - 160} y={875} width={320} height={20} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
+      <text x={CX} y={889} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Conduction = 182,494 BTU/hr</text>
+
       <Note x={CX + 400} y={570} w={170} lines={["\u26A0\uFE0F CLTD Correction:", "CLTD_c = CLTD + (25.5 - T\u1D63)", "+ (T\u2092 - 29.4)", "T\u1D63 = indoor (24\u00b0C)", "T\u2092 = outdoor mean"]} c={C.amber} />
 
-      <Arr x1={CX} y1={870} x2={CX} y2={900} />
+      <Arr x1={CX} y1={900} x2={CX} y2={930} />
 
       {/* ── §3 SOLAR RADIATION — FENESTRATION ── */}
-      <Sec y={900} num="§3" title="External Load: Solar Radiation (Fenestration)" color="#f59e0b" />
-      <Arr x1={CX} y1={938} x2={CX} y2={960} />
+      <Sec y={930} num="§3" title="External Load: Solar Radiation (Fenestration)" color="#f59e0b" />
+      <Arr x1={CX} y1={968} x2={CX} y2={990} />
 
-      <rect x={CX - 360} y={960} width={720} height={280} rx={12} fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={2} />
-      <text x={CX} y={985} textAnchor="middle" fill={C.amber.tx} fontSize={13} fontWeight={700}>{"☀\uFE0F"} Fenestration Solar Heat Gain</text>
+      <rect x={CX - 360} y={990} width={720} height={280} rx={12} fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={2} />
+      <text x={CX} y={1015} textAnchor="middle" fill={C.amber.tx} fontSize={13} fontWeight={700}>{"☀\uFE0F"} Fenestration Solar Heat Gain</text>
 
-      <rect x={CX - 300} y={1000} width={600} height={36} rx={8} fill="#fff" stroke={C.amber.bd} strokeWidth={1.5} />
-      <text x={CX} y={1023} textAnchor="middle" fill={C.amber.tx} fontSize={14} fontWeight={800}>
+      <rect x={CX - 300} y={1030} width={600} height={36} rx={8} fill="#fff" stroke={C.amber.bd} strokeWidth={1.5} />
+      <text x={CX} y={1053} textAnchor="middle" fill={C.amber.tx} fontSize={14} fontWeight={800}>
         Q = A {"×"} SC {"×"} SHGF {"×"} CLF (BTU/hr)
       </text>
 
@@ -246,7 +247,7 @@ export function CoolingVentilationCalcSVG() {
         "SHGF = Solar Heat Gain Factor (BTU/hr\u00b7ft\u00b2) — ASHRAE Table 36",
         "CLF = Cooling Load Factor — accounts for thermal mass delay",
       ].map((s, i) => (
-        <text key={i} x={CX - 320} y={1055 + i * 18} fill={C.amber.tx} fontSize={10}>{s}</text>
+        <text key={i} x={CX - 320} y={1085 + i * 18} fill={C.amber.tx} fontSize={10}>{s}</text>
       ))}
 
       {/* Solar results */}
@@ -255,9 +256,9 @@ export function CoolingVentilationCalcSVG() {
         const xs = [CX - 320, CX - 180, CX - 80, CX + 10, CX + 110, CX + 210];
         return (
           <g>
-            <rect x={CX - 330} y={1132} width={660} height={20} rx={4} fill={C.blue.bg} />
+            <rect x={CX - 330} y={1162} width={660} height={20} rx={4} fill={C.blue.bg} />
             {cols.map((c, i) => (
-              <text key={i} x={xs[i]} y={1146} fill={C.blue.tx} fontSize={9} fontWeight={700}>{c}</text>
+              <text key={i} x={xs[i]} y={1176} fill={C.blue.tx} fontSize={9} fontWeight={700}>{c}</text>
             ))}
             {[
               ["North", "800", "0.45", "36", "0.73", "9,461"],
@@ -268,7 +269,7 @@ export function CoolingVentilationCalcSVG() {
             ].map((row, i) => (
               <g key={i}>
                 {row.map((v, j) => (
-                  <text key={j} x={xs[j]} y={1168 + i * 18} fill={C.amber.tx} fontSize={9}>{v}</text>
+                  <text key={j} x={xs[j]} y={1198 + i * 18} fill={C.amber.tx} fontSize={9}>{v}</text>
                 ))}
               </g>
             ))}
@@ -276,26 +277,26 @@ export function CoolingVentilationCalcSVG() {
         );
       })()}
 
-      <rect x={CX - 160} y={1268 - 15} width={320} height={22} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
-      <text x={CX} y={1268} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Solar = 94,311 BTU/hr</text>
+      <rect x={CX - 160} y={1283} width={320} height={22} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
+      <text x={CX} y={1298} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Solar = 94,311 BTU/hr</text>
 
-      <Note x={60} y={970} w={190} lines={["\uD83D\uDCCC ASHRAE Tables:", "\u2022 Table 36: SHGF by lat/mo", "\u2022 Table 37: SC values", "\u2022 Table 38: CLF values", "\u2022 Shade factor if overhang"]} c={C.cyan} />
+      <Note x={60} y={1000} w={190} lines={["\uD83D\uDCCC ASHRAE Tables:", "\u2022 Table 36: SHGF by lat/mo", "\u2022 Table 37: SC values", "\u2022 Table 38: CLF values", "\u2022 Shade factor if overhang"]} c={C.cyan} />
 
-      <Arr x1={CX} y1={1280} x2={CX} y2={1310} />
+      <Arr x1={CX} y1={1310} x2={CX} y2={1340} />
 
       {/* ── §4 INTERNAL LOADS — OCCUPANCY ── */}
-      <Sec y={1310} num="§4" title="Internal Load: Occupancy (Sensible + Latent)" color="#06b6d4" />
-      <Arr x1={CX} y1={1348} x2={CX} y2={1370} />
+      <Sec y={1340} num="§4" title="Internal Load: Occupancy (Sensible + Latent)" color="#06b6d4" />
+      <Arr x1={CX} y1={1378} x2={CX} y2={1400} />
 
-      <rect x={CX - 360} y={1370} width={720} height={260} rx={12} fill={C.cyan.bg} stroke={C.cyan.bd} strokeWidth={2} />
-      <text x={CX} y={1395} textAnchor="middle" fill={C.cyan.tx} fontSize={13} fontWeight={700}>{"👥"} Metabolic Heat Gain per Occupant</text>
+      <rect x={CX - 360} y={1400} width={720} height={260} rx={12} fill={C.cyan.bg} stroke={C.cyan.bd} strokeWidth={2} />
+      <text x={CX} y={1425} textAnchor="middle" fill={C.cyan.tx} fontSize={13} fontWeight={700}>{"👥"} Metabolic Heat Gain per Occupant</text>
 
-      <rect x={CX - 300} y={1408} width={280} height={32} rx={8} fill="#fff" stroke={C.cyan.bd} strokeWidth={1} />
-      <text x={CX - 160} y={1428} textAnchor="middle" fill={C.cyan.tx} fontSize={12} fontWeight={800}>
+      <rect x={CX - 300} y={1438} width={280} height={32} rx={8} fill="#fff" stroke={C.cyan.bd} strokeWidth={1} />
+      <text x={CX - 160} y={1458} textAnchor="middle" fill={C.cyan.tx} fontSize={12} fontWeight={800}>
         Q_s = N {"×"} SHG {"×"} CLF
       </text>
-      <rect x={CX + 20} y={1408} width={280} height={32} rx={8} fill="#fff" stroke={C.cyan.bd} strokeWidth={1} />
-      <text x={CX + 160} y={1428} textAnchor="middle" fill={C.cyan.tx} fontSize={12} fontWeight={800}>
+      <rect x={CX + 20} y={1438} width={280} height={32} rx={8} fill="#fff" stroke={C.cyan.bd} strokeWidth={1} />
+      <text x={CX + 160} y={1458} textAnchor="middle" fill={C.cyan.tx} fontSize={12} fontWeight={800}>
         Q_l = N {"×"} LHG
       </text>
 
@@ -304,9 +305,9 @@ export function CoolingVentilationCalcSVG() {
         const xs = [CX - 330, CX - 200, CX - 120, CX - 40, CX + 40, CX + 130, CX + 240];
         return (
           <g>
-            <rect x={CX - 340} y={1455} width={680} height={20} rx={4} fill={C.blue.bg} />
+            <rect x={CX - 340} y={1485} width={680} height={20} rx={4} fill={C.blue.bg} />
             {cols.map((c, i) => (
-              <text key={i} x={xs[i]} y={1469} fill={C.blue.tx} fontSize={9} fontWeight={700}>{c}</text>
+              <text key={i} x={xs[i]} y={1499} fill={C.blue.tx} fontSize={9} fontWeight={700}>{c}</text>
             ))}
             {[
               ["Office (seated)", "250", "245", "205", "0.71", "43,488", "51,250"],
@@ -317,7 +318,7 @@ export function CoolingVentilationCalcSVG() {
             ].map((row, i) => (
               <g key={i}>
                 {row.map((v, j) => (
-                  <text key={j} x={xs[j]} y={1490 + i * 18} fill={C.cyan.tx} fontSize={9}>{v}</text>
+                  <text key={j} x={xs[j]} y={1520 + i * 18} fill={C.cyan.tx} fontSize={9}>{v}</text>
                 ))}
               </g>
             ))}
@@ -325,24 +326,24 @@ export function CoolingVentilationCalcSVG() {
         );
       })()}
 
-      <rect x={CX - 200} y={1594} width={400} height={22} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
-      <text x={CX} y={1609} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>
+      <rect x={CX - 200} y={1624} width={400} height={22} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
+      <text x={CX} y={1639} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>
         {"✅"} Occupancy: Sensible = 93,053 | Latent = 122,750 BTU/hr
       </text>
 
-      <Note x={CX + 380} y={1380} w={175} lines={["\uD83D\uDCCC ASHRAE Table 1:", "\u2022 SHG/LHG per activity", "\u2022 Adjusted metabolic", "\u2022 CLF from Table 37", "\u2022 N = design occupancy"]} c={C.rose} />
+      <Note x={CX + 380} y={1410} w={175} lines={["\uD83D\uDCCC ASHRAE Table 1:", "\u2022 SHG/LHG per activity", "\u2022 Adjusted metabolic", "\u2022 CLF from Table 37", "\u2022 N = design occupancy"]} c={C.rose} />
 
-      <Arr x1={CX} y1={1630} x2={CX} y2={1660} />
+      <Arr x1={CX} y1={1660} x2={CX} y2={1690} />
 
       {/* ── §5 INTERNAL LOADS — LIGHTING ── */}
-      <Sec y={1660} num="§5" title="Internal Load: Lighting Heat Gain" color="#14b8a6" />
-      <Arr x1={CX} y1={1698} x2={CX} y2={1720} />
+      <Sec y={1690} num="§5" title="Internal Load: Lighting Heat Gain" color="#14b8a6" />
+      <Arr x1={CX} y1={1728} x2={CX} y2={1750} />
 
-      <rect x={CX - 340} y={1720} width={680} height={210} rx={12} fill={C.teal.bg} stroke={C.teal.bd} strokeWidth={2} />
-      <text x={CX} y={1745} textAnchor="middle" fill={C.teal.tx} fontSize={13} fontWeight={700}>{"💡"} Lighting Heat Gain</text>
+      <rect x={CX - 340} y={1750} width={680} height={220} rx={12} fill={C.teal.bg} stroke={C.teal.bd} strokeWidth={2} />
+      <text x={CX} y={1775} textAnchor="middle" fill={C.teal.tx} fontSize={13} fontWeight={700}>{"💡"} Lighting Heat Gain</text>
 
-      <rect x={CX - 280} y={1760} width={560} height={36} rx={8} fill="#fff" stroke={C.teal.bd} strokeWidth={1.5} />
-      <text x={CX} y={1783} textAnchor="middle" fill={C.teal.tx} fontSize={14} fontWeight={800}>
+      <rect x={CX - 280} y={1790} width={560} height={36} rx={8} fill="#fff" stroke={C.teal.bd} strokeWidth={1.5} />
+      <text x={CX} y={1813} textAnchor="middle" fill={C.teal.tx} fontSize={14} fontWeight={800}>
         Q = Total Watts {"×"} Ballast Factor {"×"} CLF {"×"} 3.412 BTU/hr
       </text>
 
@@ -351,7 +352,7 @@ export function CoolingVentilationCalcSVG() {
         "CLF = Cooling Load Factor (lights) — from ASHRAE Table 38",
         "Space Factor: accounts for % light to return air plenum",
       ].map((s, i) => (
-        <text key={i} x={CX - 300} y={1815 + i * 16} fill={C.teal.tx} fontSize={10}>{s}</text>
+        <text key={i} x={CX - 300} y={1845 + i * 16} fill={C.teal.tx} fontSize={10}>{s}</text>
       ))}
 
       {[
@@ -360,25 +361,25 @@ export function CoolingVentilationCalcSVG() {
         ["Common areas: 8,000 W \u00d7 1.0 \u00d7 0.65 \u00d7 3.412", "=  17,743 BTU/hr"],
       ].map(([calc, result], i) => (
         <g key={i}>
-          <text x={CX - 280} y={1870 + i * 18} fill={C.teal.tx} fontSize={10} fontFamily="monospace">{calc}</text>
-          <text x={CX + 180} y={1870 + i * 18} fill={C.teal.tx} fontSize={10} fontWeight={700}>{result}</text>
+          <text x={CX - 280} y={1900 + i * 18} fill={C.teal.tx} fontSize={10} fontFamily="monospace">{calc}</text>
+          <text x={CX + 180} y={1900 + i * 18} fill={C.teal.tx} fontSize={10} fontWeight={700}>{result}</text>
         </g>
       ))}
 
-      <rect x={CX - 150} y={1918} width={300} height={20} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
-      <text x={CX} y={1932} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Lighting = 259,251 BTU/hr</text>
+      <rect x={CX - 150} y={1948} width={300} height={20} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
+      <text x={CX} y={1962} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Lighting = 259,251 BTU/hr</text>
 
-      <Arr x1={CX} y1={1930} x2={CX} y2={1960} />
+      <Arr x1={CX} y1={1960} x2={CX} y2={1990} />
 
       {/* ── §6 INTERNAL LOADS — EQUIPMENT ── */}
-      <Sec y={1960} num="§6" title="Internal Load: Equipment &amp; Appliances" color="#f97316" />
-      <Arr x1={CX} y1={1998} x2={CX} y2={2020} />
+      <Sec y={1990} num="§6" title="Internal Load: Equipment &amp; Appliances" color="#f97316" />
+      <Arr x1={CX} y1={2028} x2={CX} y2={2050} />
 
-      <rect x={CX - 360} y={2020} width={720} height={240} rx={12} fill={C.orange.bg} stroke={C.orange.bd} strokeWidth={2} />
-      <text x={CX} y={2045} textAnchor="middle" fill={C.orange.tx} fontSize={13} fontWeight={700}>{"🖥\uFE0F"} Equipment Heat Gain with Diversity Factors</text>
+      <rect x={CX - 360} y={2050} width={720} height={240} rx={12} fill={C.orange.bg} stroke={C.orange.bd} strokeWidth={2} />
+      <text x={CX} y={2075} textAnchor="middle" fill={C.orange.tx} fontSize={13} fontWeight={700}>{"🖥\uFE0F"} Equipment Heat Gain with Diversity Factors</text>
 
-      <rect x={CX - 300} y={2060} width={600} height={32} rx={8} fill="#fff" stroke={C.orange.bd} strokeWidth={1.5} />
-      <text x={CX} y={2080} textAnchor="middle" fill={C.orange.tx} fontSize={13} fontWeight={800}>
+      <rect x={CX - 300} y={2090} width={600} height={32} rx={8} fill="#fff" stroke={C.orange.bd} strokeWidth={1.5} />
+      <text x={CX} y={2110} textAnchor="middle" fill={C.orange.tx} fontSize={13} fontWeight={800}>
         Q = Connected Load (W) {"×"} Diversity Factor {"×"} Use Factor {"×"} 3.412
       </text>
 
@@ -387,9 +388,9 @@ export function CoolingVentilationCalcSVG() {
         const xs = [CX - 320, CX - 140, CX - 20, CX + 60, CX + 170];
         return (
           <g>
-            <rect x={CX - 330} y={2105} width={660} height={20} rx={4} fill={C.blue.bg} />
+            <rect x={CX - 330} y={2135} width={660} height={20} rx={4} fill={C.blue.bg} />
             {cols.map((c, i) => (
-              <text key={i} x={xs[i]} y={2119} fill={C.blue.tx} fontSize={9} fontWeight={700}>{c}</text>
+              <text key={i} x={xs[i]} y={2149} fill={C.blue.tx} fontSize={9} fontWeight={700}>{c}</text>
             ))}
             {[
               ["Computers (250 nos.)", "62,500", "0.80", "0.75", "128,250"],
@@ -400,7 +401,7 @@ export function CoolingVentilationCalcSVG() {
             ].map((row, i) => (
               <g key={i}>
                 {row.map((v, j) => (
-                  <text key={j} x={xs[j]} y={2140 + i * 18} fill={C.orange.tx} fontSize={9}>{v}</text>
+                  <text key={j} x={xs[j]} y={2170 + i * 18} fill={C.orange.tx} fontSize={9}>{v}</text>
                 ))}
               </g>
             ))}
@@ -408,47 +409,47 @@ export function CoolingVentilationCalcSVG() {
         );
       })()}
 
-      <rect x={CX - 150} y={2237} width={300} height={20} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
-      <text x={CX} y={2251} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Equipment = 323,099 BTU/hr</text>
+      <rect x={CX - 150} y={2267} width={300} height={20} rx={4} fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
+      <text x={CX} y={2281} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={700}>{"✅"} Total Equipment = 323,099 BTU/hr</text>
 
-      <Note x={60} y={2030} w={195} lines={["\uD83D\uDCA1 Diversity Factors:", "\u2022 Similar to Electrical", "  Demand Factors", "\u2022 DF \u00d7 UF = effective", "  heat to conditioned space", "\u2022 Motor heat: In/Out split"]} c={C.amber} />
+      <Note x={60} y={2060} w={195} lines={["\uD83D\uDCA1 Diversity Factors:", "\u2022 Similar to Electrical", "  Demand Factors", "\u2022 DF \u00d7 UF = effective", "  heat to conditioned space", "\u2022 Motor heat: In/Out split"]} c={C.amber} />
 
-      <Arr x1={CX} y1={2260} x2={CX} y2={2290} />
+      <Arr x1={CX} y1={2290} x2={CX} y2={2320} />
 
       {/* ── §7 VENTILATION & PSYCHROMETRICS ── */}
-      <Sec y={2290} num="§7" title="Ventilation &amp; Infiltration (Psychrometric Branch)" color="#e11d48" />
-      <Arr x1={CX} y1={2328} x2={CX} y2={2350} />
+      <Sec y={2320} num="§7" title="Ventilation &amp; Infiltration (Psychrometric Branch)" color="#e11d48" />
+      <Arr x1={CX} y1={2358} x2={CX} y2={2380} />
 
-      <rect x={CX - 380} y={2350} width={760} height={340} rx={12} fill={C.rose.bg} stroke={C.rose.bd} strokeWidth={2} />
-      <text x={CX} y={2375} textAnchor="middle" fill={C.rose.tx} fontSize={13} fontWeight={700}>{"🌬\uFE0F"} Ventilation &amp; Infiltration Heat Gain</text>
+      <rect x={CX - 380} y={2380} width={760} height={340} rx={12} fill={C.rose.bg} stroke={C.rose.bd} strokeWidth={2} />
+      <text x={CX} y={2400} textAnchor="middle" fill={C.rose.tx} fontSize={13} fontWeight={700}>{"🌬\uFE0F"} Ventilation &amp; Infiltration Heat Gain</text>
 
       {/* Sensible formula */}
-      <rect x={CX - 340} y={2392} width={330} height={50} rx={8} fill="#fff" stroke={C.rose.bd} strokeWidth={1.5} />
-      <text x={CX - 175} y={2412} textAnchor="middle" fill={C.rose.tx} fontSize={11} fontWeight={700}>Sensible Heat:</text>
-      <text x={CX - 175} y={2432} textAnchor="middle" fill={C.rose.tx} fontSize={12} fontWeight={800}>
+      <rect x={CX - 340} y={2412} width={330} height={50} rx={8} fill="#fff" stroke={C.rose.bd} strokeWidth={1.5} />
+      <text x={CX - 175} y={2432} textAnchor="middle" fill={C.rose.tx} fontSize={11} fontWeight={700}>Sensible Heat:</text>
+      <text x={CX - 175} y={2452} textAnchor="middle" fill={C.rose.tx} fontSize={12} fontWeight={800}>
         Q_s = 1.08 {"×"} CFM {"×"} {"Δ"}T
       </text>
 
       {/* Latent formula */}
-      <rect x={CX + 10} y={2392} width={340} height={50} rx={8} fill="#fff" stroke={C.rose.bd} strokeWidth={1.5} />
-      <text x={CX + 180} y={2412} textAnchor="middle" fill={C.rose.tx} fontSize={11} fontWeight={700}>Latent Heat:</text>
-      <text x={CX + 180} y={2432} textAnchor="middle" fill={C.rose.tx} fontSize={12} fontWeight={800}>
+      <rect x={CX + 10} y={2412} width={340} height={50} rx={8} fill="#fff" stroke={C.rose.bd} strokeWidth={1.5} />
+      <text x={CX + 180} y={2432} textAnchor="middle" fill={C.rose.tx} fontSize={11} fontWeight={700}>Latent Heat:</text>
+      <text x={CX + 180} y={2452} textAnchor="middle" fill={C.rose.tx} fontSize={12} fontWeight={800}>
         Q_l = 0.68 {"×"} CFM {"×"} {"Δ"}W
       </text>
 
-      <text x={CX - 350} y={2465} fill={C.rose.tx} fontSize={10} fontWeight={600}>Where:</text>
+      <text x={CX - 350} y={2485} fill={C.rose.tx} fontSize={10} fontWeight={600}>Where:</text>
       {[
         "\u0394T = (T_outdoor - T_indoor) = 42 - 24 = 18\u00b0C = 32.4\u00b0F",
         "\u0394W = (W_outdoor - W_indoor) = 118 - 65 = 53 grains/lb",
         "Ventilation CFM = 12,500 \u00d7 10.76 \u00d7 0.6 / 0.472 = 10,850 CFM (ASHRAE 62.1)",
         "Infiltration CFM = 0.3 ACH \u00d7 Volume / 60 = 2,800 CFM (crack method estimate)",
       ].map((s, i) => (
-        <text key={i} x={CX - 350} y={2483 + i * 16} fill={C.rose.tx} fontSize={10}>{s}</text>
+        <text key={i} x={CX - 350} y={2503 + i * 16} fill={C.rose.tx} fontSize={10}>{s}</text>
       ))}
 
       {/* Calculation results */}
-      <rect x={CX - 330} y={2555} width={660} height={70} rx={8} fill="#fff" stroke={C.rose.bd} strokeWidth={1} />
-      <text x={CX} y={2575} textAnchor="middle" fill={C.rose.tx} fontSize={11} fontWeight={700}>Calculation Results:</text>
+      <rect x={CX - 330} y={2575} width={660} height={68} rx={8} fill="#fff" stroke={C.rose.bd} strokeWidth={1} />
+      <text x={CX} y={2593} textAnchor="middle" fill={C.rose.tx} fontSize={11} fontWeight={700}>Calculation Results:</text>
       {[
         ["Ventilation Sensible:", "1.08 \u00d7 10,850 \u00d7 32.4 = 379,555 BTU/hr"],
         ["Ventilation Latent:", "0.68 \u00d7 10,850 \u00d7 53 = 390,878 BTU/hr"],
@@ -456,26 +457,26 @@ export function CoolingVentilationCalcSVG() {
         ["Infiltration Latent:", "0.68 \u00d7 2,800 \u00d7 53 = 100,912 BTU/hr"],
       ].map(([label, val], i) => (
         <g key={i}>
-          <text x={CX - 300} y={2593 + i * 15} fill={C.rose.tx} fontSize={9} fontWeight={600}>{label}</text>
-          <text x={CX - 60} y={2593 + i * 15} fill={C.rose.tx} fontSize={9}>{val}</text>
+          <text x={CX - 300} y={2610 + i * 14} fill={C.rose.tx} fontSize={9} fontWeight={600}>{label}</text>
+          <text x={CX - 60} y={2610 + i * 14} fill={C.rose.tx} fontSize={9}>{val}</text>
         </g>
       ))}
 
       {/* Bypass Factor note */}
-      <rect x={CX - 180} y={2650} width={360} height={30} rx={6} fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={1} />
-      <text x={CX} y={2666} textAnchor="middle" fill={C.amber.tx} fontSize={10} fontWeight={600}>
+      <rect x={CX - 180} y={2668} width={360} height={28} rx={6} fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={1} />
+      <text x={CX} y={2685} textAnchor="middle" fill={C.amber.tx} fontSize={10} fontWeight={600}>
         {"⚙\uFE0F"} Coil Bypass Factor (BF) = 0.15 | Effective = {"("}1 - BF{")"} {"×"} Q
       </text>
 
-      <Note x={CX + 400} y={2360} w={165} lines={["\uD83D\uDCCC Psychrometric:", "\u2022 Plot outdoor state", "\u2022 Plot indoor state", "\u2022 Draw ADP line", "\u2022 BF = (T_off - T_adp)", "  / (T_room - T_adp)", "\u2022 BF typ. 0.1\u20130.2"]} c={C.violet} />
+      <Note x={CX + 400} y={2390} w={165} lines={["\uD83D\uDCCC Psychrometric:", "\u2022 Plot outdoor state", "\u2022 Plot indoor state", "\u2022 Draw ADP line", "\u2022 BF = (T_off - T_adp)", "  / (T_room - T_adp)", "\u2022 BF typ. 0.1\u20130.2"]} c={C.violet} />
 
-      <Arr x1={CX} y1={2690} x2={CX} y2={2720} />
+      <Arr x1={CX} y1={2700} x2={CX} y2={2720} />
 
       {/* ── §8 FINAL COOLING LOAD — ERSH / GTH / TR ── */}
-      <Sec y={2720} num="§8" title="Final Output: ERSH {"→"} GTH {"→"} TR {"→"} Supply CFM" color="#059669" />
+      <Sec y={2720} num="§8" title="Final Output: ERSH &#x2192; GTH &#x2192; TR &#x2192; Supply CFM" color="#059669" />
       <Arr x1={CX} y1={2758} x2={CX} y2={2780} />
 
-      <rect x={CX - 380} y={2780} width={760} height={460} rx={12} fill={C.green.bg} stroke={C.green.bd} strokeWidth={2.5} />
+      <rect x={CX - 380} y={2780} width={760} height={475} rx={12} fill={C.green.bg} stroke={C.green.bd} strokeWidth={2.5} />
       <text x={CX} y={2808} textAnchor="middle" fill={C.green.tx} fontSize={14} fontWeight={700}>{"📊"} Grand Summation &amp; Equipment Capacity</text>
 
       {/* RSHG */}
@@ -754,7 +755,7 @@ export function CoolingVentilationCalcSVG() {
       <Arr x1={CX} y1={5130} x2={CX} y2={5160} />
 
       {/* ── §13 COMMON OUTPUT — FAN SELECTION ── */}
-      <Sec y={5160} num="§13" title="Common Output: Summation {"→"} Diversities {"→"} Fan Selection" color="#8b5cf6" />
+      <Sec y={5160} num="§13" title="Common Output: Summation &#x2192; Diversities &#x2192; Fan Selection" color="#8b5cf6" />
       <Arr x1={CX} y1={5198} x2={CX} y2={5220} />
 
       <rect x={CX - 380} y={5220} width={760} height={300} rx={12} fill={C.violet.bg} stroke={C.violet.bd} strokeWidth={2} />
