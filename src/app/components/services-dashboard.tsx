@@ -25,7 +25,12 @@ import {
   ZoomOut,
   RotateCcw,
   Download,
+  Copy,
+  Check,
+  FileCode2,
 } from "lucide-react";
+import { CALC_MERMAID_CODES } from "./mermaid-codes";
+import { copyToClipboard } from "./clipboard-utils";
 
 // =====================================================================
 // SERVICE DEFINITIONS
@@ -514,7 +519,20 @@ function CalcDetailOverlay({
   onClose: () => void;
 }) {
   const [zoom, setZoom] = useState(0.48);
+  const [mermaidCopied, setMermaidCopied] = useState(false);
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleCopyMermaid = useCallback(() => {
+    const mermaidData = CALC_MERMAID_CODES[calcId];
+    if (mermaidData && mermaidData.code) {
+      copyToClipboard(mermaidData.code).then(() => {
+        setMermaidCopied(true);
+        setTimeout(() => setMermaidCopied(false), 2000);
+      });
+    } else {
+      alert("Mermaid code not available for this calculation.");
+    }
+  }, [calcId]);
 
   // Check if it's a fully built custom SVG
   const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB","DD_PIP","DD_PRV"]);
@@ -704,6 +722,28 @@ function CalcDetailOverlay({
             >
               <Download className="w-4 h-4" /> PNG
             </button>
+            {CALC_MERMAID_CODES[calcId] && (
+              <button
+                onClick={handleCopyMermaid}
+                className="flex items-center gap-1.5 rounded-full hover:opacity-80 transition-opacity px-3"
+                style={{
+                  height: 36,
+                  backgroundColor: mermaidCopied ? "rgba(16, 185, 129, 0.3)" : "rgba(255,255,255,0.2)",
+                  color: "#fff",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                }}
+                title="Copy Mermaid.js code"
+              >
+                {mermaidCopied ? (
+                  <><Check className="w-4 h-4" /> Copied!</>
+                ) : (
+                  <><FileCode2 className="w-4 h-4" /> Mermaid</>
+                )}
+              </button>
+            )}
             <button
               onClick={onClose}
               className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"

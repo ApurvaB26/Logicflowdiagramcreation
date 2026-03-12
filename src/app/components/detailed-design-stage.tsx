@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 import { PRVCalcSVG } from "./prv-calc";
+import { CALC_MERMAID_CODES } from "./mermaid-codes";
+import { copyToClipboard } from "./clipboard-utils";
 
 // =====================================================================
 // DETAILED DESIGN STAGE — COMPLETE FLOW CHART
@@ -889,7 +891,20 @@ const DD_CALC_FLOWS: Record<string, CalcFlow> = {
 // CALC DETAIL OVERLAY COMPONENT
 // =====================================================================
 function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () => void }) {
+  const [mermaidCopied, setMermaidCopied] = useState(false);
   const flow = DD_CALC_FLOWS[calcId];
+
+  const handleCopyMermaid = useCallback(() => {
+    const mermaidData = CALC_MERMAID_CODES[calcId];
+    if (mermaidData && mermaidData.code) {
+      copyToClipboard(mermaidData.code).then(() => {
+        setMermaidCopied(true);
+        setTimeout(() => setMermaidCopied(false), 2000);
+      });
+    } else {
+      alert("Mermaid code not available for this calculation.");
+    }
+  }, [calcId]);
 
   // ── Full custom SVG for DD_CB (Cable Sizing) ──
   if (calcId === "DD_CB") {
@@ -913,11 +928,21 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
                 <p className="text-white" style={{ fontSize: 12, opacity: 0.75, margin: 0 }}>Full 19-step algorithm — IS 3961 / IEC 60502</p>
               </div>
             </div>
-            <button onClick={onClose}
-              className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
-              style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
-              <span className="text-xl">&times;</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {CALC_MERMAID_CODES[calcId] && (
+                <button onClick={handleCopyMermaid}
+                  className="flex items-center gap-1.5 rounded-full hover:opacity-80 transition-opacity px-3"
+                  style={{ height: 36, backgroundColor: mermaidCopied ? "rgba(16, 185, 129, 0.3)" : "rgba(255,255,255,0.2)", color: "#fff", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer" }}
+                  title="Copy Mermaid.js code">
+                  {mermaidCopied ? "✓ Copied!" : "📋 Mermaid"}
+                </button>
+              )}
+              <button onClick={onClose}
+                className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
+                <span className="text-xl">&times;</span>
+              </button>
+            </div>
           </div>
           <div className="overflow-auto flex-1">
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
@@ -951,11 +976,21 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
                 <p className="text-white" style={{ fontSize: 12, opacity: 0.75, margin: 0 }}>Pressure Gradient {"→"} Zone Logic {"→"} PRV Mapping {"→"} Riser Sizing {"→"} BOM</p>
               </div>
             </div>
-            <button onClick={onClose}
-              className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
-              style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
-              <span className="text-xl">&times;</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {CALC_MERMAID_CODES[calcId] && (
+                <button onClick={handleCopyMermaid}
+                  className="flex items-center gap-1.5 rounded-full hover:opacity-80 transition-opacity px-3"
+                  style={{ height: 36, backgroundColor: mermaidCopied ? "rgba(16, 185, 129, 0.3)" : "rgba(255,255,255,0.2)", color: "#fff", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer" }}
+                  title="Copy Mermaid.js code">
+                  {mermaidCopied ? "✓ Copied!" : "📋 Mermaid"}
+                </button>
+              )}
+              <button onClick={onClose}
+                className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
+                <span className="text-xl">&times;</span>
+              </button>
+            </div>
           </div>
           <div className="overflow-auto flex-1">
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
@@ -989,11 +1024,21 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
                 <p className="text-white" style={{ fontSize: 12, opacity: 0.75, margin: 0 }}>Hunter{"'"}s Method — FU {"→"} GPM {"→"} Pipe {"Ø"} — IS 2065 / NBC</p>
               </div>
             </div>
-            <button onClick={onClose}
-              className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
-              style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
-              <span className="text-xl">&times;</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {CALC_MERMAID_CODES[calcId] && (
+                <button onClick={handleCopyMermaid}
+                  className="flex items-center gap-1.5 rounded-full hover:opacity-80 transition-opacity px-3"
+                  style={{ height: 36, backgroundColor: mermaidCopied ? "rgba(16, 185, 129, 0.3)" : "rgba(255,255,255,0.2)", color: "#fff", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer" }}
+                  title="Copy Mermaid.js code">
+                  {mermaidCopied ? "✓ Copied!" : "📋 Mermaid"}
+                </button>
+              )}
+              <button onClick={onClose}
+                className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
+                <span className="text-xl">&times;</span>
+              </button>
+            </div>
           </div>
           <div className="overflow-auto flex-1">
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>

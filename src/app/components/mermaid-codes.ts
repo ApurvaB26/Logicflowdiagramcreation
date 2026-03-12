@@ -939,33 +939,48 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class INIT,DONE terminal`,
   },
   FTB: {
-    title: "Terrace Fire Booster Pump",
+    title: "Balcony & Terrace Rainwater Pipe Sizing",
     code: `flowchart TD
-    INIT([🟢 Terrace Booster Pump<br/>Head Calculation])
+    INIT([🟢 Balcony & Terrace RWP Sizing<br/>Start])
 
-    P1[/PHASE 1: Parameters/]
-    P1A[Terrace Tank Level<br/>🤖 Auto-fetch elevation]
-    P1B[Highest Sprinkler Level<br/>Topmost floor served]
-    P1C[Pipe Configuration<br/>Material, diameter, length]
-    INIT --> P1 --> P1A --> P1B --> P1C
+    %% Phase 1: Catchment Area Analysis
+    P1[/PHASE 1: Catchment Area Analysis/]
+    P1A[Define Area Served<br/>Balcony, terrace, mumty segments]
+    P1B[Segment Breakdown<br/>Multiple catchment zones]
+    P1C[Assign Run-off Coefficient<br/>C = 1.0 for concrete/tiled decks]
+    P1D[Surface Type Table<br/>Concrete=1.0, Metal=0.95, Green=0.30]
+    INIT --> P1 --> P1A --> P1B --> P1C --> P1D
 
-    P2[/PHASE 2: Head Components/]
-    P2A[Static Head<br/>Highest point − Tank level]
-    P2B[Pipe Friction<br/>Hazen-Williams calculation]
-    P2C[Fitting Losses<br/>Equivalent length method]
-    P2D[Residual Pressure<br/>Nozzle requirement]
-    P1C --> P2 --> P2A --> P2B --> P2C --> P2D
+    %% Phase 2: Hydraulic Load Calculation
+    P2[/PHASE 2: Hydraulic Load Calculation/]
+    P2A[Rainfall Intensity Input<br/>Peak I in mm/hr from local data]
+    P2B[Peak Flow Formula<br/>Q = Area × I × C / 3600]
+    P2C[Unit Conversion Check<br/>Ensure L/sec consistency]
+    P1D --> P2 --> P2A --> P2B --> P2C
 
-    P3[/PHASE 3: Total Head & Selection/]
-    P3A[Total Booster Head<br/>Static + Friction + Fittings + Residual]
-    P3B[Safety Factor<br/>+20% per IS-15105]
-    P3C[Pump Selection<br/>DB lookup → performance curve match]
-    P2D --> P3 --> P3A --> P3B --> P3C
+    %% Phase 3: Riser Distribution Logic
+    P3[/PHASE 3: Riser Distribution/]
+    P3A[Number of Pipes Input<br/>Based on architectural constraints]
+    P3B[Duty Flow per Pipe<br/>Qp = Total Q ÷ N pipes]
+    P3C[Max Area Rule<br/>50-70 m² per 100mm pipe]
+    P2C --> P3 --> P3A --> P3B --> P3C
 
-    P4([📥 Booster Pump Report])
-    P3C --> P4
-    DONE([🏁 Terrace Booster Complete])
-    P4 --> DONE
+    %% Phase 4: Pipe Diameter Determination
+    P4[/PHASE 4: Pipe Sizing/]
+    P4A[Theoretical Diameter<br/>Based on gravity-fed flow capacity]
+    P4B[NBC 2016 Capacity Table<br/>75mm, 100mm, 150mm, 200mm]
+    P4C[Safety Factor<br/>2/3rd fill ratio for vertical risers]
+    P3C --> P4 --> P4A --> P4B --> P4C
+
+    %% Phase 5: Final Output & Selection
+    P5[/PHASE 5: Final Selection/]
+    P5A[Calculated Size<br/>Exact mathematical requirement]
+    P5B[Selected Size<br/>Round up to standard commercial size]
+    P5C([📥 RWP Schedule<br/>Site Installation Ready])
+    P4C --> P5 --> P5A --> P5B --> P5C
+
+    DONE([🏁 RWP Sizing Complete])
+    P5C --> DONE
 
     classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
     class INIT,DONE terminal`,
@@ -975,94 +990,143 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     code: `flowchart TD
     INIT([🟢 Rainwater Harvesting<br/>& Tank Sizing])
 
-    P1[/PHASE 1: Catchment Data/]
-    P1A[Plot Area<br/>🤖 Auto-fetch from project]
-    P1B[Roof Area<br/>Building footprint calculation]
-    P1C[Paved Area<br/>Roads, parking, pathways]
-    P1D[Green Area<br/>Garden, softscape]
-    P1E[Runoff Coefficients<br/>Roof=0.85, Paved=0.75, Green=0.15]
+    %% Phase 1: Catchment Analysis
+    P1[/PHASE 1: Catchment Analysis/]
+    P1A[Catchment Input Module<br/>Identify all roof/terrace areas]
+    P1B[Multi-Area Input Table<br/>Name, Area, Surface Type, C-Factor]
+    P1C[Total Area Breakdown<br/>Aggregate all zones]
+    P1D[Surface Classification<br/>Hardscape vs Softscape]
+    P1E[Coefficient Database<br/>Concrete=0.95, Metal=0.90, Green=0.30]
     INIT --> P1 --> P1A --> P1B --> P1C --> P1D --> P1E
 
-    P2[/PHASE 2: Rainfall Data/]
-    P2A[Location<br/>🤖 Auto-fetch GPS coordinates]
-    P2B[Annual Rainfall<br/>IMD data lookup by location]
-    P2C[Design Rainfall<br/>Monthly max or monsoon period]
+    %% Phase 2: Hydrology Data
+    P2[/PHASE 2: Hydrology Data/]
+    P2A[Rainfall Intensity Input<br/>Peak I in mm/hr from IMD data]
+    P2B[Regional Intensity Table<br/>Mumbai=113, Bangalore=90, etc.]
+    P2C[Annual vs Design Intensity<br/>Peak for pipes, avg for tank]
     P1E --> P2 --> P2A --> P2B --> P2C
 
-    P3[/PHASE 3: Runoff Calculation/]
-    P3A[Roof Runoff<br/>Roof Area × Coeff × Rainfall]
-    P3B[Paved Runoff<br/>Paved Area × Coeff × Rainfall]
-    P3C[Total Harvestable<br/>Sum of all runoff volumes]
-    P2C --> P3 --> P3A --> P3B --> P3C
+    %% Phase 3: Yield Calculation
+    P3[/PHASE 3: Yield Calculation/]
+    P3A[Yield Engine Activation<br/>Rational Method application]
+    P3B[Peak Flow Formula<br/>Qpeak = C×I×A / 3600]
+    P3C[Harvest Volume Formula<br/>Vharvest = Area×Annual Rain×C / 1000]
+    P3D[Total Yield Output<br/>Q in L/sec + V in KL]
+    P2C --> P3 --> P3A --> P3B --> P3C --> P3D
 
-    P4[/PHASE 4: Tank Sizing/]
-    P4A[Daily Demand Offset<br/>Flushing + gardening needs]
-    P4B{NBC 2016 Compliance?<br/>Minimum storage check}
-    P4C[Tank Volume<br/>Max of (demand-based, NBC minimum)]
-    P4D[Downcomer Sizing<br/>Pipe diameter for roof drainage]
-    P4E[Velocity Guard<br/>First-flush diverter sizing]
-    P3C --> P4 --> P4A --> P4B
-    P4B -->|Compliant| P4C
-    P4B -->|Below Min| P4C
-    P4C --> P4D --> P4E
+    %% Phase 4: RWDP Sizing
+    P4[/PHASE 4: RWDP Sizing/]
+    P4A[User Selects Diameter<br/>75mm / 100mm / 150mm / 200mm]
+    P4B[NBC 2016 Table Lookup<br/>Cross-reference capacity]
+    P4C[Downcomer Count<br/>Number of pipes required]
+    P3D --> P4 --> P4A --> P4B --> P4C
 
-    P5([📥 RWH Report<br/>Tank Size + Downcomer Schedule])
-    P4E --> P5
+    %% Phase 5: Collector Hydraulics
+    P5[/PHASE 5: Collector Routing/]
+    P5A[Pipe Slope Input<br/>1 in 100 or 1 in 200]
+    P5B[Manning's Equation<br/>V = 1/n × R^2/3 × S^1/2]
+    P5C[Velocity Calculation<br/>Horizontal collector flow]
+    P4C --> P5 --> P5A --> P5B --> P5C
+
+    %% Phase 6: Velocity Guard
+    P6[/PHASE 6: Velocity Guard/]
+    P6A{V ≥ 0.5 m/s?<br/>Siltation Check}
+    P6B[✅ Safe Design<br/>Proceed to tank sizing]
+    P6C[⚠️ Siltation Alarm<br/>Adjust slope/diameter]
+    P5C --> P6A
+    P6A -->|Yes| P6B
+    P6A -->|No| P6C
+    P6B --> P7
+    P6C --> P7
+
+    %% Phase 7: Tank Sizing
+    P7[/PHASE 7: Tank Sizing/]
+    P7A[NBC 2016 Standards<br/>Standard tank capacities]
+    P7B[Capacity Table<br/>10KL, 25KL, 50KL, 100KL]
+    P7C[Min Retention vs User Size<br/>Round up to NBC standard]
+    P7D[Final Tank Selection<br/>Suggest dimensions]
+    P7 --> P7A --> P7B --> P7C --> P7D
+
+    %% Phase 8: Final Output
+    P8([📥 RWH Dashboard<br/>RWDP + Tank + Collector + NBC Report])
+    P7D --> P8
+
     DONE([🏁 RWH Complete])
-    P5 --> DONE
+    P8 --> DONE
 
     classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
     classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
     class INIT,DONE terminal
-    class P4B decision`,
+    class P6A decision`,
   },
   SWD: {
-    title: "Storm Water Drainage Calculator",
+    title: "Storm Water Drainage & Pipe Sizing",
     code: `flowchart TD
-    INIT([🟢 Storm Water Drainage<br/>Calculator])
+    INIT([🟢 Storm Water Drainage<br/>& Pipe Sizing])
 
-    P1[/PHASE 1: Site Data/]
-    P1A[Catchment Areas<br/>🤖 Auto-fetch from project]
-    P1B[Slope & Gradient<br/>Site survey data]
-    P1C[Soil Type<br/>Infiltration characteristics]
-    INIT --> P1 --> P1A --> P1B --> P1C
+    %% Phase 1: Hydrological Input
+    P1[/PHASE 1: Hydrological Input/]
+    P1A[Define Catchment Area<br/>Input area in Hectares]
+    P1B[Rainfall Intensity<br/>Peak I in mm/hr from meteo data]
+    P1C[Run-off Coefficient<br/>Surface type based C-factor]
+    P1D[Coefficient Table<br/>Concrete=0.90, Asphalt=0.85, etc.]
+    P1E[Rational Method Formula<br/>Qg = C × I × A]
+    INIT --> P1 --> P1A --> P1B --> P1C --> P1D --> P1E
 
-    P2[/PHASE 2: Rainfall Intensity/]
-    P2A[Location IDF Curve<br/>🤖 Intensity-Duration-Frequency data]
-    P2B[Return Period<br/>📋 5yr / 10yr / 25yr selection]
-    P2C[Time of Concentration<br/>Kirpich formula calculation]
-    P2D[Design Intensity<br/>i = from IDF curve at Tc]
-    P1C --> P2 --> P2A --> P2B --> P2C --> P2D
+    %% Phase 2: Channel & Node Geometry
+    P2[/PHASE 2: Channel Geometry/]
+    P2A[Node Path Definition<br/>From Node X to Node Y]
+    P2B{Conveyance Type?<br/>Open or Closed}
+    P2C[Open Channel<br/>Width, Depth, Free Board]
+    P2D[Closed Pipe<br/>Diameter D₁ in mm]
+    P2E[Geometry Calculation<br/>R = A / P hydraulic radius]
+    P1E --> P2 --> P2A --> P2B
+    P2B -->|Open| P2C --> P2E
+    P2B -->|Closed| P2D --> P2E
 
-    P3[/PHASE 3: Rational Method/]
-    P3A[Runoff Coefficient<br/>Weighted C for mixed surfaces]
-    P3B[Peak Discharge<br/>Q = C × i × A / 360]
-    P3C{Q > Capacity?<br/>System Check}
-    P3D[Single Pipe System<br/>Gravity flow sufficient]
-    P3E[Retention/Detention<br/>On-site storage required]
-    P2D --> P3 --> P3A --> P3B --> P3C
-    P3C -->|Within Capacity| P3D
-    P3C -->|Exceeds| P3E
+    %% Phase 3: Hydraulic Analysis
+    P3[/PHASE 3: Hydraulic Analysis/]
+    P3A[Slope Input<br/>S as 1 in 100, 1 in 200, etc.]
+    P3B[Manning's n Coefficient<br/>Material-based roughness]
+    P3C[Manning's n Table<br/>PVC=0.010, Concrete=0.013, etc.]
+    P3D[Velocity Formula<br/>V = 1/n × R^2/3 × S^1/2]
+    P3E[Carrying Capacity<br/>Rcc = A × V]
+    P2E --> P3 --> P3A --> P3B --> P3C --> P3D --> P3E
 
-    P4[/PHASE 4: Pipe Sizing/]
-    P4A[Manning's Equation<br/>V = (1/n) × R^(2/3) × S^(1/2)]
-    P4B[Pipe Diameter<br/>Select from standard sizes]
-    P4C[Velocity Check<br/>0.6m/s ≤ V ≤ 3.0m/s]
-    P4D{Velocity OK?<br/>Design Check}
-    P4E[Resize Pipe<br/>Adjust diameter]
-    P3D & P3E --> P4 --> P4A --> P4B --> P4C --> P4D
-    P4D -->|OK| P5
-    P4D -->|Out of Range| P4E
-    P4E -.->|Recalc| P4B
+    %% Phase 4: Validation & Compliance
+    P4[/PHASE 4: Validation/]
+    P4A{Capacity Check:<br/>Rcc > Qg?}
+    P4B[✅ Capacity OK<br/>Design meets requirement]
+    P4C[❌ REDESIGN<br/>Increase slope or size]
+    P4D{Velocity Check:<br/>0.6 ≤ V ≤ 3.0?}
+    P4E[✅ Velocity OK<br/>No siltation/scouring]
+    P4F[⚠️ ADJUST<br/>Modify parameters]
+    P4G[Continuity Equation<br/>Verify D using Q = A×V]
+    P3E --> P4A
+    P4A -->|Yes| P4B
+    P4A -->|No| P4C
+    P4B --> P4D
+    P4C --> P4D
+    P4D -->|Yes| P4E
+    P4D -->|No| P4F
+    P4E --> P4G
+    P4F --> P4G
 
-    P5([📥 SWD Report<br/>Pipe Schedule + Manhole Layout])
+    %% Phase 5: Final Output
+    P5[/PHASE 5: Final Output/]
+    P5A[Status Result<br/>OKAY or REDESIGN REQUIRED]
+    P5B[Final Specification<br/>Channel Size or Pipe Diameter]
+    P5C[Layout Data<br/>IL and FGL levels]
+    P5D([📥 SWD Schedule<br/>Site Execution Ready])
+    P4G --> P5 --> P5A --> P5B --> P5C --> P5D
+
     DONE([🏁 SWD Complete])
-    P5 --> DONE
+    P5D --> DONE
 
     classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
     classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
     class INIT,DONE terminal
-    class P3C,P4D decision`,
+    class P2B,P4A,P4D decision`,
   },
   DD_CB: {
     title: "Cable Sizing & Voltage Drop Calculation",

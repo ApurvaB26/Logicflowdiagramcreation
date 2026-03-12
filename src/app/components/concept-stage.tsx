@@ -12,6 +12,8 @@ import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
+import { CALC_MERMAID_CODES } from "./mermaid-codes";
+import { copyToClipboard } from "./clipboard-utils";
 
 // =====================================================================
 // CONCEPT STAGE — COMPLETE DETAILED FLOW CHART
@@ -1376,7 +1378,20 @@ function downloadCalcPNG(containerRef: React.RefObject<HTMLDivElement | null>, t
 function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () => void }) {
   const flow = CALC_FLOWS[calcId];
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
+  const [mermaidCopied, setMermaidCopied] = useState(false);
   if (!flow) return null;
+
+  const handleCopyMermaid = () => {
+    const mermaidData = CALC_MERMAID_CODES[calcId];
+    if (mermaidData && mermaidData.code) {
+      copyToClipboard(mermaidData.code).then(() => {
+        setMermaidCopied(true);
+        setTimeout(() => setMermaidCopied(false), 2000);
+      });
+    } else {
+      alert("Mermaid code not available for this calculation.");
+    }
+  };
 
   const nodeW2 = 260;
   const nodeH2 = 60;
@@ -1451,6 +1466,24 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
             >
               ⬇ PNG
             </button>
+            {CALC_MERMAID_CODES[calcId] && (
+              <button
+                onClick={handleCopyMermaid}
+                className="flex items-center gap-1.5 rounded-full hover:opacity-80 transition-opacity px-3"
+                style={{
+                  height: 36,
+                  backgroundColor: mermaidCopied ? "rgba(16, 185, 129, 0.3)" : "rgba(255,255,255,0.2)",
+                  color: "#fff",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                }}
+                title="Copy Mermaid.js code"
+              >
+                {mermaidCopied ? "✓ Copied!" : "📋 Mermaid"}
+              </button>
+            )}
             <button
               onClick={onClose}
               className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
