@@ -2,13 +2,13 @@ import React from "react";
 
 // =====================================================================
 // OWC (Organic Waste Converter) CALCULATOR — Custom SVG Flow Diagram
-// Full architecture: Project Data → Population Calc → NBC/CPHEEO Norms →
-// Waste Generation → Segregation → Bin Sizing → Infrastructure →
-// OWC Machine Selection → Composting Output → Summary Dashboard
+// Auto-population only | Lodha Policy Norms | Validation Gate
+// Project Data → Auto-Population → Lodha Norms → Waste Generation →
+// Segregation → Bin Sizing → Infrastructure → OWC Machine → Compost → Dashboard
 // =====================================================================
 
 const W = 1600;
-const H = 7400;
+const H = 6800;
 const CX = W / 2;
 
 const C = {
@@ -110,44 +110,13 @@ function Arrow({ x1, y1, x2, y2, color, label, dash }: {
   );
 }
 
-// Category card with items list
-function CategoryCard({ x, y, w, h, title, items, color }: {
-  x: number; y: number; w: number; h: number;
-  title: string; items: string[];
-  color: { bg: string; bd: string; tx: string };
-}) {
-  const hdrH = 34;
-  const pillH = 20, pillGap = 4;
-  return (
-    <g>
-      <rect x={x} y={y} width={w} height={h} rx={12} fill={color.bg} stroke={color.bd} strokeWidth={2} />
-      <rect x={x} y={y} width={w} height={hdrH} rx={12} fill={color.bd} />
-      <rect x={x} y={y + hdrH - 6} width={w} height={6} fill={color.bd} />
-      <text x={x + w / 2} y={y + 23} textAnchor="middle" fill="#fff" fontSize={13} fontWeight={700}>{title}</text>
-      {items.map((item, i) => {
-        const py = y + hdrH + 8 + i * (pillH + pillGap);
-        const pw = w - 20;
-        const px = x + 10;
-        return (
-          <g key={i}>
-            <rect x={px} y={py} width={pw} height={pillH} rx={5}
-              fill="#fff" stroke={color.bd} strokeWidth={1} opacity={0.9} />
-            <text x={px + pw / 2} y={py + pillH / 2 + 4} textAnchor="middle"
-              fill={color.tx} fontSize={10} fontWeight={500}>{item}</text>
-          </g>
-        );
-      })}
-    </g>
-  );
-}
-
 function DataTable({ x, y, title, headers, rows, color }: {
   x: number; y: number; title: string;
   headers: string[]; rows: string[][];
   color: { bg: string; bd: string; tx: string };
 }) {
   const tw = 780, colW = tw / headers.length;
-  const rowH = 30, hdrY = y + 52;
+  const rowH = 28, hdrY = y + 52;
   const th = 52 + (rows.length + 1) * (rowH + 2) + 12;
   return (
     <g>
@@ -162,27 +131,25 @@ function DataTable({ x, y, title, headers, rows, color }: {
         <g key={`h-${i}`}>
           <rect x={x + i * colW + 3} y={hdrY} width={colW - 6} height={rowH} rx={5}
             fill={color.bg} stroke={color.bd} strokeWidth={1.5} />
-          <text x={x + i * colW + colW / 2} y={hdrY + 20} textAnchor="middle"
+          <text x={x + i * colW + colW / 2} y={hdrY + 19} textAnchor="middle"
             fill={color.tx} fontSize={10.5} fontWeight={700}>{h}</text>
         </g>
       ))}
       {rows.map((row, ri) => (
         <g key={`r-${ri}`}>
           {row.map((cell, ci) => {
-            const isUser = cell === "User Input";
             const isAuto = cell === "Auto" || cell === "Auto-calc";
             return (
               <g key={`c-${ri}-${ci}`}>
                 <rect x={x + ci * colW + 3} y={hdrY + (ri + 1) * (rowH + 2) + 2}
                   width={colW - 6} height={rowH} rx={5}
-                  fill={isUser ? C.blue.bg : isAuto ? C.green.bg : "#fff"}
-                  stroke={isUser ? C.blue.bd : isAuto ? C.green.bd : "#e2e8f0"}
-                  strokeWidth={isUser || isAuto ? 1.5 : 1}
-                  strokeDasharray={isUser ? "5,3" : "none"} />
-                <text x={x + ci * colW + colW / 2} y={hdrY + (ri + 1) * (rowH + 2) + 21}
+                  fill={isAuto ? C.green.bg : "#fff"}
+                  stroke={isAuto ? C.green.bd : "#e2e8f0"}
+                  strokeWidth={isAuto ? 1.5 : 1} />
+                <text x={x + ci * colW + colW / 2} y={hdrY + (ri + 1) * (rowH + 2) + 20}
                   textAnchor="middle"
-                  fill={isUser ? C.blue.tx : isAuto ? C.green.tx : "#64748b"}
-                  fontSize={10.5} fontWeight={isUser || isAuto ? 600 : 400}>{cell}</text>
+                  fill={isAuto ? C.green.tx : "#64748b"}
+                  fontSize={10.5} fontWeight={isAuto ? 600 : 400}>{cell}</text>
               </g>
             );
           })}
@@ -233,16 +200,36 @@ function NoteBox({ x, y, w, h, icon, title, lines, color }: {
   );
 }
 
-// Norms reference card
-function NormsCard({ x, y }: { x: number; y: number }) {
-  const w = 540, h = 220;
+// Redirect flag banner
+function RedirectFlag({ x, y, w }: { x: number; y: number; w: number }) {
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={40} rx={8}
+        fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={2} strokeDasharray="6,3" />
+      <text x={x + 22} y={y + 17} fill={C.amber.tx} fontSize={14}>
+        {"\u26A0\uFE0F"}
+      </text>
+      <text x={x + 42} y={y + 17} fill={C.amber.tx} fontSize={11} fontWeight={700}>
+        To modify any input data, click the cell {"\u2192"} Redirects to Main Input Page
+      </text>
+      <text x={x + 42} y={y + 33} fill={C.amber.tx} fontSize={10} opacity={0.7}>
+        All project parameters are fetched from the central database. Changes must be made at the source.
+      </text>
+    </g>
+  );
+}
+
+// Lodha Policy Norms card (replaces NBC/CPHEEO)
+function LodhaNormsCard({ x, y }: { x: number; y: number }) {
+  const w = 600, h = 240;
   const fields = [
-    { label: "Residential Waste Rate", value: "0.45 kg/cap/day", src: "CPHEEO 2016" },
-    { label: "Commercial Waste Rate", value: "0.50 kg/cap/day", src: "CPHEEO 2016" },
-    { label: "Wet:Dry Ratio", value: "60:40", src: "NBC 2016" },
-    { label: "Density — Wet Waste", value: "500 kg/m³", src: "IS Standard" },
-    { label: "Density — Dry Waste", value: "150 kg/m³", src: "IS Standard" },
-    { label: "OWC Safety Factor", value: "1.15–1.25", src: "Industry Std" },
+    { label: "Residential Waste Rate", value: "As per Lodha Policy", src: "Lodha Policy" },
+    { label: "Commercial Waste Rate", value: "As per Lodha Policy", src: "Lodha Policy" },
+    { label: "Wet : Dry Ratio", value: "As per Lodha Policy", src: "Lodha Policy" },
+    { label: "Density \u2014 Wet Waste", value: "As per Lodha Policy", src: "Lodha Policy" },
+    { label: "Density \u2014 Dry Waste", value: "As per Lodha Policy", src: "Lodha Policy" },
+    { label: "OWC Safety Factor", value: "As per Lodha Policy", src: "Lodha Policy" },
+    { label: "Per-capita Generation Rate", value: "As per Lodha Policy", src: "Lodha Policy" },
   ];
   return (
     <g>
@@ -250,7 +237,7 @@ function NormsCard({ x, y }: { x: number; y: number }) {
       <rect x={x} y={y} width={w} height={42} rx={14} fill={C.amber.bd} />
       <rect x={x} y={y + 30} width={w} height={12} fill={C.amber.bd} />
       <text x={x + w / 2} y={y + 28} textAnchor="middle" fill="#fff" fontSize={14} fontWeight={700}>
-        {"📋"} CPHEEO / NBC Waste Generation Norms
+        {"\uD83C\uDFE2"} LODHA POLICY \u2014 Waste Generation Norms
       </text>
       {fields.map((f, i) => {
         const fy = y + 52 + i * 26;
@@ -258,12 +245,12 @@ function NormsCard({ x, y }: { x: number; y: number }) {
           <g key={i}>
             <circle cx={x + 22} cy={fy + 9} r={4} fill={C.amber.bd} />
             <text x={x + 34} y={fy + 14} fill={C.amber.tx} fontSize={12} fontWeight={500}>{f.label}</text>
-            <rect x={x + 300} y={fy + 1} width={100} height={18} rx={4}
+            <rect x={x + 310} y={fy + 1} width={140} height={18} rx={4}
               fill={C.green.bg} stroke={C.green.bd} strokeWidth={1} />
-            <text x={x + 350} y={fy + 14} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={600}>
+            <text x={x + 380} y={fy + 14} textAnchor="middle" fill={C.green.tx} fontSize={10} fontWeight={600}>
               {f.value}
             </text>
-            <text x={x + 460} y={fy + 14} textAnchor="middle" fill={C.amber.tx} fontSize={9} opacity={0.6}>
+            <text x={x + 520} y={fy + 14} textAnchor="middle" fill={C.amber.tx} fontSize={9} opacity={0.6}>
               {f.src}
             </text>
           </g>
@@ -276,7 +263,7 @@ function NormsCard({ x, y }: { x: number; y: number }) {
 // Bin sizing table
 function BinSizingTable({ x, y }: { x: number; y: number }) {
   const tw = 800, th = 250;
-  const headers = ["Bin Type", "Capacity (L)", "Footprint (m²)", "Colour Code", "Stream", "Nos Required"];
+  const headers = ["Bin Type", "Capacity (L)", "Footprint (m\u00b2)", "Colour Code", "Stream", "Nos Required"];
   const rows = [
     ["HDPE 120L", "120", "0.24", "Green", "Wet Waste", "Auto-calc"],
     ["HDPE 240L", "240", "0.42", "Green", "Wet Waste", "Auto-calc"],
@@ -295,7 +282,7 @@ function BinSizingTable({ x, y }: { x: number; y: number }) {
       <rect x={x} y={y} width={tw} height={44} rx={14} fill={C.cyan.bd} />
       <rect x={x} y={y + 32} width={tw} height={12} fill={C.cyan.bd} />
       <text x={x + 18} y={y + 20} fill="#fff" fontSize={13} fontWeight={700}>
-        {"📊"} BIN DATABASE — Available Sizes & Specifications (NBC 2016 / IS Standards)
+        {"\uD83D\uDCCA"} BIN DATABASE \u2014 Available Sizes & Specifications (Lodha Policy)
       </text>
       <text x={x + 18} y={y + 38} fill="#fff" fontSize={10} opacity={0.8}>
         System auto-selects optimal bin mix based on waste volume
@@ -336,12 +323,12 @@ function BinSizingTable({ x, y }: { x: number; y: number }) {
 // OWC Machine selection table
 function OWCMachineTable({ x, y }: { x: number; y: number }) {
   const tw = 760, th = 220;
-  const headers = ["Model", "Capacity (kg/day)", "Power (kW)", "Footprint (m²)", "Cycle (hrs)", "Selection"];
+  const headers = ["Model", "Capacity (kg/day)", "Power (kW)", "Footprint (m\u00b2)", "Cycle (hrs)", "Selection"];
   const rows = [
-    ["OWC-50", "50", "1.5", "1.2", "18–24", "—"],
-    ["OWC-100", "100", "2.2", "2.0", "18–24", "—"],
-    ["OWC-200", "200", "3.7", "3.5", "16–20", "—"],
-    ["OWC-500", "500", "7.5", "6.0", "16–20", "Auto-select"],
+    ["OWC-50", "50", "1.5", "1.2", "18\u201324", "\u2014"],
+    ["OWC-100", "100", "2.2", "2.0", "18\u201324", "\u2014"],
+    ["OWC-200", "200", "3.7", "3.5", "16\u201320", "\u2014"],
+    ["OWC-500", "500", "7.5", "6.0", "16\u201320", "Auto-select"],
   ];
   const colW = tw / 6;
   const rowH = 28;
@@ -354,10 +341,10 @@ function OWCMachineTable({ x, y }: { x: number; y: number }) {
       <rect x={x} y={y} width={tw} height={44} rx={14} fill={C.green.bd} />
       <rect x={x} y={y + 32} width={tw} height={12} fill={C.green.bd} />
       <text x={x + 18} y={y + 20} fill="#fff" fontSize={13} fontWeight={700}>
-        {"⚙️"} OWC MACHINE DATABASE — Standard Models & Specifications
+        {"\u2699\uFE0F"} OWC MACHINE DATABASE \u2014 Standard Models & Specifications
       </text>
       <text x={x + 18} y={y + 38} fill="#fff" fontSize={10} opacity={0.8}>
-        Auto-selects smallest machine ≥ required capacity with safety factor
+        Auto-selects smallest machine {"\u2265"} required capacity with safety factor
       </text>
       {headers.map((h, i) => (
         <g key={`h-${i}`}>
@@ -394,11 +381,11 @@ function OWCMachineTable({ x, y }: { x: number; y: number }) {
 function OWCSummaryDashboard({ x, y }: { x: number; y: number }) {
   const dw = 1000, dh = 280;
   const sections = [
-    { label: "Total Daily\nWaste", icon: "🗑️", color: C.slate },
-    { label: "Wet Waste\n(Organic)", icon: "🟢", color: C.green },
-    { label: "Dry Waste\n(Recyclable)", icon: "🔵", color: C.blue },
-    { label: "OWC Machine\nCapacity", icon: "⚙️", color: C.teal },
-    { label: "Compost\nOutput", icon: "🌱", color: C.green },
+    { label: "Total Daily\nWaste", icon: "\uD83D\uDDD1\uFE0F", color: C.slate },
+    { label: "Wet Waste\n(Organic)", icon: "\uD83D\uDFE2", color: C.green },
+    { label: "Dry Waste\n(Recyclable)", icon: "\uD83D\uDD35", color: C.blue },
+    { label: "OWC Machine\nCapacity", icon: "\u2699\uFE0F", color: C.teal },
+    { label: "Compost\nOutput", icon: "\uD83C\uDF31", color: C.green },
   ];
   const metrics = [
     { label: "Green Bins", value: "XX Nos", color: C.green },
@@ -416,49 +403,49 @@ function OWCSummaryDashboard({ x, y }: { x: number; y: number }) {
       <rect x={x} y={y} width={dw} height={42} rx={16} fill={C.green.bd} />
       <rect x={x} y={y + 28} width={dw} height={14} fill={C.green.bd} />
       <text x={x + dw / 2} y={y + 28} textAnchor="middle" fill="#fff" fontSize={15} fontWeight={700}>
-        {"📊"} OWC FINAL OUTPUT DASHBOARD — Complete Waste Management Summary
+        {"\uD83D\uDCCA"} OWC FINAL OUTPUT DASHBOARD \u2014 Complete Waste Management Summary
       </text>
       {sections.map((s, i) => {
-        const cx = x + 12 + i * (cardW + 8);
-        const cy = y + 52;
+        const scx = x + 12 + i * (cardW + 8);
+        const scy = y + 52;
         return (
           <g key={i}>
-            <rect x={cx} y={cy} width={cardW} height={55} rx={8}
+            <rect x={scx} y={scy} width={cardW} height={55} rx={8}
               fill={s.color.bg} stroke={s.color.bd} strokeWidth={1.5} />
-            <text x={cx + cardW / 2} y={cy + 18} textAnchor="middle" fontSize={16}>{s.icon}</text>
-            <text x={cx + cardW / 2} y={cy + 34} textAnchor="middle"
+            <text x={scx + cardW / 2} y={scy + 18} textAnchor="middle" fontSize={16}>{s.icon}</text>
+            <text x={scx + cardW / 2} y={scy + 34} textAnchor="middle"
               fill={s.color.tx} fontSize={9} fontWeight={600}>{s.label.split("\n")[0]}</text>
-            <text x={cx + cardW / 2} y={cy + 46} textAnchor="middle"
+            <text x={scx + cardW / 2} y={scy + 46} textAnchor="middle"
               fill={s.color.tx} fontSize={9} fontWeight={600}>{s.label.split("\n")[1]}</text>
           </g>
         );
       })}
       {metrics.map((m, i) => {
-        const cx = x + 12 + i * (metricW + 10);
-        const cy = y + 120;
+        const mcx = x + 12 + i * (metricW + 10);
+        const mcy = y + 120;
         return (
           <g key={`m-${i}`}>
-            <rect x={cx} y={cy} width={metricW} height={56} rx={10}
+            <rect x={mcx} y={mcy} width={metricW} height={56} rx={10}
               fill={m.color.bg} stroke={m.color.bd} strokeWidth={2} />
-            <text x={cx + metricW / 2} y={cy + 22} textAnchor="middle"
+            <text x={mcx + metricW / 2} y={mcy + 22} textAnchor="middle"
               fill={m.color.tx} fontSize={13} fontWeight={700}>{m.label}</text>
-            <text x={cx + metricW / 2} y={cy + 42} textAnchor="middle"
+            <text x={mcx + metricW / 2} y={mcy + 42} textAnchor="middle"
               fill={m.color.bd} fontSize={16} fontWeight={800}>{m.value}</text>
           </g>
         );
       })}
       <text x={x + dw / 2} y={y + 200} textAnchor="middle" fill={C.green.tx} fontSize={10} opacity={0.6}>
-        Total Waste = Wet + Dry | Bin Count per stream | Garbage Room = Bin footprint × 1.5 | OWC = Wet × SF
+        Total Waste = Wet + Dry | Bin Count per stream | Garbage Room = Bin footprint {"\u00D7"} 1.5 | OWC = Wet {"\u00D7"} SF
       </text>
 
-      {/* Compliance and export row */}
+      {/* Compliance row */}
       <rect x={x + 20} y={y + 216} width={dw - 40} height={44} rx={8}
         fill={C.violet.bg} stroke={C.violet.bd} strokeWidth={1.5} />
       <text x={x + dw / 2} y={y + 234} textAnchor="middle" fill={C.violet.tx} fontSize={12} fontWeight={700}>
-        ✅ Compliance: NBC 2016 Part-8 | CPHEEO Manual 2016 | SWM Rules 2016 | State PCB Norms
+        {"\u2705"} Compliance: Lodha Policy Norms | SWM Rules 2016 | State PCB Norms
       </text>
       <text x={x + dw / 2} y={y + 250} textAnchor="middle" fill={C.violet.tx} fontSize={10} opacity={0.7}>
-        Export → Concept Report | BOQ Input | SWM Plan Drawing | IGBC/GRIHA Submission
+        Export {"\u2192"} Concept Report | BOQ Input | SWM Plan Drawing | IGBC/GRIHA Submission
       </text>
     </g>
   );
@@ -470,72 +457,74 @@ function OWCSummaryDashboard({ x, y }: { x: number; y: number }) {
 // =====================================================================
 export function OWCCalcSVG() {
 
-  const nh = 70;
-  const gap = 50;
-
-  const Y = {
-    // Section 0: Entry
-    entry:           50,
-    // Section 1: Project Data Auto-Fetch
-    dbFetch:         200,
-    fetchTable:      320,
-    // Section 2: Population Logic
-    popHeader:       640,
-    popDecision:     780,
-    popManual:       900,
-    popAuto:         900,
-    popConverge:    1040,
-    // Section 3: NBC/CPHEEO Norms
-    normsHeader:    1140,
-    normsCard:      1260,
-    normsConfirm:   1550,
-    normsOverride:  1650,
-    normsConverge:  1780,
-    // Section 4: Waste Generation Engine
-    wasteHeader:    1880,
-    wasteFormula:   1990,
-    wasteTotal:     2130,
-    // Section 5: Segregation (60/40)
-    segHeader:      2290,
-    segSplit:       2430,
-    segWetCalc:     2590,
-    segDryCalc:     2590,
-    segConverge:    2760,
-    // Section 6: Bin Sizing
-    binHeader:      2860,
-    binTable:       2980,
-    binFormula:     3280,
-    binResult:      3420,
-    // Section 7: Infrastructure
-    infraHeader:    3560,
-    garbageRoom:    3680,
-    garbageFormula: 3820,
-    infraDecision:  3980,
-    infraCentral:   4100,
-    infraDist:      4100,
-    infraConverge:  4260,
-    // Section 8: OWC Machine Selection
-    owcHeader:      4360,
-    owcCapacity:    4480,
-    owcTable:       4620,
-    owcDecision:    4900,
-    owcMulti:       5020,
-    owcSingle:      5020,
-    owcConverge:    5160,
-    // Section 9: Composting & Sludge
-    compHeader:     5260,
-    compCalc:       5380,
-    compStreams:     5530,
-    sludgeCalc:     5710,
-    // Section 10: Final Dashboard
-    dashboard:      5870,
-    // Terminal
-    terminal:       6200,
-  };
+  // ── Computed Y positions with proper spacing ──
+  // DataTable(8 rows) height: 52 + 9*30 + 12 = 334
+  // DataTable(4 rows) height: 52 + 5*30 + 12 = 224
+  // DataTable(3 rows) height: 52 + 4*30 + 12 = 184
 
   const nw = 440;
   const nx = CX - nw / 2;
   const tableX = CX - 390;
+
+  // ── Y coordinate map (carefully computed, no overlaps) ──
+  const Y = {
+    // Section 0: Entry
+    entry:          50,
+    // Section 1: Project Data Auto-Fetch
+    dbFetch:        170,
+    fetchTable:     290,
+    redirectFlag:   648,  // 290 + 334 + 24
+    // Section 2: Population (Auto only + Validation)
+    popHeader:      740,
+    popAutoCalc:    860,
+    popValidate:    1010, // diamond cy
+    popApproved:    1120,
+    // Section 3: Lodha Policy Norms (no acceptance diamond)
+    normsHeader:    1240,
+    normsCard:      1360,
+    normsLocked:    1650,
+    // Section 4: Waste Generation Engine
+    wasteHeader:    1770,
+    wasteFormula:   1890,
+    wasteTotal:     2030,
+    wasteTable:     2150,
+    // Section 5: Segregation (60/40)
+    segHeader:      2440,
+    segSplit:       2590,
+    segWetCalc:     2620,
+    segDryCalc:     2620,
+    segConverge:    2810,
+    // Section 6: Bin Sizing
+    binHeader:      2930,
+    binTable:       3050,
+    binFormula:     3350,
+    binResult:      3490,
+    // Section 7: Infrastructure
+    infraHeader:    3740,
+    garbageRoom:    3860,
+    garbageFormula: 3980,
+    infraDecision:  4130,  // diamond cy
+    infraCentral:   4240,
+    infraDist:      4240,
+    infraConverge:  4370,
+    // Section 8: OWC Machine Selection
+    owcHeader:      4490,
+    owcCapacity:    4610,
+    owcTable:       4750,
+    owcDecision:    5030,  // diamond cy
+    owcMulti:       5140,
+    owcSingle:      5140,
+    owcConverge:    5270,
+    // Section 9: Composting & Sludge
+    compHeader:     5390,
+    compCalc:       5510,
+    compStreams:     5660,
+    sludgeCalc:     5840,
+    // Section 10: Final Dashboard
+    dashboard:      5980,
+    // Terminal
+    terminal:       6310,
+  };
 
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }} preserveAspectRatio="xMidYMin meet">
@@ -554,38 +543,38 @@ export function OWCCalcSVG() {
       {/* ═══════════════════════════════════════════════════════════════
           PHASE BANDS
       ═══════════════════════════════════════════════════════════════ */}
-      <PhaseBand y={Y.entry - 15}       h={120}  label="ENTRY — OWC CALCULATION MODULE" color={C.blue.bd} />
-      <PhaseBand y={Y.dbFetch - 20}     h={Y.popHeader - Y.dbFetch - 30} label="SECTION 1 — PROJECT DATA AUTO-FETCH FROM MAIN DATABASE" color={C.purple.bd} />
-      <PhaseBand y={Y.popHeader - 20}   h={Y.normsHeader - Y.popHeader - 30} label="SECTION 2 — POPULATION CALCULATION & VALIDATION" color={C.blue.bd} />
-      <PhaseBand y={Y.normsHeader - 20} h={Y.wasteHeader - Y.normsHeader - 30} label="SECTION 3 — NBC / CPHEEO WASTE GENERATION NORMS" color={C.amber.bd} />
-      <PhaseBand y={Y.wasteHeader - 20} h={Y.segHeader - Y.wasteHeader - 30} label="SECTION 4 — WASTE GENERATION ENGINE" color={C.orange.bd} />
-      <PhaseBand y={Y.segHeader - 20}   h={Y.binHeader - Y.segHeader - 30} label="SECTION 5 — WASTE SEGREGATION (60:40 WET/DRY SPLIT)" color={C.teal.bd} />
-      <PhaseBand y={Y.binHeader - 20}   h={Y.infraHeader - Y.binHeader - 30} label="SECTION 6 — BIN CAPACITY & SIZING (NBC 2016)" color={C.cyan.bd} />
-      <PhaseBand y={Y.infraHeader - 20} h={Y.owcHeader - Y.infraHeader - 30} label="SECTION 7 — INFRASTRUCTURE PLANNING (GARBAGE ROOM)" color={C.violet.bd} />
-      <PhaseBand y={Y.owcHeader - 20}   h={Y.compHeader - Y.owcHeader - 30} label="SECTION 8 — OWC MACHINE SELECTION & SIZING" color={C.green.bd} />
-      <PhaseBand y={Y.compHeader - 20}  h={Y.dashboard - Y.compHeader - 30} label="SECTION 9 — COMPOSTING OUTPUT & SLUDGE HANDLING" color={C.rose.bd} />
-      <PhaseBand y={Y.dashboard - 20}   h={Y.terminal - Y.dashboard + 80} label="SECTION 10 — FINAL OUTPUT DASHBOARD" color={C.green.bd} />
+      <PhaseBand y={Y.entry - 15}       h={100}  label="ENTRY \u2014 OWC CALCULATION MODULE" color={C.blue.bd} />
+      <PhaseBand y={Y.dbFetch - 20}     h={Y.popHeader - Y.dbFetch - 30} label="SECTION 1 \u2014 PROJECT DATA AUTO-FETCH FROM MAIN DATABASE" color={C.purple.bd} />
+      <PhaseBand y={Y.popHeader - 20}   h={Y.normsHeader - Y.popHeader - 30} label="SECTION 2 \u2014 AUTO POPULATION CALCULATION & VALIDATION GATE" color={C.blue.bd} />
+      <PhaseBand y={Y.normsHeader - 20} h={Y.wasteHeader - Y.normsHeader - 30} label="SECTION 3 \u2014 LODHA POLICY WASTE GENERATION NORMS" color={C.amber.bd} />
+      <PhaseBand y={Y.wasteHeader - 20} h={Y.segHeader - Y.wasteHeader - 30} label="SECTION 4 \u2014 WASTE GENERATION ENGINE" color={C.orange.bd} />
+      <PhaseBand y={Y.segHeader - 20}   h={Y.binHeader - Y.segHeader - 30} label="SECTION 5 \u2014 WASTE SEGREGATION (WET/DRY SPLIT)" color={C.teal.bd} />
+      <PhaseBand y={Y.binHeader - 20}   h={Y.infraHeader - Y.binHeader - 30} label="SECTION 6 \u2014 BIN CAPACITY & SIZING (LODHA POLICY)" color={C.cyan.bd} />
+      <PhaseBand y={Y.infraHeader - 20} h={Y.owcHeader - Y.infraHeader - 30} label="SECTION 7 \u2014 INFRASTRUCTURE PLANNING (GARBAGE ROOM)" color={C.violet.bd} />
+      <PhaseBand y={Y.owcHeader - 20}   h={Y.compHeader - Y.owcHeader - 30} label="SECTION 8 \u2014 OWC MACHINE SELECTION & SIZING" color={C.green.bd} />
+      <PhaseBand y={Y.compHeader - 20}  h={Y.dashboard - Y.compHeader - 30} label="SECTION 9 \u2014 COMPOSTING OUTPUT & SLUDGE HANDLING" color={C.rose.bd} />
+      <PhaseBand y={Y.dashboard - 20}   h={Y.terminal - Y.dashboard + 120} label="SECTION 10 \u2014 FINAL OUTPUT DASHBOARD" color={C.green.bd} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 0 — ENTRY
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.entry} w={nw} h={nh}
+      <Box x={nx} y={Y.entry} w={nw} h={70}
         label="Start: OWC Calculation Module"
-        sub="Organic Waste Converter — Sizing, Bins & Infrastructure"
+        sub="Organic Waste Converter \u2014 Sizing, Bins & Infrastructure"
         color={C.blue} badge="ENTRY" />
-      <Arrow x1={CX} y1={Y.entry + nh} x2={CX} y2={Y.dbFetch} />
+      <Arrow x1={CX} y1={Y.entry + 70} x2={CX} y2={Y.dbFetch} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1 — PROJECT DATA AUTO-FETCH
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.dbFetch} w={nw} h={nh}
+      <Box x={nx} y={Y.dbFetch} w={nw} h={70}
         label="Connect to Main Building Database"
         sub="Auto-fetch key project parameters for waste calculation"
         color={C.purple} badge="DB FETCH" />
-      <Arrow x1={CX} y1={Y.dbFetch + nh} x2={CX} y2={Y.fetchTable} />
+      <Arrow x1={CX} y1={Y.dbFetch + 70} x2={CX} y2={Y.fetchTable} />
 
       <DataTable x={tableX} y={Y.fetchTable}
-        title={"📄 AUTO-FETCHED DATA FROM MAIN DATABASE"}
+        title={"\uD83D\uDCC4 AUTO-FETCHED DATA FROM MAIN DATABASE"}
         headers={["Parameter", "Source", "Value", "Logic"]}
         rows={[
           ["Project Name & Location", "Main DB", "Auto", "Direct fetch"],
@@ -594,123 +583,124 @@ export function OWCCalcSVG() {
           ["Total Carpet Area (sqm)", "Main DB", "Auto", "Sum all units"],
           ["Total Car Parks", "Main DB", "Auto", "Direct fetch"],
           ["Occupancy Rate (persons/flat)", "Main DB", "Auto", "BHK-wise standard"],
-          ["Total Population", "Calculated", "Auto-calc", "Σ(Flats × Occupancy)"],
+          ["Total Population", "Calculated", "Auto-calc", "\u03A3(Flats \u00D7 Occupancy)"],
           ["Commercial Area (sqm)", "Main DB", "Auto", "If applicable"],
         ]}
         color={C.purple}
       />
-      <Arrow x1={CX} y1={Y.fetchTable + 356} x2={CX} y2={Y.popHeader} />
+
+      {/* Redirect flag below input table */}
+      <RedirectFlag x={tableX} y={Y.redirectFlag} w={780} />
+
+      <Arrow x1={CX} y1={Y.redirectFlag + 50} x2={CX} y2={Y.popHeader} />
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2 — POPULATION CALCULATION & VALIDATION
+          SECTION 2 — AUTO POPULATION CALCULATION & VALIDATION GATE
+          (Manual override removed — auto-population only)
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.popHeader} w={nw} h={nh}
-        label="Population Computation Engine"
-        sub="Calculate effective population for waste generation"
-        color={C.blue} badge="COMPUTE" />
-      <Arrow x1={CX} y1={Y.popHeader + nh} x2={CX} y2={Y.popDecision - 48} />
+      <Box x={nx} y={Y.popHeader} w={nw} h={70}
+        label="Auto Population Computation"
+        sub="System auto-calculates from Main DB \u2014 no manual override"
+        color={C.blue} badge="AUTO-CALC" />
+      <Arrow x1={CX} y1={Y.popHeader + 70} x2={CX} y2={Y.popAutoCalc} />
 
-      <Diamond cx={CX} cy={Y.popDecision} rxD={210} ryD={48}
-        label="Population Source?"
-        sub="Auto-calculated or Manual Override?"
-        color={C.blue} />
-
-      {/* Auto branch (left) */}
-      <Arrow x1={CX - 140} y1={Y.popDecision + 40} x2={CX - 300} y2={Y.popAuto}
-        label="Auto" color={C.green.bd} />
-      <Box x={CX - 520} y={Y.popAuto} w={420} h={70}
-        label="Auto: Σ(Flats × BHK Occupancy)"
-        sub="Standard: 1BHK=2.5, 2BHK=3.5, 3BHK=4.5, 4BHK=5.5"
+      <Box x={CX - 320} y={Y.popAutoCalc} w={640} h={80}
+        label={`Auto: \u03A3(Flats \u00D7 BHK Occupancy Rate)`}
+        sub="Standard: 1BHK=2.5, 2BHK=3.5, 3BHK=4.5, 4BHK=5.5 persons/unit"
         color={C.green} badge="AUTO" />
 
-      {/* Manual branch (right) */}
-      <Arrow x1={CX + 140} y1={Y.popDecision + 40} x2={CX + 300} y2={Y.popManual}
-        label="Manual" color={C.reject} />
-      <Box x={CX + 100} y={Y.popManual} w={420} h={70}
-        label="Manual Override by User"
-        sub="Custom population input → logged with audit trail"
-        color={C.rose} badge="OVERRIDE" />
+      {/* Side note: no manual */}
+      <NoteBox x={CX + 360} y={Y.popAutoCalc - 10} w={220} h={80}
+        icon={"\uD83D\uDD12"} title="Manual Disabled"
+        lines={["Population is auto-fetched", "No manual override allowed", "Change at Main Input only"]}
+        color={C.slate} />
+      <line x1={CX + 320} y1={Y.popAutoCalc + 40} x2={CX + 360} y2={Y.popAutoCalc + 40}
+        stroke={C.slate.bd} strokeWidth={2} strokeDasharray="5,3" />
 
-      {/* Converge */}
-      <Arrow x1={CX - 300} y1={Y.popAuto + 70} x2={CX} y2={Y.popConverge} />
-      <Arrow x1={CX + 300} y1={Y.popManual + 70} x2={CX} y2={Y.popConverge} />
-      <Box x={nx} y={Y.popConverge} w={nw} h={60}
-        label="Validated Population (P)"
-        sub="Locked for all downstream calculations"
+      <Arrow x1={CX} y1={Y.popAutoCalc + 80} x2={CX} y2={Y.popValidate - 50} />
+
+      {/* ── VALIDATION GATE ── */}
+      <Diamond cx={CX} cy={Y.popValidate} rxD={220} ryD={50}
+        label="Validate & Approve Data?"
+        sub="User must review and approve before proceeding"
+        color={C.blue} />
+
+      {/* Approved → proceed */}
+      <Arrow x1={CX} y1={Y.popValidate + 50} x2={CX} y2={Y.popApproved}
+        label="Approved" color={C.green.bd} />
+      <Box x={nx} y={Y.popApproved} w={nw} h={60}
+        label="Population Validated & Locked (P)"
+        sub="Approved by user \u2014 locked for all downstream calcs"
         color={C.green} badge="LOCKED" />
-      <Arrow x1={CX} y1={Y.popConverge + 60} x2={CX} y2={Y.normsHeader} />
+
+      {/* Not Approved → redirect to main input */}
+      <Arrow x1={CX + 220} y1={Y.popValidate} x2={CX + 440} y2={Y.popValidate}
+        label="Not Approved" color={C.reject} />
+      <g>
+        <rect x={CX + 440} y={Y.popValidate - 40} width={340} height={80} rx={12}
+          fill={C.rose.bg} stroke={C.reject} strokeWidth={2.5} />
+        <rect x={CX + 440 + 340 - 100} y={Y.popValidate - 34} width={90} height={22} rx={11} fill={C.reject} opacity={0.85} />
+        <text x={CX + 440 + 340 - 55} y={Y.popValidate - 20} textAnchor="middle" fill="#fff" fontSize={10} fontWeight={700}>REDIRECT</text>
+        <text x={CX + 610} y={Y.popValidate - 8} textAnchor="middle" fill={C.rose.tx} fontSize={13} fontWeight={700}>
+          {"\u26A0\uFE0F"} Redirect to Main Input Page
+        </text>
+        <text x={CX + 610} y={Y.popValidate + 12} textAnchor="middle" fill={C.rose.tx} fontSize={11} opacity={0.7}>
+          Modify source data at origin
+        </text>
+        <text x={CX + 610} y={Y.popValidate + 28} textAnchor="middle" fill={C.rose.tx} fontSize={10} opacity={0.6}>
+          Then re-enter OWC module
+        </text>
+      </g>
+
+      <Arrow x1={CX} y1={Y.popApproved + 60} x2={CX} y2={Y.normsHeader} />
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3 — NBC / CPHEEO NORMS
+          SECTION 3 — LODHA POLICY NORMS (no acceptance/override diamond)
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.normsHeader} w={nw} h={nh}
+      <Box x={nx} y={Y.normsHeader} w={nw} h={70}
         label="Fetch Waste Generation Norms"
-        sub="CPHEEO Manual 2016 / NBC Part-8 / State Regulations"
+        sub="Lodha Policy Norms \u2014 Applied automatically"
         color={C.amber} badge="NORMS" />
-      <Arrow x1={CX} y1={Y.normsHeader + nh} x2={CX} y2={Y.normsCard} />
+      <Arrow x1={CX} y1={Y.normsHeader + 70} x2={CX} y2={Y.normsCard} />
 
-      <NormsCard x={CX - 270} y={Y.normsCard} />
+      <LodhaNormsCard x={CX - 300} y={Y.normsCard} />
 
       {/* Side reference */}
-      <NoteBox x={CX + 310} y={Y.normsCard + 20} w={260} h={90}
-        icon="📘" title="Reference Codes"
-        lines={["CPHEEO Manual 2016 Ch-4", "NBC 2016 Part-8 Annex", "SWM Rules 2016 (MoEFCC)"]}
+      <NoteBox x={CX + 340} y={Y.normsCard + 30} w={240} h={100}
+        icon={"\uD83C\uDFE2"} title="Lodha Policy"
+        lines={["Lodha-specific waste norms", "Applied as per project policy", "Values will be updated", "by user-provided data"]}
         color={C.amber} />
-      <line x1={CX + 270} y1={Y.normsCard + 65} x2={CX + 310} y2={Y.normsCard + 65}
+      <line x1={CX + 300} y1={Y.normsCard + 80} x2={CX + 340} y2={Y.normsCard + 80}
         stroke={C.amber.bd} strokeWidth={2} strokeDasharray="5,3" />
 
-      <Arrow x1={CX} y1={Y.normsCard + 220} x2={CX} y2={Y.normsConfirm - 48} />
+      <Arrow x1={CX} y1={Y.normsCard + 240} x2={CX} y2={Y.normsLocked} />
 
-      <Diamond cx={CX} cy={Y.normsConfirm} rxD={200} ryD={48}
-        label="Norms Acceptable?"
-        sub="Confirm or Override values?"
-        color={C.amber} />
-
-      {/* Confirmed (left) */}
-      <Arrow x1={CX - 130} y1={Y.normsConfirm + 40} x2={CX - 280} y2={Y.normsOverride}
-        label="Confirmed" color={C.green.bd} />
-      <Box x={CX - 460} y={Y.normsOverride} w={360} h={60}
-        label="Lock Norms & Proceed"
-        sub="Values locked for this project session"
+      <Box x={nx} y={Y.normsLocked} w={nw} h={60}
+        label="Lodha Norms Locked (R kg/cap/day)"
+        sub="Policy values auto-applied \u2014 no override option"
         color={C.green} badge="LOCKED" />
-
-      {/* Override (right) */}
-      <Arrow x1={CX + 130} y1={Y.normsConfirm + 40} x2={CX + 280} y2={Y.normsOverride}
-        label="Override" color={C.reject} />
-      <Box x={CX + 100} y={Y.normsOverride} w={360} h={60}
-        label="Manual Override with Audit"
-        sub="Custom rates saved → audit trail logged"
-        color={C.rose} badge="OVERRIDE" />
-
-      {/* Converge */}
-      <Arrow x1={CX - 280} y1={Y.normsOverride + 60} x2={CX} y2={Y.normsConverge} />
-      <Arrow x1={CX + 280} y1={Y.normsOverride + 60} x2={CX} y2={Y.normsConverge} />
-      <Box x={nx} y={Y.normsConverge} w={nw} h={60}
-        label="Waste Rate Locked (R kg/cap/day)"
-        sub="CPHEEO rate or overridden value → proceed"
-        color={C.green} badge="PROCEED" />
-      <Arrow x1={CX} y1={Y.normsConverge + 60} x2={CX} y2={Y.wasteHeader} />
+      <Arrow x1={CX} y1={Y.normsLocked + 60} x2={CX} y2={Y.wasteHeader} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4 — WASTE GENERATION ENGINE
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.wasteHeader} w={nw} h={nh}
+      <Box x={nx} y={Y.wasteHeader} w={nw} h={70}
         label="Waste Generation Calculation Engine"
         sub="Compute total daily solid waste from population & norms"
         color={C.orange} badge="ENGINE" />
-      <Arrow x1={CX} y1={Y.wasteHeader + nh} x2={CX} y2={Y.wasteFormula} />
+      <Arrow x1={CX} y1={Y.wasteHeader + 70} x2={CX} y2={Y.wasteFormula} />
 
       <FormulaBlock x={CX - 320} y={Y.wasteFormula} w={640} h={90}
         lines={[
-          "W_total = P × R",
-          "W_total = Population × Waste Rate (kg/cap/day)",
-          "Example: 2000 persons × 0.45 = 900 kg/day",
+          "W_total = P \u00D7 R",
+          "W_total = Population \u00D7 Waste Rate (kg/cap/day)",
+          "Example: 2000 persons \u00D7 0.45 = 900 kg/day",
         ]}
         color={C.orange} />
 
       {/* Side: additional sources */}
       <NoteBox x={CX + 360} y={Y.wasteFormula} w={240} h={90}
-        icon="📦" title="Additional Sources"
+        icon={"\uD83D\uDCE6"} title="Additional Sources"
         lines={["+ Commercial area waste", "+ Club/Amenity area waste", "+ Visitor waste (5% uplift)"]}
         color={C.orange} />
       <line x1={CX + 320} y1={Y.wasteFormula + 45} x2={CX + 360} y2={Y.wasteFormula + 45}
@@ -718,32 +708,34 @@ export function OWCCalcSVG() {
 
       <Arrow x1={CX} y1={Y.wasteFormula + 90} x2={CX} y2={Y.wasteTotal} />
 
-      <Box x={CX - 260} y={Y.wasteTotal} w={520} h={nh}
+      <Box x={CX - 280} y={Y.wasteTotal} w={560} h={70}
         label="Total Daily Waste = W_total + W_commercial + W_visitor"
         sub="Aggregated daily solid waste generation (kg/day)"
         color={C.orange} badge="TOTAL" />
 
-      <DataTable x={tableX} y={Y.wasteTotal + 80}
-        title={"📊 WASTE GENERATION BREAKDOWN"}
+      <Arrow x1={CX} y1={Y.wasteTotal + 70} x2={CX} y2={Y.wasteTable} />
+
+      <DataTable x={tableX} y={Y.wasteTable}
+        title={"\uD83D\uDCCA WASTE GENERATION BREAKDOWN"}
         headers={["Source", "Population/Area", "Rate", "Waste (kg/day)"]}
         rows={[
-          ["Residential", "P persons", "0.45 kg/cap/day", "Auto-calc"],
-          ["Commercial", "Area sqm", "0.50 kg/cap/day", "Auto-calc"],
-          ["Club/Amenity", "Area sqm", "0.30 kg/cap/day", "Auto-calc"],
+          ["Residential", "P persons", "As per Lodha Policy", "Auto-calc"],
+          ["Commercial", "Area sqm", "As per Lodha Policy", "Auto-calc"],
+          ["Club/Amenity", "Area sqm", "As per Lodha Policy", "Auto-calc"],
           ["Visitor (5%)", "Estimated", "5% of residential", "Auto-calc"],
         ]}
         color={C.orange}
       />
-      <Arrow x1={CX} y1={Y.wasteTotal + 80 + 250} x2={CX} y2={Y.segHeader} />
+      <Arrow x1={CX} y1={Y.wasteTable + 224} x2={CX} y2={Y.segHeader} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5 — WASTE SEGREGATION (60:40)
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.segHeader} w={nw} h={nh}
+      <Box x={nx} y={Y.segHeader} w={nw} h={70}
         label="Waste Segregation at Source"
-        sub="SWM Rules 2016 — Mandatory source segregation"
+        sub="SWM Rules 2016 \u2014 Mandatory source segregation"
         color={C.teal} badge="SEGREGATION" />
-      <Arrow x1={CX} y1={Y.segHeader + nh} x2={CX} y2={Y.segSplit - 30} />
+      <Arrow x1={CX} y1={Y.segHeader + 70} x2={CX} y2={Y.segSplit - 50} />
 
       {/* Fan-out to Wet/Dry */}
       {(() => {
@@ -753,19 +745,19 @@ export function OWCCalcSVG() {
         const barY = Y.segSplit - 30;
         return (
           <g>
-            <line x1={CX} y1={barY - 30} x2={CX} y2={barY}
+            <line x1={CX} y1={barY} x2={CX} y2={barY + 5}
               stroke={C.arrow} strokeWidth={2.5} />
-            <line x1={leftX + boxW / 2} y1={barY} x2={rightX + boxW / 2} y2={barY}
+            <line x1={leftX + boxW / 2} y1={barY + 5} x2={rightX + boxW / 2} y2={barY + 5}
               stroke={C.arrow} strokeWidth={2.5} />
-            <line x1={leftX + boxW / 2} y1={barY} x2={leftX + boxW / 2} y2={Y.segSplit}
+            <line x1={leftX + boxW / 2} y1={barY + 5} x2={leftX + boxW / 2} y2={Y.segWetCalc}
               stroke={C.arrow} strokeWidth={2.5} markerEnd="url(#owc-a)" />
-            <line x1={rightX + boxW / 2} y1={barY} x2={rightX + boxW / 2} y2={Y.segSplit}
+            <line x1={rightX + boxW / 2} y1={barY + 5} x2={rightX + boxW / 2} y2={Y.segDryCalc}
               stroke={C.arrow} strokeWidth={2.5} markerEnd="url(#owc-a)" />
             {/* Labels */}
-            <rect x={leftX + boxW / 2 - 22} y={barY - 18} width={44} height={16} rx={4} fill="#fff" opacity={0.92} />
-            <text x={leftX + boxW / 2} y={barY - 7} textAnchor="middle" fill="#475569" fontSize={11} fontWeight={600}>60%</text>
-            <rect x={rightX + boxW / 2 - 22} y={barY - 18} width={44} height={16} rx={4} fill="#fff" opacity={0.92} />
-            <text x={rightX + boxW / 2} y={barY - 7} textAnchor="middle" fill="#475569" fontSize={11} fontWeight={600}>40%</text>
+            <rect x={leftX + boxW / 2 - 22} y={barY - 14} width={44} height={16} rx={4} fill="#fff" opacity={0.92} />
+            <text x={leftX + boxW / 2} y={barY - 3} textAnchor="middle" fill="#475569" fontSize={11} fontWeight={600}>60%</text>
+            <rect x={rightX + boxW / 2 - 22} y={barY - 14} width={44} height={16} rx={4} fill="#fff" opacity={0.92} />
+            <text x={rightX + boxW / 2} y={barY - 3} textAnchor="middle" fill="#475569" fontSize={11} fontWeight={600}>40%</text>
           </g>
         );
       })()}
@@ -773,19 +765,19 @@ export function OWCCalcSVG() {
       {/* Wet Waste (left) */}
       <Box x={CX - 340} y={Y.segWetCalc} w={280} h={80}
         label="Wet Waste (Organic)"
-        sub="60% of total → Kitchen/Food waste"
+        sub="60% of total \u2192 Kitchen/Food waste"
         color={C.green} badge="WET" />
       <FormulaBlock x={CX - 370} y={Y.segWetCalc + 90} w={340} h={60}
-        lines={["W_wet = W_total × 0.60", "Volume_wet = W_wet ÷ 500 kg/m³"]}
+        lines={["W_wet = W_total \u00D7 0.60", "Volume_wet = W_wet \u00F7 500 kg/m\u00B3"]}
         color={C.green} />
 
       {/* Dry Waste (right) */}
       <Box x={CX + 60} y={Y.segDryCalc} w={280} h={80}
         label="Dry Waste (Recyclable)"
-        sub="40% of total → Paper/Plastic/Glass"
+        sub="40% of total \u2192 Paper/Plastic/Glass"
         color={C.blue} badge="DRY" />
       <FormulaBlock x={CX + 30} y={Y.segDryCalc + 90} w={340} h={60}
-        lines={["W_dry = W_total × 0.40", "Volume_dry = W_dry ÷ 150 kg/m³"]}
+        lines={["W_dry = W_total \u00D7 0.40", "Volume_dry = W_dry \u00F7 150 kg/m\u00B3"]}
         color={C.blue} />
 
       {/* Converge */}
@@ -793,18 +785,18 @@ export function OWCCalcSVG() {
       <Arrow x1={CX + 200} y1={Y.segDryCalc + 150} x2={CX} y2={Y.segConverge} />
       <Box x={nx} y={Y.segConverge} w={nw} h={60}
         label="Segregated Volumes Calculated"
-        sub="Wet volume + Dry volume → inputs to bin sizing"
+        sub="Wet volume + Dry volume \u2192 inputs to bin sizing"
         color={C.teal} badge="PROCEED" />
       <Arrow x1={CX} y1={Y.segConverge + 60} x2={CX} y2={Y.binHeader} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 6 — BIN CAPACITY & SIZING
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.binHeader} w={nw} h={nh}
+      <Box x={nx} y={Y.binHeader} w={nw} h={70}
         label="Bin Sizing Engine"
-        sub="Fetch bin specs from DB → auto-select optimal mix"
+        sub="Fetch bin specs from DB \u2192 auto-select optimal mix"
         color={C.cyan} badge="SIZING" />
-      <Arrow x1={CX} y1={Y.binHeader + nh} x2={CX} y2={Y.binTable} />
+      <Arrow x1={CX} y1={Y.binHeader + 70} x2={CX} y2={Y.binTable} />
 
       <BinSizingTable x={CX - 400} y={Y.binTable} />
 
@@ -812,52 +804,52 @@ export function OWCCalcSVG() {
 
       <FormulaBlock x={CX - 340} y={Y.binFormula} w={680} h={90}
         lines={[
-          "N_wet_bins = Volume_wet ÷ (Bin_capacity_L ÷ 1000) ÷ η",
-          "N_dry_bins = Volume_dry ÷ (Bin_capacity_L ÷ 1000) ÷ η",
-          "η = Fill efficiency factor (0.75–0.85) | Collection freq: 1×/day",
+          "N_wet_bins = Volume_wet \u00F7 (Bin_capacity_L \u00F7 1000) \u00F7 \u03B7",
+          "N_dry_bins = Volume_dry \u00F7 (Bin_capacity_L \u00F7 1000) \u00F7 \u03B7",
+          "\u03B7 = Fill efficiency factor (0.75\u20130.85) | Collection freq: 1\u00D7/day",
         ]}
         color={C.cyan} />
 
       <Arrow x1={CX} y1={Y.binFormula + 90} x2={CX} y2={Y.binResult} />
 
       <DataTable x={tableX} y={Y.binResult}
-        title={"📋 BIN REQUIREMENT SUMMARY"}
-        headers={["Stream", "Daily Volume (m³)", "Bin Size", "Fill Factor", "Nos Required"]}
+        title={"\uD83D\uDCCB BIN REQUIREMENT SUMMARY"}
+        headers={["Stream", "Daily Volume (m\u00B3)", "Bin Size", "Fill Factor", "Nos Required"]}
         rows={[
           ["Wet (Green)", "Auto-calc", "240L", "0.80", "Auto-calc"],
           ["Dry (Blue)", "Auto-calc", "1100L", "0.75", "Auto-calc"],
-          ["Hazardous (Red)", "Nominal", "30L", "—", "2 min"],
+          ["Hazardous (Red)", "Nominal", "30L", "\u2014", "2 min"],
         ]}
         color={C.cyan}
       />
-      <Arrow x1={CX} y1={Y.binResult + 180} x2={CX} y2={Y.infraHeader} />
+      <Arrow x1={CX} y1={Y.binResult + 184} x2={CX} y2={Y.infraHeader} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 7 — INFRASTRUCTURE PLANNING
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.infraHeader} w={nw} h={nh}
+      <Box x={nx} y={Y.infraHeader} w={nw} h={70}
         label="Garbage Room Infrastructure"
         sub="Sizing based on total bin footprint + circulation"
         color={C.violet} badge="INFRA" />
-      <Arrow x1={CX} y1={Y.infraHeader + nh} x2={CX} y2={Y.garbageRoom} />
+      <Arrow x1={CX} y1={Y.infraHeader + 70} x2={CX} y2={Y.garbageRoom} />
 
-      <Box x={CX - 280} y={Y.garbageRoom} w={560} h={nh}
+      <Box x={CX - 280} y={Y.garbageRoom} w={560} h={70}
         label="Calculate Total Bin Footprint"
-        sub="Σ(N_bins × Footprint per bin) for all streams"
+        sub={`\u03A3(N_bins \u00D7 Footprint per bin) for all streams`}
         color={C.violet} badge="COMPUTE" />
-      <Arrow x1={CX} y1={Y.garbageRoom + nh} x2={CX} y2={Y.garbageFormula} />
+      <Arrow x1={CX} y1={Y.garbageRoom + 70} x2={CX} y2={Y.garbageFormula} />
 
       <FormulaBlock x={CX - 340} y={Y.garbageFormula} w={680} h={90}
         lines={[
-          "A_garbage = Σ(N_i × FP_i) × CF",
+          "A_garbage = \u03A3(N_i \u00D7 FP_i) \u00D7 CF",
           "CF = Circulation Factor = 1.50 (50% extra for access/movement)",
-          "Minimum area: 12 sqm (NBC 2016 recommendation)",
+          "Minimum area as per Lodha Policy norms",
         ]}
         color={C.violet} />
 
       {/* Side note */}
       <NoteBox x={CX + 380} y={Y.garbageFormula} w={220} h={90}
-        icon="💡" title="Design Rules"
+        icon={"\uD83D\uDCA1"} title="Design Rules"
         lines={["Min headroom: 2.4m", "Washable flooring req'd", "Ventilation: 6 ACH min"]}
         color={C.violet} />
       <line x1={CX + 340} y1={Y.garbageFormula + 45} x2={CX + 380} y2={Y.garbageFormula + 45}
@@ -875,7 +867,7 @@ export function OWCCalcSVG() {
         label="Centralized" color={C.green.bd} />
       <Box x={CX - 520} y={Y.infraCentral} w={420} h={70}
         label="Single Garbage Room at Basement"
-        sub="One large room — simpler O&M, higher area need"
+        sub="One large room \u2014 simpler O&M, higher area need"
         color={C.green} badge="OPTION A" />
 
       {/* Distributed (right) */}
@@ -883,7 +875,7 @@ export function OWCCalcSVG() {
         label="Distributed" color={C.reject} />
       <Box x={CX + 100} y={Y.infraDist} w={420} h={70}
         label="Multiple Collection Points per Wing"
-        sub="Smaller rooms per block — lower per-room area"
+        sub="Smaller rooms per block \u2014 lower per-room area"
         color={C.amber} badge="OPTION B" />
 
       {/* Converge */}
@@ -891,24 +883,24 @@ export function OWCCalcSVG() {
       <Arrow x1={CX + 300} y1={Y.infraDist + 70} x2={CX} y2={Y.infraConverge} />
       <Box x={nx} y={Y.infraConverge} w={nw} h={60}
         label="Garbage Room Area Finalized"
-        sub="Layout selected → area locked for drawing input"
+        sub="Layout selected \u2192 area locked for drawing input"
         color={C.violet} badge="LOCKED" />
       <Arrow x1={CX} y1={Y.infraConverge + 60} x2={CX} y2={Y.owcHeader} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 8 — OWC MACHINE SELECTION
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.owcHeader} w={nw} h={nh}
+      <Box x={nx} y={Y.owcHeader} w={nw} h={70}
         label="OWC Machine Sizing Engine"
         sub="Select machine based on wet waste capacity requirement"
         color={C.green} badge="SIZING" />
-      <Arrow x1={CX} y1={Y.owcHeader + nh} x2={CX} y2={Y.owcCapacity} />
+      <Arrow x1={CX} y1={Y.owcHeader + 70} x2={CX} y2={Y.owcCapacity} />
 
       <FormulaBlock x={CX - 300} y={Y.owcCapacity} w={600} h={90}
         lines={[
-          "OWC_req = W_wet × Safety Factor",
-          "Safety Factor = 1.15 – 1.25 (for peak days)",
-          "Select smallest machine ≥ OWC_req from DB",
+          "OWC_req = W_wet \u00D7 Safety Factor",
+          "Safety Factor = 1.15 \u2013 1.25 (for peak days)",
+          "Select smallest machine \u2265 OWC_req from DB",
         ]}
         color={C.green} />
       <Arrow x1={CX} y1={Y.owcCapacity + 90} x2={CX} y2={Y.owcTable} />
@@ -919,7 +911,7 @@ export function OWCCalcSVG() {
 
       <Diamond cx={CX} cy={Y.owcDecision} rxD={220} ryD={48}
         label="Single Machine Sufficient?"
-        sub="Required capacity ≤ largest single unit?"
+        sub={`Required capacity \u2264 largest single unit?`}
         color={C.green} />
 
       {/* Single (left) */}
@@ -927,7 +919,7 @@ export function OWCCalcSVG() {
         label="Yes" color={C.green.bd} />
       <Box x={CX - 520} y={Y.owcSingle} w={420} h={70}
         label="Single OWC Unit Selected"
-        sub="1 × Machine model from DB — lowest footprint"
+        sub="1 \u00D7 Machine model from DB \u2014 lowest footprint"
         color={C.green} badge="SINGLE" />
 
       {/* Multiple (right) */}
@@ -935,7 +927,7 @@ export function OWCCalcSVG() {
         label="No" color={C.reject} />
       <Box x={CX + 100} y={Y.owcMulti} w={420} h={70}
         label="Multiple OWC Units in Parallel"
-        sub="N × smaller machines to meet total capacity"
+        sub="N \u00D7 smaller machines to meet total capacity"
         color={C.amber} badge="PARALLEL" />
 
       {/* Converge */}
@@ -950,17 +942,17 @@ export function OWCCalcSVG() {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 9 — COMPOSTING OUTPUT & SLUDGE
       ═══════════════════════════════════════════════════════════════ */}
-      <Box x={nx} y={Y.compHeader} w={nw} h={nh}
+      <Box x={nx} y={Y.compHeader} w={nw} h={70}
         label="Composting & By-product Analysis"
         sub="OWC output: compost + leachate + residual sludge"
         color={C.rose} badge="ANALYSIS" />
-      <Arrow x1={CX} y1={Y.compHeader + nh} x2={CX} y2={Y.compCalc} />
+      <Arrow x1={CX} y1={Y.compHeader + 70} x2={CX} y2={Y.compCalc} />
 
       <FormulaBlock x={CX - 340} y={Y.compCalc} w={680} h={90}
         lines={[
-          "Compost Output = W_wet × Conversion Ratio (0.25–0.35)",
-          "Leachate Volume = W_wet × 0.05 – 0.10 (5–10% by weight)",
-          "Residual = W_wet − Compost − Leachate (sent to landfill)",
+          "Compost Output = W_wet \u00D7 Conversion Ratio (0.25\u20130.35)",
+          "Leachate Volume = W_wet \u00D7 0.05 \u2013 0.10 (5\u201310% by weight)",
+          "Residual = W_wet \u2212 Compost \u2212 Leachate (sent to landfill)",
         ]}
         color={C.rose} />
       <Arrow x1={CX} y1={Y.compCalc + 90} x2={CX} y2={Y.compStreams - 30} />
@@ -968,9 +960,9 @@ export function OWCCalcSVG() {
       {/* 3-way fan-out for compost streams */}
       {(() => {
         const streams = [
-          { label: "Compost Output", sub: "25–35% of wet waste", sub2: "Garden/Landscape use", color: C.green, icon: "🌱" },
-          { label: "Leachate", sub: "5–10% liquid by-product", sub2: "Routed to STP inlet", color: C.cyan, icon: "💧" },
-          { label: "Residual / Reject", sub: "Remaining inert waste", sub2: "Sent to municipal landfill", color: C.slate, icon: "🚛" },
+          { label: "Compost Output", sub: "25\u201335% of wet waste", sub2: "Garden/Landscape use", color: C.green, icon: "\uD83C\uDF31" },
+          { label: "Leachate", sub: "5\u201310% liquid by-product", sub2: "Routed to STP inlet", color: C.cyan, icon: "\uD83D\uDCA7" },
+          { label: "Residual / Reject", sub: "Remaining inert waste", sub2: "Sent to municipal landfill", color: C.slate, icon: "\uD83D\uDE9B" },
         ];
         const cardW = 280, cardH = 100, gapX = 40;
         const totalW = streams.length * cardW + (streams.length - 1) * gapX;
@@ -984,25 +976,25 @@ export function OWCCalcSVG() {
               stroke={C.arrow} strokeWidth={2.5} />
             <line x1={centers[0]} y1={barY} x2={centers[centers.length - 1]} y2={barY}
               stroke={C.arrow} strokeWidth={2.5} />
-            {centers.map((cx, i) => (
-              <line key={`cs-${i}`} x1={cx} y1={barY} x2={cx} y2={barY + 20}
+            {centers.map((ccx, i) => (
+              <line key={`cs-${i}`} x1={ccx} y1={barY} x2={ccx} y2={barY + 20}
                 stroke={C.arrow} strokeWidth={2.5} markerEnd="url(#owc-a)" />
             ))}
             {streams.map((s, i) => {
-              const cx = sx + i * (cardW + gapX);
+              const scx = sx + i * (cardW + gapX);
               return (
                 <g key={`s-${i}`}>
-                  <rect x={cx} y={barY + 20} width={cardW} height={cardH} rx={12}
+                  <rect x={scx} y={barY + 20} width={cardW} height={cardH} rx={12}
                     fill={s.color.bg} stroke={s.color.bd} strokeWidth={2.5} />
-                  <rect x={cx} y={barY + 20} width={cardW} height={30} rx={12} fill={s.color.bd} />
-                  <rect x={cx} y={barY + 38} width={cardW} height={12} fill={s.color.bd} />
-                  <text x={cx + cardW / 2} y={barY + 40} textAnchor="middle" fill="#fff" fontSize={12} fontWeight={700}>
+                  <rect x={scx} y={barY + 20} width={cardW} height={30} rx={12} fill={s.color.bd} />
+                  <rect x={scx} y={barY + 38} width={cardW} height={12} fill={s.color.bd} />
+                  <text x={scx + cardW / 2} y={barY + 40} textAnchor="middle" fill="#fff" fontSize={12} fontWeight={700}>
                     {s.icon} {s.label}
                   </text>
-                  <text x={cx + cardW / 2} y={barY + 68} textAnchor="middle" fill={s.color.tx} fontSize={11} fontWeight={600}>
+                  <text x={scx + cardW / 2} y={barY + 68} textAnchor="middle" fill={s.color.tx} fontSize={11} fontWeight={600}>
                     {s.sub}
                   </text>
-                  <text x={cx + cardW / 2} y={barY + 86} textAnchor="middle" fill={s.color.tx} fontSize={10} opacity={0.7}>
+                  <text x={scx + cardW / 2} y={barY + 86} textAnchor="middle" fill={s.color.tx} fontSize={10} opacity={0.7}>
                     {s.sub2}
                   </text>
                 </g>
@@ -1014,20 +1006,20 @@ export function OWCCalcSVG() {
 
       {/* Sludge/dry waste disposal */}
       <Arrow x1={CX} y1={Y.compStreams + 140} x2={CX} y2={Y.sludgeCalc} />
-      <Box x={CX - 280} y={Y.sludgeCalc} w={560} h={nh}
+      <Box x={CX - 280} y={Y.sludgeCalc} w={560} h={70}
         label="Dry Waste Disposal Strategy"
         sub="Recyclables to vendor | Rejects to municipal collection"
         color={C.slate} badge="DISPOSAL" />
 
       {/* Side note */}
       <NoteBox x={CX + 320} y={Y.sludgeCalc} w={240} h={70}
-        icon="♻️" title="Recycling Target"
-        lines={["≥ 80% diversion from landfill", "Per SWM Rules 2016"]}
+        icon={"\u267B\uFE0F"} title="Recycling Target"
+        lines={["\u2265 80% diversion from landfill", "Per SWM Rules 2016"]}
         color={C.teal} />
       <line x1={CX + 280} y1={Y.sludgeCalc + 35} x2={CX + 320} y2={Y.sludgeCalc + 35}
         stroke={C.teal.bd} strokeWidth={2} strokeDasharray="5,3" />
 
-      <Arrow x1={CX} y1={Y.sludgeCalc + nh} x2={CX} y2={Y.dashboard} />
+      <Arrow x1={CX} y1={Y.sludgeCalc + 70} x2={CX} y2={Y.dashboard} />
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 10 — FINAL OUTPUT DASHBOARD
@@ -1039,7 +1031,7 @@ export function OWCCalcSVG() {
       {/* Terminal */}
       <Box x={nx} y={Y.terminal} w={nw} h={60}
         label="OWC CALCULATION COMPLETE"
-        sub="All outputs locked → Export to Report & BOQ"
+        sub="All outputs locked \u2192 Export to Report & BOQ"
         color={C.green} badge="DONE" rx={30} />
     </svg>
   );
