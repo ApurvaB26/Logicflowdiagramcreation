@@ -11,7 +11,7 @@ import React from "react";
 // =====================================================================
 
 const W = 1600;
-const H = 12800;
+const H = 6320;
 const CX = W / 2;
 
 const C = {
@@ -109,7 +109,7 @@ export function EarthingCalcSVG() {
       <text x={CX} y={128} textAnchor="middle" fill="#67e8f9" fontSize={10}>Voltage: 433V 3φ | System: TN-S | Soil Resistivity: 50 Ω·m | Fault Duration: 1 sec</text>
 
       {/* ═══════════════ PHASE 1: SOURCE FAULT LEVEL ═══════════════ */}
-      <PhaseBand y={160} h={2600} label="▌ PHASE 1 — SOURCE FAULT LEVEL CALCULATION" color="#3b82f6" />
+      <PhaseBand y={160} h={1900} label="▌ PHASE 1 — SOURCE FAULT LEVEL CALCULATION" color="#3b82f6" />
 
       {/* Section 1: Project & Transformer Input Data */}
       <SectionTitle y={190} num="§1" title="Project & Transformer Input Data" color="#3b82f6" />
@@ -173,7 +173,7 @@ export function EarthingCalcSVG() {
       <SectionTitle y={755} num="§3" title="Transformer Fault Current Calculation" color="#f59e0b" />
       <Arr x1={CX} y1={795} x2={CX} y2={820} />
 
-      <rect x={CX - 320} y={820} width={640} height={210} rx={12} fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={2} />
+      <rect x={CX - 320} y={820} width={640} height={220} rx={12} fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={2} />
       <text x={CX} y={845} textAnchor="middle" fill={C.amber.tx} fontSize={13} fontWeight={700}>🧮 Three-Phase Symmetrical Fault Current</text>
 
       <rect x={CX - 280} y={860} width={560} height={40} rx={8} fill="#fff" stroke={C.amber.bd} strokeWidth={1} />
@@ -192,26 +192,26 @@ export function EarthingCalcSVG() {
         <text key={i} x={CX - 260} y={920 + i * 20} fill={C.amber.tx} fontSize={11}>{s}</text>
       ))}
 
-      <Arr x1={CX} y1={1030} x2={CX} y2={1060} />
+      <Arr x1={CX} y1={1040} x2={CX} y2={1065} />
 
       {/* Decision: Round to Standard */}
-      <Diamond cx={CX} cy={1100} w={380} h={70} text="Round to Standard Rating?" sub="IS 8623 / IEC 61439" c={C.amber} />
+      <Diamond cx={CX} cy={1105} w={380} h={70} text="Round to Standard Rating?" sub="IS 8623 / IEC 61439" c={C.amber} />
 
-      <Arr x1={CX} y1={1135} x2={CX} y2={1165} />
+      <Arr x1={CX} y1={1140} x2={CX} y2={1170} />
 
-      <rect x={CX - 180} y={1165} width={360} height={50} rx={10} fill={C.green.bg} stroke={C.green.bd} strokeWidth={2} />
-      <text x={CX} y={1186} textAnchor="middle" fill={C.green.tx} fontSize={12} fontWeight={700}>📊 Transformer Fault Level = 32.6 kA</text>
-      <text x={CX} y={1202} textAnchor="middle" fill={C.green.tx} fontSize={10}>→ Standard Rating: 36 kA (next standard up)</text>
+      <rect x={CX - 180} y={1170} width={360} height={50} rx={10} fill={C.green.bg} stroke={C.green.bd} strokeWidth={2} />
+      <text x={CX} y={1191} textAnchor="middle" fill={C.green.tx} fontSize={12} fontWeight={700}>📊 Transformer Fault Level = 32.6 kA</text>
+      <text x={CX} y={1207} textAnchor="middle" fill={C.green.tx} fontSize={10}>→ Standard Rating: 36 kA (next standard up)</text>
 
-      <Annotation x={CX + 230} y={1060} w={180} lines={["📌 Standard Ratings:", "• 10 kA, 16 kA", "• 25 kA, 36 kA", "• 50 kA, 65 kA", "• 80 kA, 100 kA", "Per IS 8623-1"]} c={C.cyan} />
+      <Annotation x={CX + 230} y={1065} w={180} lines={["📌 Standard Ratings:", "• 10 kA, 16 kA", "• 25 kA, 36 kA", "• 50 kA, 65 kA", "• 80 kA, 100 kA", "Per IS 8623-1"]} c={C.cyan} />
 
-      <Arr x1={CX} y1={1215} x2={CX} y2={1250} />
+      <Arr x1={CX} y1={1220} x2={CX} y2={1250} />
 
       {/* Section 4: DG Set Fault Level */}
       <SectionTitle y={1250} num="§4" title="DG Set Fault Level Calculation" color="#06b6d4" />
       <Arr x1={CX} y1={1290} x2={CX} y2={1320} />
 
-      <rect x={CX - 340} y={1320} width={680} height={140} rx={12} fill={C.cyan.bg} stroke={C.cyan.bd} strokeWidth={2} />
+      <rect x={CX - 340} y={1320} width={680} height={200} rx={12} fill={C.cyan.bg} stroke={C.cyan.bd} strokeWidth={2} />
       <text x={CX} y={1345} textAnchor="middle" fill={C.cyan.tx} fontSize={13} fontWeight={700}>🔧 DG Set Sub-Transient Reactance Method</text>
 
       {[
@@ -277,7 +277,7 @@ export function EarthingCalcSVG() {
       <text x={CX} y={2018} textAnchor="middle" fill={C.green.tx} fontSize={11}>MDB Design: 50 kA | TR-only: 36 kA | DG-only: 10 kA</text>
 
       {/* ═══════════════ PHASE 2: DISTRIBUTION FAULT ═══════════════ */}
-      <PhaseBand y={2070} h={2600} label="▌ PHASE 2 — DISTRIBUTION / PANEL FAULT LEVEL" color="#f59e0b" />
+      <PhaseBand y={2070} h={1700} label="▌ PHASE 2 — DISTRIBUTION / PANEL FAULT LEVEL" color="#f59e0b" />
 
       {/* Section 6: Cable Impedance Data */}
       <SectionTitle y={2100} num="§6" title="Cable Impedance Data Collection" color="#f59e0b" />
@@ -355,7 +355,7 @@ export function EarthingCalcSVG() {
       <SectionTitle y={2840} num="§8" title="Downstream Panel Fault Level Calculation" color="#f97316" />
       <Arr x1={CX} y1={2880} x2={CX} y2={2910} />
 
-      <rect x={CX - 380} y={2910} width={760} height={310} rx={12} fill={C.orange.bg} stroke={C.orange.bd} strokeWidth={2} />
+      <rect x={CX - 380} y={2910} width={760} height={330} rx={12} fill={C.orange.bg} stroke={C.orange.bd} strokeWidth={2} />
       <text x={CX} y={2935} textAnchor="middle" fill={C.orange.tx} fontSize={13} fontWeight={700}>📊 Cumulative Impedance & Panel Fault Levels</text>
 
       <rect x={CX - 340} y={2950} width={680} height={36} rx={8} fill="#fff" stroke={C.orange.bd} strokeWidth={1} />
@@ -419,7 +419,7 @@ export function EarthingCalcSVG() {
       {/* Breaker selection table */}
       <Arr x1={CX} y1={3500} x2={CX} y2={3530} />
 
-      <rect x={CX - 350} y={3530} width={700} height={180} rx={12} fill={C.slate.bg} stroke={C.slate.bd} strokeWidth={2} />
+      <rect x={CX - 350} y={3530} width={700} height={200} rx={12} fill={C.slate.bg} stroke={C.slate.bd} strokeWidth={2} />
       <text x={CX} y={3555} textAnchor="middle" fill={C.slate.tx} fontSize={12} fontWeight={700}>📋 Breaker Selection Summary</text>
 
       {(() => {
@@ -449,11 +449,11 @@ export function EarthingCalcSVG() {
         );
       })()}
 
-      <rect x={CX - 200} y={3720} width={400} height={30} rx={8} fill={C.green.bg} stroke={C.green.bd} strokeWidth={2} />
-      <text x={CX} y={3740} textAnchor="middle" fill={C.green.tx} fontSize={12} fontWeight={700}>✅ Phase 2 Output: All Panels Verified</text>
+      <rect x={CX - 200} y={3745} width={400} height={30} rx={8} fill={C.green.bg} stroke={C.green.bd} strokeWidth={2} />
+      <text x={CX} y={3765} textAnchor="middle" fill={C.green.tx} fontSize={12} fontWeight={700}>✅ Phase 2 Output: All Panels Verified</text>
 
       {/* ═══════════════ PHASE 3: EARTHING CONDUCTOR SIZING ═══════════════ */}
-      <PhaseBand y={3790} h={3500} label="▌ PHASE 3 — EARTHING CONDUCTOR SIZING" color="#10b981" />
+      <PhaseBand y={3790} h={1380} label="▌ PHASE 3 — EARTHING CONDUCTOR SIZING" color="#10b981" />
 
       {/* Section 10: Adiabatic Equation */}
       <SectionTitle y={3820} num="§10" title="Adiabatic Conductor Sizing (IS 3043)" color="#10b981" />
@@ -462,17 +462,17 @@ export function EarthingCalcSVG() {
       <rect x={CX - 340} y={3890} width={680} height={200} rx={12} fill={C.green.bg} stroke={C.green.bd} strokeWidth={2} />
       <text x={CX} y={3915} textAnchor="middle" fill={C.green.tx} fontSize={13} fontWeight={700}>🧮 Earth Conductor Cross-Section — Adiabatic Method</text>
 
-      <rect x={CX - 280} y={3935} width={560} height={45} rx={8} fill="#fff" stroke={C.green.bd} strokeWidth={1.5} />
-      <text x={CX} y={3958} textAnchor="middle" fill={C.green.tx} fontSize={16} fontWeight={800}>
+      <rect x={CX - 280} y={3935} width={560} height={50} rx={8} fill="#fff" stroke={C.green.bd} strokeWidth={1.5} />
+      <text x={CX} y={3955} textAnchor="middle" fill={C.green.tx} fontSize={16} fontWeight={800}>
         A = I × √t / k
       </text>
-      <text x={CX} y={3975} textAnchor="middle" fill={C.green.tx} fontSize={10}>
+      <text x={CX} y={3978} textAnchor="middle" fill={C.green.tx} fontSize={10}>
         Where: A = cross-section (mm²), I = fault current (A), t = fault duration (s), k = material constant
       </text>
 
       {/* Material constants table */}
-      <rect x={CX - 250} y={3995} width={500} height={80} rx={8} fill="#fff" stroke={C.green.bd} strokeWidth={1} />
-      <text x={CX} y={4015} textAnchor="middle" fill={C.green.tx} fontSize={11} fontWeight={700}>Material Constant (k) — IS 3043 Table 3</text>
+      <rect x={CX - 250} y={4000} width={500} height={80} rx={8} fill="#fff" stroke={C.green.bd} strokeWidth={1} />
+      <text x={CX} y={4020} textAnchor="middle" fill={C.green.tx} fontSize={11} fontWeight={700}>Material Constant (k) — IS 3043 Table 3</text>
       {[
         ["Copper (Cu) conductor", "k = 205"],
         ["Galvanized Iron (GI) strip", "k = 80"],
@@ -480,8 +480,8 @@ export function EarthingCalcSVG() {
         ["Galvanized Steel wire rope", "k = 78"],
       ].map(([mat, val], i) => (
         <g key={i}>
-          <text x={CX - 200} y={4035 + i * 16} fill={C.green.tx} fontSize={10}>{mat}</text>
-          <text x={CX + 120} y={4035 + i * 16} fill={C.green.tx} fontSize={10} fontWeight={700}>{val}</text>
+          <text x={CX - 200} y={4040 + i * 16} fill={C.green.tx} fontSize={10}>{mat}</text>
+          <text x={CX + 120} y={4040 + i * 16} fill={C.green.tx} fontSize={10} fontWeight={700}>{val}</text>
         </g>
       ))}
 
@@ -493,7 +493,7 @@ export function EarthingCalcSVG() {
       <SectionTitle y={4120} num="§11" title="Equipment-wise Earth Conductor Sizing" color="#059669" />
       <Arr x1={CX} y1={4160} x2={CX} y2={4190} />
 
-      <rect x={CX - 380} y={4190} width={760} height={500} rx={12} fill={C.teal.bg} stroke={C.teal.bd} strokeWidth={2} />
+      <rect x={CX - 380} y={4190} width={760} height={470} rx={12} fill={C.teal.bg} stroke={C.teal.bd} strokeWidth={2} />
       <text x={CX} y={4215} textAnchor="middle" fill={C.teal.tx} fontSize={13} fontWeight={700}>📊 Earthing Conductor Sizing — All Equipment</text>
 
       {/* Example calculation */}
@@ -588,7 +588,7 @@ export function EarthingCalcSVG() {
       <text x={CX} y={5128} textAnchor="middle" fill={C.green.tx} fontSize={10}>All conductors sized + Earth pit count: 8 nos. (R_net = 1.79 Ω &lt; 2 Ω)</text>
 
       {/* ═══════════════ SUMMARY TABLE ═══════════════ */}
-      <PhaseBand y={5180} h={600} label="▌ SUMMARY — INPUT TO OUTPUT MAPPING" color="#8b5cf6" />
+      <PhaseBand y={5180} h={320} label="▌ SUMMARY — INPUT TO OUTPUT MAPPING" color="#8b5cf6" />
 
       <SectionTitle y={5210} num="§S" title="Phase Summary — Input → Process → Output" color="#8b5cf6" />
       <Arr x1={CX} y1={5250} x2={CX} y2={5280} />
@@ -627,7 +627,7 @@ export function EarthingCalcSVG() {
       })()}
 
       {/* ═══════════════ DASHBOARD ═══════════════ */}
-      <PhaseBand y={5520} h={900} label="▌ OUTPUT DASHBOARD" color="#059669" />
+      <PhaseBand y={5520} h={660} label="▌ OUTPUT DASHBOARD" color="#059669" />
 
       <SectionTitle y={5550} num="§D" title="Short Circuit & Earthing Design Dashboard" color="#059669" />
       <Arr x1={CX} y1={5590} x2={CX} y2={5620} />
