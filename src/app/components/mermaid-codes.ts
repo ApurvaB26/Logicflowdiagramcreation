@@ -1302,16 +1302,22 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
 export const STAGE_MERMAID_MAP: Record<string, string> = {
   concept: CONCEPT_STAGE_MERMAID,
   detailed: DETAILED_DESIGN_MERMAID,
+  tender: TENDER_STAGE_MERMAID,
+  vfc: VFC_STAGE_MERMAID,
 };
 
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
   concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
   detailed: ["DD_CB", "DD_PIP", "DD_PRV"], // Cable Sizing + Pipe Sizing + PRV ready; others coming soon
+  tender: [],
+  vfc: [],
 };
 
 // ── STAGE LABELS ──
 export const STAGE_LABELS: Record<string, string> = {
   concept: "Concept Stage",
   detailed: "Detailed Design Stage",
+  tender: "Tender Stage",
+  vfc: "VFC Stage",
 };

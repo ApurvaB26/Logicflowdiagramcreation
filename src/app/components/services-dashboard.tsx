@@ -35,12 +35,14 @@ interface Calculation {
   title: string;
   description: string;
   status: "ready" | "coming-soon";
-  stage: "concept" | "detailed";
+  stage: "concept" | "detailed" | "tender" | "vfc";
 }
 
 const STAGE_META: Record<string, { label: string; color: string; bg: string }> = {
   concept:  { label: "Concept Stage",         color: "#3b82f6", bg: "#dbeafe" },
   detailed: { label: "Detailed Design Stage", color: "#8b5cf6", bg: "#ede9fe" },
+  tender:   { label: "Tender Stage",          color: "#14b8a6", bg: "#ccfbf1" },
+  vfc:      { label: "VFC Stage",             color: "#a78bfa", bg: "#e8d5ff" },
 };
 
 interface Service {
@@ -1133,6 +1135,8 @@ export function ServicesDashboard() {
   const stageCounts = {
     concept: allCalcs.filter((c) => c.stage === "concept").length,
     detailed: allCalcs.filter((c) => c.stage === "detailed").length,
+    tender: allCalcs.filter((c) => c.stage === "tender").length,
+    vfc: allCalcs.filter((c) => c.stage === "vfc").length,
   };
 
   return (
@@ -1164,7 +1168,7 @@ export function ServicesDashboard() {
           </span>
         </div>
         <div className="w-px h-5 bg-[#e2e8f0]" />
-        {(["concept", "detailed"] as const).map((stage) => {
+        {(["concept", "detailed", "tender", "vfc"] as const).map((stage) => {
           const sm = STAGE_META[stage];
           return (
             <div key={stage} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ backgroundColor: sm.bg, border: `1px solid ${sm.color}30` }}>

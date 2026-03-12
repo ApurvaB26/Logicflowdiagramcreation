@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { ConceptStageChart } from "./concept-stage";
 import { DetailedDesignStageChart } from "./detailed-design-stage";
+import { TenderStageChart } from "./tender-stage";
+import { VFCStageChart } from "./vfc-stage";
 import { ServicesDashboard } from "./services-dashboard";
 import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
@@ -325,17 +327,23 @@ export function SharePage() {
   // Determine what we're showing
   const isConceptChart = type === "concept";
   const isDetailedChart = type === "detailed";
+  const isTenderChart = type === "tender";
+  const isVfcChart = type === "vfc";
   const isServices = type === "services";
   const isCalc = type === "calc" && id;
   const calcMeta = isCalc ? CALC_META[id] : null;
   const CalcComponent = isCalc ? CALC_COMPONENTS[id] : null;
-  const isStageChart = isConceptChart || isDetailedChart;
+  const isStageChart = isConceptChart || isDetailedChart || isTenderChart || isVfcChart;
 
   const shareUrl = window.location.href;
   const title = isConceptChart
     ? "MEP Concept Stage \u2014 Complete Workflow"
     : isDetailedChart
     ? "MEP Detailed Design Stage \u2014 Complete Workflow"
+    : isTenderChart
+    ? "MEP Tender Stage \u2014 Complete Workflow"
+    : isVfcChart
+    ? "MEP VFC Stage \u2014 Complete Workflow"
     : isServices
     ? "MEP Services Dashboard"
     : calcMeta
@@ -454,6 +462,10 @@ export function SharePage() {
               ? "linear-gradient(90deg, #f59e0b, #d97706, #b45309)"
               : isCalc
               ? accentColor
+              : isVfcChart
+              ? "linear-gradient(90deg, #a78bfa, #8b5cf6, #6d28d9, #4f46e5, #3b82f6)"
+              : isTenderChart
+              ? "linear-gradient(90deg, #14b8a6, #06b6d4, #3b82f6, #8b5cf6, #10b981)"
               : isDetailedChart
               ? "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)"
               : "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
@@ -656,9 +668,15 @@ export function SharePage() {
           const stageId = type || "";
           const stageLabel = MERMAID_STAGE_LABELS[stageId] || stageId;
           const StageComponent = isConceptChart ? ConceptStageChart
+            : isTenderChart ? TenderStageChart
+            : isVfcChart ? VFCStageChart
             : DetailedDesignStageChart;
           const stageGradient = isConceptChart
             ? "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)"
+            : isTenderChart
+            ? "linear-gradient(90deg, #14b8a6, #06b6d4, #3b82f6, #8b5cf6, #10b981)"
+            : isVfcChart
+            ? "linear-gradient(90deg, #a78bfa, #8b5cf6, #6d28d9, #4f46e5, #3b82f6)"
             : "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)";
           const calcIds = STAGE_CALC_IDS[stageId] || [];
           const readyCalcIds = calcIds.filter((cid) => CALC_COMPONENTS[cid]);

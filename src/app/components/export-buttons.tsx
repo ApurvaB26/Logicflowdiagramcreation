@@ -12,7 +12,7 @@ import { copyToClipboard } from "./clipboard-utils";
 // PROPS
 // =====================================================================
 interface ExportButtonsProps {
-  currentStage?: string; // "concept" | "detailed"
+  currentStage?: string; // "concept" | "detailed" | "tender" | "vfc"
 }
 
 // =====================================================================
