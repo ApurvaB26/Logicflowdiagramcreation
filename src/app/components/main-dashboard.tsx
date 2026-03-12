@@ -2,8 +2,6 @@ import { useState } from "react";
 import { ServicesDashboard } from "./services-dashboard";
 import { ConceptStageChart } from "./concept-stage";
 import { DetailedDesignStageChart } from "./detailed-design-stage";
-import { TenderStageChart } from "./tender-stage";
-import { VFCStageChart } from "./vfc-stage";
 import { ExportButtons } from "./export-buttons";
 import { ShareModal } from "./share-modal";
 import { FeedbackQRPanel } from "./feedback-qr-panel";
@@ -15,34 +13,26 @@ import {
   LayoutGrid,
   GitBranch,
   PenTool,
-  ShoppingCart,
-  HardHat,
   Share2,
 } from "lucide-react";
 
-type View = "services" | "concept" | "detailed" | "tender" | "vfc";
+type View = "services" | "concept" | "detailed";
 
 const VIEW_TABS: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: "services", label: "Services", icon: <LayoutGrid className="w-3.5 h-3.5" /> },
   { id: "concept", label: "Concept", icon: <GitBranch className="w-3.5 h-3.5" /> },
   { id: "detailed", label: "Detailed", icon: <PenTool className="w-3.5 h-3.5" /> },
-  { id: "tender", label: "Tender", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
-  { id: "vfc", label: "VFC", icon: <HardHat className="w-3.5 h-3.5" /> },
 ];
 
 const STAGE_GRADIENTS: Record<string, string> = {
   concept:  "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
   detailed: "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)",
-  tender:   "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)",
-  vfc:      "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #10b981, #059669)",
 };
 
 const STAGE_LABELS: Record<string, string> = {
   services: "Concept Stage Calculations",
   concept:  "Concept Stage Complete Workflow",
   detailed: "Detailed Design Stage Complete Workflow",
-  tender:   "Tender Stage Complete Workflow",
-  vfc:      "VFC Stage Complete Workflow",
 };
 
 export function MainDashboard() {
@@ -156,8 +146,6 @@ export function MainDashboard() {
                 <div className="p-4 w-full" style={{ zoom }}>
                   {view === "concept" && <ConceptStageChart />}
                   {view === "detailed" && <DetailedDesignStageChart />}
-                  {view === "tender" && <TenderStageChart />}
-                  {view === "vfc" && <VFCStageChart />}
                 </div>
               </div>
             </div>

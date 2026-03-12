@@ -1,16 +1,16 @@
 import React from "react";
 
 // =====================================================================
-// DOMESTIC & FLUSHING PUMP CALCULATIONS — Custom SVG Flow Diagram
-// Phase 1: Project Data & Capacity Inputs (Q)
-// Phase 2: Hydraulic Head (TDH) Calculations
-// Phase 3: Selection & Output
+// PUMP HEAD & FLOW RATE CALCULATION LOGIC — Custom SVG Flow Diagram
+// Phase 1: Input & Data Gathering
+// Phase 2: Flow Rate (Q) Calculation
+// Phase 3: Head (H) & Pressure Loss Analysis
+// Phase 4: Final Output & Pump Sizing
 // =====================================================================
 
 const W = 1560;
-const CX = W / 2; // 780 — main flow spine
+const CX = W / 2;
 
-// Colors — Bold Blue/Orange/Green system
 const C = {
   blue:   { bg: "#dbeafe", bd: "#2563eb", tx: "#1e40af" },
   orange: { bg: "#fff7ed", bd: "#ea580c", tx: "#9a3412" },
@@ -25,18 +25,25 @@ const C = {
   arrow:  "#94a3b8",
 };
 
-// ── Constants ──
-const BW = 520;                // main box width
-const BH = 64;                 // main box height
-const BX = CX - BW / 2;       // main box left edge (centered)
-const COL_W = 340;             // branch column width
-const COL_GAP = 30;            // gap between branch columns
-const TOTAL_3COL = COL_W * 3 + COL_GAP * 2; // total 3-col width
-const COL_LX = CX - TOTAL_3COL / 2;         // left col start
-const COL_MX = COL_LX + COL_W + COL_GAP;    // mid col start
-const COL_RX = COL_MX + COL_W + COL_GAP;    // right col start
-const NOTE_W = 300;            // note box width
-const NOTE_X = BX + BW + 30;  // note box x (right of main box)
+const BW = 520;
+const BH = 64;
+const BX = CX - BW / 2;
+const AG = 48;
+const NOTE_W = 310;
+const NOTE_X = BX + BW + 30;
+
+// ── Four-column layout for branching ──
+const COL_W4 = 280;
+const COL_GAP4 = 20;
+const TOTAL_4COL = COL_W4 * 4 + COL_GAP4 * 3;
+const COL4_1X = CX - TOTAL_4COL / 2;
+const COL4_2X = COL4_1X + COL_W4 + COL_GAP4;
+const COL4_3X = COL4_2X + COL_W4 + COL_GAP4;
+const COL4_4X = COL4_3X + COL_W4 + COL_GAP4;
+
+// ── Three-column layout (for phase 3 notes) ──
+const COL_W = 340;
+const COL_GAP = 30;
 
 // =====================================================================
 // REUSABLE SVG COMPONENTS
@@ -52,16 +59,6 @@ function PhaseBand({ y, h, label, color, icon }: { y: number; h: number; label: 
       <text x={40} y={y + 24} fill={color} fontSize={13} fontWeight={800} letterSpacing={1.2}>
         {icon ? `${icon}  ${label}` : label}
       </text>
-    </g>
-  );
-}
-
-function StepBadge({ x, y, num, color }: { x: number; y: number; num: number | string; color: string }) {
-  return (
-    <g>
-      <circle cx={x} cy={y} r={18} fill={color} />
-      <circle cx={x} cy={y} r={18} fill="none" stroke="#fff" strokeWidth={2} opacity={0.25} />
-      <text x={x} y={y + 5} textAnchor="middle" fill="#fff" fontSize={14} fontWeight={700}>{num}</text>
     </g>
   );
 }
@@ -115,14 +112,14 @@ function FanArrow({ x1, y1, x2, y2, label, color: c }: {
   x1: number; y1: number; x2: number; y2: number; label?: string; color?: string;
 }) {
   const cl = c || C.arrow;
-  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  const my = (y1 + y2) / 2;
   return (
     <g>
       <path d={`M${x1},${y1} L${x1},${my} L${x2},${my} L${x2},${y2}`}
         fill="none" stroke={cl} strokeWidth={2} markerEnd="url(#dfp-arrow)" />
       {label && (
         <>
-          <rect x={x2 - 28} y={y2 - 22} width={56} height={18} rx={9} fill="#fff" stroke={cl} strokeWidth={1} />
+          <rect x={x2 - 36} y={y2 - 22} width={72} height={18} rx={9} fill="#fff" stroke={cl} strokeWidth={1} />
           <text x={x2} y={y2 - 10} textAnchor="middle" fill={cl} fontSize={9} fontWeight={600}>{label}</text>
         </>
       )}
@@ -198,109 +195,56 @@ function FormulaBox({ x, y, w, h, formula, note, color }: {
 // MAIN SVG COMPONENT
 // =====================================================================
 export function DomesticFlushingPumpCalcSVG() {
-  // Y-cursor — everything flows downward from here
   let Y = 20;
-  const AG = 48; // arrow gap — vertical space for arrows between elements
 
-  // ═══════════════════════════════════════════════════
-  // TITLE
-  // ═══════════════════════════════════════════════════
-  const titleY = Y;
-  Y += 90;
+  // ═══ TITLE ═══
+  const titleY = Y; Y += 90;
 
-  // ═══════════════════════════════════════════════════
-  // PHASE 1 — PROJECT DATA & CAPACITY
-  // ═══════════════════════════════════════════════════
-  const p1Y = Y;
-  Y += 48;
-
-  // Step 1: Entry
-  const entryY = Y; Y += BH + AG;
-
-  // Step 2: Strategy Diamond
-  const stratDiaY = Y + 38; Y += 80 + 6;
-
-  // 3 strategy columns
-  const stratColY = Y; Y += 90 + AG;
-
-  // Merge
-  const stratMergeY = Y; Y += 60 + AG;
-
-  // Step 3: Capacity Diamond
-  const capDiaY = Y + 38; Y += 80 + 6;
-
-  // 3 capacity columns
-  const capColY = Y; Y += 200 + AG;
-
-  // Merge
-  const capMergeY = Y; Y += 56 + AG;
-
-  // Q output
-  const qOutY = Y; Y += BH + AG;
-
+  // ═══ PHASE 1 — INPUT & DATA GATHERING ═══
+  const p1Y = Y; Y += 48;
+  const startY = Y; Y += BH + AG;       // Start node
+  const inputAY = Y; Y += BH + AG;      // Input A: Building Height
+  const inputBY = Y; Y += BH + AG;      // Input B: Tank Locations
+  const inputCY = Y; Y += BH + AG;      // Input C: System Type
   const p1H = Y - p1Y - 8;
 
-  // ═══════════════════════════════════════════════════
-  // PHASE 2 — TDH CALCULATIONS
-  // ═══════════════════════════════════════════════════
-  const p2Y = Y;
-  Y += 48;
-
-  // Step A: Static Head
-  const stepAY = Y; Y += BH + AG;
-  const formulaAY = Y; Y += 60 + AG;
-
-  // Step B: Friction
-  const stepBY = Y; Y += BH + AG;
-  const diaMatY = Y + 32; Y += 68 + 6;
-  const formulaBY = Y; Y += 120 + AG;
-
-  // Step C: Minor losses
-  const stepCY = Y; Y += BH + AG;
-  const formulaCY = Y; Y += 60 + AG;
-
-  // Step D: Residual
-  const stepDY = Y; Y += BH + AG;
-  const tableDY = Y; Y += 120 + AG;
-
-  // TDH big formula
-  const tdhFormulaY = Y; Y += 74 + AG;
-  // TDH output
-  const tdhOutY = Y; Y += BH + AG;
-
+  // ═══ PHASE 2 — FLOW RATE (Q) CALCULATION ═══
+  const p2Y = Y; Y += 48;
+  const decDiaY = Y + 38; Y += 80 + 6;  // Decision diamond
+  const pathColY = Y; Y += 140 + AG;    // 4 path columns
+  const pathMergeY = Y; Y += 56 + AG;   // Merge
+  const qOutY = Y; Y += BH + AG;        // Q output
   const p2H = Y - p2Y - 8;
 
-  // ═══════════════════════════════════════════════════
-  // PHASE 3 — SELECTION & OUTPUT
-  // ═══════════════════════════════════════════════════
-  const p3Y = Y;
-  Y += 48;
-
-  // Config diamond
-  const cfgDiaY = Y + 38; Y += 80 + 6;
-  // 3 config columns
-  const cfgColY = Y; Y += 160 + AG;
-  // Merge
-  const cfgMergeY = Y; Y += 56 + AG;
-
-  // Steps 5-6-7 linear
-  const step5Y = Y; Y += BH + AG;
-  const step6Y = Y; Y += BH + AG;
-  const step7Y = Y; Y += BH + AG;
-
-  // Output table
-  const outTblY = Y; Y += 170 + AG;
-
-  // Done
-  const doneY = Y; Y += 64;
-
+  // ═══ PHASE 3 — HEAD (H) & PRESSURE LOSS ANALYSIS ═══
+  const p3Y = Y; Y += 48;
+  const step1Y = Y; Y += BH + AG;       // Static Head
+  const formula1Y = Y; Y += 60 + AG;    // formula
+  const step2Y = Y; Y += BH + AG;       // Friction Loss
+  const formula2Y = Y; Y += 60 + AG;    // formula
+  const step3Y = Y; Y += BH + AG;       // Fitting Losses
+  const formula3Y = Y; Y += 60 + AG;    // formula
+  const step4Y = Y; Y += BH + AG;       // Residual Pressure
+  const table4Y = Y; Y += 120 + AG;     // table
   const p3H = Y - p3Y - 8;
+
+  // ═══ PHASE 4 — FINAL OUTPUT & PUMP SIZING ═══
+  const p4Y = Y; Y += 48;
+  const tdhFormulaY = Y; Y += 74 + AG;  // TDH formula
+  const out1Y = Y; Y += BH + AG;        // Output 1: Duty Point
+  const out2Y = Y; Y += BH + AG;        // Output 2: Standby
+  const out3Y = Y; Y += BH + AG;        // Output 3: Jockey
+  const outTblY = Y; Y += 170 + AG;     // Final schedule table
+  const doneY = Y; Y += 64;
+  const p4H = Y - p4Y - 8;
+
   const totalH = Y + 30;
 
-  // Column centers for fan-out/in
-  const LC = COL_LX + COL_W / 2;
-  const MC = COL_MX + COL_W / 2;
-  const RC = COL_RX + COL_W / 2;
+  // Column centers for 4-way fan-out
+  const C1 = COL4_1X + COL_W4 / 2;
+  const C2 = COL4_2X + COL_W4 / 2;
+  const C3 = COL4_3X + COL_W4 / 2;
+  const C4 = COL4_4X + COL_W4 / 2;
 
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${totalH}`} preserveAspectRatio="xMidYMin meet"
@@ -317,375 +261,301 @@ export function DomesticFlushingPumpCalcSVG() {
         </linearGradient>
       </defs>
 
-      {/* White background */}
       <rect width={W} height={totalH} fill="#ffffff" rx={20} />
 
       {/* ══════════ TITLE ══════════ */}
-      <rect x={CX - 380} y={titleY} width={760} height={72} rx={20} fill="url(#dfp-title-grad)" />
+      <rect x={CX - 400} y={titleY} width={800} height={72} rx={20} fill="url(#dfp-title-grad)" />
       <text x={CX} y={titleY + 30} textAnchor="middle" fill="#fff" fontSize={22} fontWeight={800}>
-        Domestic & Flushing Pump Calculations
+        Pump Head & Flow Rate Calculation Logic
       </text>
       <text x={CX} y={titleY + 52} textAnchor="middle" fill="#fff" fontSize={12} opacity={0.85}>
-        Flow Rate (Q) + Total Dynamic Head (TDH) + Pump Selection & Infrastructure Outputs
+        Input & Data Gathering {"→"} Flow Rate (Q) {"→"} Head & Pressure Loss {"→"} Final Pump Sizing
       </text>
 
-      {/* ══════════ PHASE 1 ══════════ */}
-      <PhaseBand y={p1Y} h={p1H} label="PHASE 1 — PROJECT DATA & CAPACITY INPUTS" color={C.blue.bd} icon="📋" />
 
-      {/* Step 1: Entry */}
-      <StepBadge x={BX - 28} y={entryY + BH / 2} num={1} color={C.blue.bd} />
-      <Box x={BX} y={entryY} w={BW} h={BH}
-        label="Project Data Entry"
-        sub="Building type, height, floor count, population, water demand"
-        color={C.blue} badge="INPUT" />
-      <NoteBox x={NOTE_X} y={entryY} w={NOTE_W} h={64}
-        text={["📥 Input Sources:", "• Architect drawings → Floor count & heights", "• Water demand calc (P3A) → Tank volumes", "• Fire system type → Pump category"]}
+      {/* ══════════════════════════════════════════════════════════════════
+          PHASE 1 — INPUT & DATA GATHERING
+          ══════════════════════════════════════════════════════════════════ */}
+      <PhaseBand y={p1Y} h={p1H} label="PHASE 1 — INPUT & DATA GATHERING" color={C.blue.bd} icon="📋" />
+
+      {/* Start Node */}
+      <Box x={BX} y={startY} w={BW} h={BH}
+        label="Project Architectural & Plumbing Data"
+        sub="Starting point — gather all project-level input data"
+        color={C.blue} badge="START" />
+      <NoteBox x={NOTE_X} y={startY + 2} w={NOTE_W} h={56}
+        text={["📥 Data Sources:", "  • Architectural drawings", "  • Plumbing design briefs", "  • Project specifications"]}
         color={C.slate} />
 
-      <VArrow y1={entryY + BH} y2={stratDiaY - 38} />
+      <VArrow y1={startY + BH} y2={inputAY} />
 
-      {/* Step 2: Strategy Diamond */}
-      <StepBadge x={BX - 28} y={stratDiaY} num={2} color={C.orange.bd} />
-      <Diamond cx={CX} cy={stratDiaY} w={440} h={70}
-        label="System Strategy Selection"
-        sub="Choose pumping strategy based on building height & zoning"
+      {/* Input A */}
+      <Box x={BX} y={inputAY} w={BW} h={BH}
+        label="Building Height & Number of Floors"
+        sub="Referencing floor-to-floor height from architect drawings"
+        color={C.blue} badge="INPUT" />
+      <NoteBox x={NOTE_X} y={inputAY + 2} w={NOTE_W} h={48}
+        text={["🏢 Floor Data:", "  Floor-to-floor height, total floors", "  Basement / podium / typical counts"]}
+        color={C.slate} />
+
+      <VArrow y1={inputAY + BH} y2={inputBY} />
+
+      {/* Input B */}
+      <Box x={BX} y={inputBY} w={BW} h={BH}
+        label="Tank Locations"
+        sub="UGT Level vs. OHT / Terrace Level — elevation reference points"
+        color={C.blue} badge="INPUT" />
+      <NoteBox x={NOTE_X} y={inputBY + 2} w={NOTE_W} h={48}
+        text={["📐 Tank Elevations:", "  UGT depth below ground", "  OHT / Terrace tank level above datum"]}
+        color={C.slate} />
+
+      <VArrow y1={inputBY + BH} y2={inputCY} />
+
+      {/* Input C */}
+      <Box x={BX} y={inputCY} w={BW} h={BH}
+        label="System Type Selection"
+        sub="Domestic, Fire, Irrigation, or STP — determines Q calculation path"
+        color={C.orange} badge="INPUT" />
+      <NoteBox x={NOTE_X} y={inputCY + 2} w={NOTE_W} h={56}
+        text={["⚙️ System Types:", "  • Domestic / Grey Water", "  • Fire System (NFPA)", "  • Irrigation / Landscape", "  • Sump / Drainage"]}
         color={C.amber} />
 
-      {/* Fan-out to 3 strategies */}
-      <FanArrow x1={CX} y1={stratDiaY + 35} x2={LC} y2={stratColY} label="Type 1" />
-      <VArrow y1={stratDiaY + 35} y2={stratColY} />
-      <FanArrow x1={CX} y1={stratDiaY + 35} x2={RC} y2={stratColY} label="Type 3" />
 
-      {/* 3 Strategy boxes */}
-      <Box x={COL_LX} y={stratColY} w={COL_W} h={76}
-        label="Gravity System"
-        sub="Pressure from elevation difference only. Simplest — no active pressure control."
-        color={C.green} badge="OPTION" />
-      <Box x={COL_MX} y={stratColY} w={COL_W} h={76}
-        label="PRV (Pressure Reducing Valve)"
-        sub="One high-pressure pump with PRVs reducing pressure at lower floors."
-        color={C.purple} badge="OPTION" />
-      <Box x={COL_RX} y={stratColY} w={COL_W} h={76}
-        label="MSMO (Multi-Stage Multi-Outlet)"
-        sub="Specialized pumps with multiple outlets for different pressure zones."
-        color={C.cyan} badge="OPTION" />
+      {/* ══════════════════════════════════════════════════════════════════
+          PHASE 2 — FLOW RATE (Q) CALCULATION
+          ══════════════════════════════════════════════════════════════════ */}
+      <PhaseBand y={p2Y} h={p2H} label="PHASE 2 — FLOW RATE (Q) CALCULATION" color={C.orange.bd} icon="💧" />
 
-      {/* Fan-in */}
-      <FanArrow x1={LC} y1={stratColY + 76} x2={CX} y2={stratMergeY} />
-      <VArrow y1={stratColY + 76} y2={stratMergeY} />
-      <FanArrow x1={RC} y1={stratColY + 76} x2={CX} y2={stratMergeY} />
+      <VArrow y1={inputCY + BH} y2={decDiaY - 38} />
 
-      {/* Strategy Merge */}
-      <Box x={CX - 200} y={stratMergeY} w={400} h={50}
-        label="Strategy Selected → Proceed to Q Calculation"
-        sub="System type determines pump sizing approach"
-        color={C.teal} />
-
-      <VArrow y1={stratMergeY + 50} y2={capDiaY - 38} />
-
-      {/* Step 3: Capacity Diamond */}
-      <StepBadge x={BX - 28} y={capDiaY} num={3} color={C.blue.bd} />
-      <Diamond cx={CX} cy={capDiaY} w={400} h={70}
-        label="Pump Category"
-        sub="Which system is this pump serving?"
+      {/* Decision Diamond */}
+      <Diamond cx={CX} cy={decDiaY} w={480} h={70}
+        label="Calculate Demand Based on System Type"
+        sub="Route to appropriate flow rate calculation method"
         color={C.amber} />
 
-      {/* Fan-out to 3 capacity branches */}
-      <FanArrow x1={CX} y1={capDiaY + 35} x2={LC} y2={capColY} label="Fire" color={C.fire.bd} />
-      <VArrow y1={capDiaY + 35} y2={capColY} color={C.blue.bd} />
-      <FanArrow x1={CX} y1={capDiaY + 35} x2={RC} y2={capColY} label="Sump" color={C.purple.bd} />
+      {/* Fan-out to 4 paths */}
+      <FanArrow x1={CX} y1={decDiaY + 35} x2={C1} y2={pathColY} label="Domestic" color={C.blue.bd} />
+      <FanArrow x1={CX} y1={decDiaY + 35} x2={C2} y2={pathColY} label="Fire" color={C.fire.bd} />
+      <FanArrow x1={CX} y1={decDiaY + 35} x2={C3} y2={pathColY} label="Irrigation" color={C.green.bd} />
+      <FanArrow x1={CX} y1={decDiaY + 35} x2={C4} y2={pathColY} label="Sump" color={C.purple.bd} />
 
-      {/* Fire branch */}
-      <Box x={COL_LX} y={capColY} w={COL_W} h={64}
-        label="Fire System Sizing"
-        sub="Based on hazard class (Ordinary / High)"
-        color={C.fire} badge="FIRE" />
-      <TableBox x={COL_LX + 10} y={capColY + 74} w={COL_W - 20}
-        headers={["Pump Type", "Flow (LPM)"]}
-        rows={[["Main Pump", "2850"], ["Booster", "900"], ["Jockey", "180"]]}
+      {/* Path 1: Domestic/Grey Water */}
+      <Box x={COL4_1X} y={pathColY} w={COL_W4} h={64}
+        label="Domestic / Grey Water"
+        sub="Tank Volume ÷ Filling Time"
+        color={C.blue} badge="PATH 1" />
+      <FormulaBox x={COL4_1X + 5} y={pathColY + 72} w={COL_W4 - 10} h={52}
+        formula="Q = V / t"
+        note="Standard filling time = 120 minutes"
+        color={C.blue} />
+
+      {/* Path 2: Fire System */}
+      <Box x={COL4_2X} y={pathColY} w={COL_W4} h={64}
+        label="Fire System"
+        sub="Per NFPA Standards"
+        color={C.fire} badge="PATH 2" />
+      <NoteBox x={COL4_2X + 5} y={pathColY + 72} w={COL_W4 - 10} h={52}
+        text={["🔥 Fire Flow Rates:", "  Main Pump: 2850 LPM", "  Jockey Pump: 180 LPM"]}
         color={C.fire} />
 
-      {/* Domestic/Transfer branch */}
-      <Box x={COL_MX} y={capColY} w={COL_W} h={64}
-        label="Domestic / Transfer"
-        sub="Tank volume ÷ Filling time"
-        color={C.blue} badge="DOMESTIC" />
-      <FormulaBox x={COL_MX + 10} y={capColY + 74} w={COL_W - 20} h={55}
-        formula="Q = V / t"
-        note="e.g. 26 m³ ÷ 120 min = 13 m³/hr"
-        color={C.blue} />
-      <NoteBox x={COL_MX + 10} y={capColY + 138} w={COL_W - 20} h={42}
-        text={["💡 V = tank capacity from P3A", "   t = filling time (design parameter)"]}
-        color={C.slate} />
+      {/* Path 3: Irrigation */}
+      <Box x={COL4_3X} y={pathColY} w={COL_W4} h={64}
+        label="Irrigation / Landscape"
+        sub="Area-based demand calculation"
+        color={C.green} badge="PATH 3" />
+      <FormulaBox x={COL4_3X + 5} y={pathColY + 72} w={COL_W4 - 10} h={52}
+        formula="Q = Area × 5 L/m² ÷ t"
+        note="Irrigation window: 1-2 hours"
+        color={C.green} />
 
-      {/* Sump branch */}
-      <Box x={COL_RX} y={capColY} w={COL_W} h={64}
-        label="Sump Pump Sizing"
-        sub="Worst-case of sprinkler burst vs tank drain"
-        color={C.purple} badge="SUMP" />
-      <NoteBox x={COL_RX + 10} y={capColY + 74} w={COL_W - 20} h={80}
-        text={[
-          "📐 Worst-case logic:",
-          "  Case A: Sprinkler burst inflow ≈ 17 Lps",
-          "  Case B: Tank drain in 10 hrs",
-          "  Q_sump = max(Case A, Case B)",
-        ]}
+      {/* Path 4: Sump/Drainage */}
+      <Box x={COL4_4X} y={pathColY} w={COL_W4} h={64}
+        label="Sump / Drainage"
+        sub="Worst-case inflow analysis"
+        color={C.purple} badge="PATH 4" />
+      <NoteBox x={COL4_4X + 5} y={pathColY + 72} w={COL_W4 - 10} h={52}
+        text={["📐 Sump Logic:", "  Inflow: Sprinkler burst / seepage", "  vs. Sump holding volume"]}
         color={C.purple} />
 
       {/* Fan-in */}
-      <FanArrow x1={LC} y1={capColY + 190} x2={CX} y2={capMergeY} />
-      <VArrow y1={capColY + 190} y2={capMergeY} />
-      <FanArrow x1={RC} y1={capColY + 190} x2={CX} y2={capMergeY} />
+      <FanArrow x1={C1} y1={pathColY + 130} x2={CX} y2={pathMergeY} />
+      <FanArrow x1={C2} y1={pathColY + 130} x2={CX} y2={pathMergeY} />
+      <FanArrow x1={C3} y1={pathColY + 130} x2={CX} y2={pathMergeY} />
+      <FanArrow x1={C4} y1={pathColY + 130} x2={CX} y2={pathMergeY} />
 
-      {/* Capacity Merge */}
-      <Box x={CX - 200} y={capMergeY} w={400} h={48}
+      <Box x={CX - 200} y={pathMergeY} w={400} h={48}
         label="Flow Rate (Q) Determined"
-        sub="All pump categories → individual Q values locked"
+        sub="System-specific Q values locked — proceed to head calculation"
         color={C.teal} />
 
-      <VArrow y1={capMergeY + 48} y2={qOutY} />
+      <VArrow y1={pathMergeY + 48} y2={qOutY} />
 
-      {/* Q Output */}
       <Box x={BX} y={qOutY} w={BW} h={BH}
-        label="📊 Phase 1 Output: Flow Rate Q (m³/hr or LPM)"
-        sub="Feeds into Phase 2 for TDH calculation"
+        label="Phase 2 Output: Flow Rate Q (m³/hr or LPM)"
+        sub="Feeds into Phase 3 for TDH calculation"
         color={C.green} badge="OUTPUT" />
 
 
-      {/* ══════════ PHASE 2 ══════════ */}
-      <PhaseBand y={p2Y} h={p2H} label="PHASE 2 — HYDRAULIC HEAD (TDH) CALCULATIONS" color={C.orange.bd} icon="🔧" />
+      {/* ══════════════════════════════════════════════════════════════════
+          PHASE 3 — HEAD (H) & PRESSURE LOSS ANALYSIS
+          ══════════════════════════════════════════════════════════════════ */}
+      <PhaseBand y={p3Y} h={p3H} label="PHASE 3 — HEAD (H) & PRESSURE LOSS ANALYSIS" color={C.orange.bd} icon="🔧" />
 
-      <VArrow y1={qOutY + BH} y2={stepAY} />
+      <VArrow y1={qOutY + BH} y2={step1Y} />
 
-      {/* Step A */}
-      <StepBadge x={BX - 28} y={stepAY + BH / 2} num="A" color={C.orange.bd} />
-      <Box x={BX} y={stepAY} w={BW} h={BH}
-        label="Step A: Static Head (Hs)"
-        sub="Vertical height difference: pump centerline → highest discharge point"
+      {/* Step 1: Static Head */}
+      <Box x={BX} y={step1Y} w={BW} h={BH}
+        label="Static Head (Hs)"
+        sub="Vertical height difference: Pump Centerline → Highest Discharge Point"
         color={C.blue} badge="HEAD" />
-      <NoteBox x={NOTE_X} y={stepAY + 4} w={NOTE_W} h={52}
-        text={["📐 Static head = elevation difference", "   between pump and highest outlet"]}
+      <NoteBox x={NOTE_X} y={step1Y + 2} w={NOTE_W} h={56}
+        text={["📐 Static Head:", "  Vertical distance between pump", "  centerline and highest outlet", "  Convert meters → bar ÷ 10.2"]}
         color={C.slate} />
 
-      <VArrow y1={stepAY + BH} y2={formulaAY} />
+      <VArrow y1={step1Y + BH} y2={formula1Y} />
 
-      <FormulaBox x={CX - 230} y={formulaAY} w={460} h={52}
-        formula="Head (bar) = Height (m) / 10.2"
+      <FormulaBox x={CX - 240} y={formula1Y} w={480} h={52}
+        formula="Hs (bar) = Height (m) / 10.2"
         note="Converts vertical distance to pressure equivalent"
         color={C.amber} />
 
-      <VArrow y1={formulaAY + 52} y2={stepBY} />
+      <VArrow y1={formula1Y + 52} y2={step2Y} />
 
-      {/* Step B */}
-      <StepBadge x={BX - 28} y={stepBY + BH / 2} num="B" color={C.orange.bd} />
-      <Box x={BX} y={stepBY} w={BW} h={BH}
-        label="Step B: Frictional Loss (Hf)"
-        sub="Based on pipe material & diameter — Hazen-Williams method"
+      {/* Step 2: Friction Loss */}
+      <Box x={BX} y={step2Y} w={BW} h={BH}
+        label="Friction Loss — Pipes (Hf)"
+        sub="Apply loss factor (4 ft per 100 ft run) to vertical & horizontal pipe lengths"
         color={C.blue} badge="HEAD" />
-
-      <VArrow y1={stepBY + BH} y2={diaMatY - 32} />
-
-      <Diamond cx={CX} cy={diaMatY} w={360} h={58}
-        label="Pipe Material?"
-        sub="Steel / Copper / PVC / GI"
-        color={C.amber} />
-
-      <VArrow y1={diaMatY + 29} y2={formulaBY} />
-
-      {/* Friction formula + side table */}
-      <FormulaBox x={BX} y={formulaBY} w={360} h={52}
-        formula="4 ft loss per 100 ft pipe length"
-        note="Hazen-Williams C factor per material"
-        color={C.amber} />
-      <TableBox x={BX + 380} y={formulaBY} w={380}
-        headers={["Material", "C Factor", "Typical Use"]}
-        rows={[
-          ["Steel", "120", "Fire mains"],
-          ["Copper", "140", "Domestic hot"],
-          ["PVC/CPVC", "150", "Cold supply"],
-          ["GI Pipe", "100", "Legacy systems"],
-        ]}
-        color={C.cyan} />
-
-      <VArrow y1={formulaBY + 52} y2={stepCY} />
-
-      {/* Step C */}
-      <StepBadge x={BX - 28} y={stepCY + BH / 2} num="C" color={C.orange.bd} />
-      <Box x={BX} y={stepCY} w={BW} h={BH}
-        label="Step C: Fitting / Minor Losses (Hm)"
-        sub="Resistance from elbows, tees, valves — simplified method"
-        color={C.blue} badge="HEAD" />
-      <NoteBox x={NOTE_X} y={stepCY + 2} w={NOTE_W} h={56}
-        text={["💡 Equivalent Length Method:", "  Each fitting = equiv. pipe length", "  Elbows, tees, gate/check valves"]}
+      <NoteBox x={NOTE_X} y={step2Y + 2} w={NOTE_W} h={56}
+        text={["📏 Friction Calculation:", "  Hazen-Williams method", "  4 ft loss per 100 ft pipe run", "  Both vertical & horizontal lengths"]}
         color={C.slate} />
 
-      <VArrow y1={stepCY + BH} y2={formulaCY} />
+      <VArrow y1={step2Y + BH} y2={formula2Y} />
 
-      <FormulaBox x={CX - 230} y={formulaCY} w={460} h={52}
+      <FormulaBox x={CX - 260} y={formula2Y} w={520} h={52}
+        formula="Hf = (4 ft / 100 ft) × Total Pipe Length"
+        note="Applied to both vertical risers and horizontal distribution"
+        color={C.amber} />
+
+      <VArrow y1={formula2Y + 52} y2={step3Y} />
+
+      {/* Step 3: Fitting Losses */}
+      <Box x={BX} y={step3Y} w={BW} h={BH}
+        label="Fitting Losses (Hm)"
+        sub="Add 30% safety factor to pipe friction for Valves, Bends & Tees"
+        color={C.blue} badge="HEAD" />
+      <NoteBox x={NOTE_X} y={step3Y + 2} w={NOTE_W} h={56}
+        text={["💡 Equivalent Length Method:", "  Elbows, tees, gate/check valves", "  30% safety factor on Hf", "  Accounts for all minor losses"]}
+        color={C.slate} />
+
+      <VArrow y1={step3Y + BH} y2={formula3Y} />
+
+      <FormulaBox x={CX - 240} y={formula3Y} w={480} h={52}
         formula="Hm = 0.30 × Hf  (30% of pipe friction)"
         note="Simplified: 30% multiplier of total frictional loss"
         color={C.amber} />
 
-      <VArrow y1={formulaCY + 52} y2={stepDY} />
+      <VArrow y1={formula3Y + 52} y2={step4Y} />
 
-      {/* Step D */}
-      <StepBadge x={BX - 28} y={stepDY + BH / 2} num="D" color={C.orange.bd} />
-      <Box x={BX} y={stepDY} w={BW} h={BH}
-        label="Step D: Residual Pressure (Hr)"
-        sub='Leftover pressure needed at fixture for proper operation'
+      {/* Step 4: Residual Pressure */}
+      <Box x={BX} y={step4Y} w={BW} h={BH}
+        label="Residual Pressure (Hr)"
+        sub='Best practice requirement at the farthest/highest fixture'
         color={C.blue} badge="HEAD" />
 
-      <VArrow y1={stepDY + BH} y2={tableDY} />
+      <VArrow y1={step4Y + BH} y2={table4Y} />
 
-      <TableBox x={CX - 240} y={tableDY} w={480}
-        headers={["Fixture Type", "Required Pressure", "Reference"]}
+      <TableBox x={CX - 240} y={table4Y} w={480}
+        headers={["System Type", "Required Pressure", "Reference"]}
         rows={[
-          ["Fire Hydrant", "3.5 bar", "IS 15105"],
-          ["Domestic Tap", "0.5 bar", "NBC 2016"],
-          ["Flushing Valve", "1.0 bar", "IS 2065"],
-          ["Shower / Basin", "0.7 bar", "IS 2065"],
+          ["Domestic Tap", "1.0 Bar", "Best Practice"],
+          ["Fire Hydrant", "3.5 Bar", "IS 15105 / NFPA"],
+          ["Flushing Valve", "1.0 Bar", "IS 2065"],
+          ["Shower / Basin", "0.7 Bar", "IS 2065"],
         ]}
         color={C.cyan} />
 
-      <VArrow y1={tableDY + 118} y2={tdhFormulaY} />
+
+      {/* ══════════════════════════════════════════════════════════════════
+          PHASE 4 — FINAL OUTPUT & PUMP SIZING
+          ══════════════════════════════════════════════════════════════════ */}
+      <PhaseBand y={p4Y} h={p4H} label="PHASE 4 — FINAL OUTPUT & PUMP SIZING" color={C.green.bd} icon="✅" />
+
+      <VArrow y1={table4Y + 118} y2={tdhFormulaY} />
 
       {/* TDH Formula — prominent */}
-      <rect x={CX - 320} y={tdhFormulaY} width={640} height={68} rx={14}
+      <rect x={CX - 340} y={tdhFormulaY} width={680} height={68} rx={14}
         fill={C.green.bg} stroke={C.green.bd} strokeWidth={3} />
       <text x={CX} y={tdhFormulaY + 28} textAnchor="middle" fill={C.green.tx} fontSize={20} fontWeight={800}>
-        TDH = Hs + Hf + Hm + Hr
+        TDH = Static Head + Friction Loss + Fitting Loss + Residual Pressure
       </text>
       <text x={CX} y={tdhFormulaY + 50} textAnchor="middle" fill={C.green.tx} fontSize={11} opacity={0.8}>
-        Total Dynamic Head = Static + Friction + Minor Losses + Residual Pressure
+        Total Dynamic Head = Hs + Hf + Hm + Hr
       </text>
 
-      <VArrow y1={tdhFormulaY + 68} y2={tdhOutY} color={C.green.bd} />
+      <VArrow y1={tdhFormulaY + 68} y2={out1Y} color={C.green.bd} />
 
-      <Box x={BX} y={tdhOutY} w={BW} h={BH}
-        label="📊 Phase 2 Output: TDH (meters or bar)"
-        sub="Combined with Q from Phase 1 → Duty Point for pump selection"
+      {/* Output 1: Main Pump Duty Point */}
+      <Box x={BX} y={out1Y} w={BW} h={BH}
+        label="Main Pump Duty Point"
+        sub="Flow Rate (Q) in LPM @ Head (H) in Meters — defines pump selection"
         color={C.green} badge="OUTPUT" />
+      <NoteBox x={NOTE_X} y={out1Y + 2} w={NOTE_W} h={48}
+        text={["🎯 Duty Point:", "  Q (LPM) @ H (meters)", "  Plotted on manufacturer curve"]}
+        color={C.green} />
 
+      <VArrow y1={out1Y + BH} y2={out2Y} />
 
-      {/* ══════════ PHASE 3 ══════════ */}
-      <PhaseBand y={p3Y} h={p3H} label="PHASE 3 — PUMP SELECTION & INFRASTRUCTURE OUTPUT" color={C.green.bd} icon="✅" />
-
-      <VArrow y1={tdhOutY + BH} y2={cfgDiaY - 38} color={C.green.bd} />
-
-      <StepBadge x={BX - 28} y={cfgDiaY} num={4} color={C.green.bd} />
-      <Diamond cx={CX} cy={cfgDiaY} w={420} h={70}
-        label="Pump Configuration"
-        sub="Select duty/standby arrangement per system type"
-        color={C.amber} />
-
-      {/* Fan-out */}
-      <FanArrow x1={CX} y1={cfgDiaY + 35} x2={LC} y2={cfgColY} label="Fire" color={C.fire.bd} />
-      <VArrow y1={cfgDiaY + 35} y2={cfgColY} color={C.blue.bd} />
-      <FanArrow x1={CX} y1={cfgDiaY + 35} x2={RC} y2={cfgColY} label="Sump" color={C.purple.bd} />
-
-      {/* Fire config */}
-      <Box x={COL_LX} y={cfgColY} w={COL_W} h={56}
-        label="Fire Pump Set"
-        sub="1 Electric Main + 1 Diesel Standby + 1 Jockey"
-        color={C.fire} badge="CONFIG" />
-      <NoteBox x={COL_LX + 10} y={cfgColY + 66} w={COL_W - 20} h={72}
-        text={["🔥 Fire Configuration:", "  • Main: Electric motor-driven", "  • Standby: Diesel engine-driven", "  • Jockey: Maintains line pressure"]}
-        color={C.fire} />
-
-      {/* Domestic config */}
-      <Box x={COL_MX} y={cfgColY} w={COL_W} h={56}
-        label="Domestic Pump Set"
-        sub="1 Working + 1 Standby (Duty sharing)"
-        color={C.blue} badge="CONFIG" />
-      <NoteBox x={COL_MX + 10} y={cfgColY + 66} w={COL_W - 20} h={72}
-        text={["💧 Domestic Configuration:", "  • Duty pump: Primary operation", "  • Standby: Auto-switchover", "  • Optional VFD for efficiency"]}
+      {/* Output 2: Standby Pump */}
+      <Box x={BX} y={out2Y} w={BW} h={BH}
+        label="Standby Pump Requirement"
+        sub="1 Working + 1 Standby configuration — auto-switchover on failure"
+        color={C.cyan} badge="OUTPUT" />
+      <NoteBox x={NOTE_X} y={out2Y + 2} w={NOTE_W} h={48}
+        text={["🔄 Redundancy:", "  1W + 1S standard config", "  Auto-changeover on fault/alarm"]}
         color={C.cyan} />
 
-      {/* Sump config */}
-      <Box x={COL_RX} y={cfgColY} w={COL_W} h={56}
-        label="Sump Pump Set"
-        sub="Multiple small pumps (e.g. 3 Nos) — duty sharing"
-        color={C.purple} badge="CONFIG" />
-      <NoteBox x={COL_RX + 10} y={cfgColY + 66} w={COL_W - 20} h={72}
-        text={["🔧 Sump Configuration:", "  • 3 pumps for redundancy", "  • Auto-level float switch", "  • Handles peak burst inflows"]}
-        color={C.purple} />
+      <VArrow y1={out2Y + BH} y2={out3Y} />
 
-      {/* Fan-in */}
-      <FanArrow x1={LC} y1={cfgColY + 148} x2={CX} y2={cfgMergeY} />
-      <VArrow y1={cfgColY + 148} y2={cfgMergeY} />
-      <FanArrow x1={RC} y1={cfgColY + 148} x2={CX} y2={cfgMergeY} />
+      {/* Output 3: Jockey Pump */}
+      <Box x={BX} y={out3Y} w={BW} h={BH}
+        label="Jockey Pump Specification"
+        sub="Small pump to maintain system pressure during no-demand periods"
+        color={C.cyan} badge="OUTPUT" />
+      <NoteBox x={NOTE_X} y={out3Y + 2} w={NOTE_W} h={48}
+        text={["⚡ Jockey Pump:", "  Maintains line pressure", "  Prevents main pump cycling"]}
+        color={C.cyan} />
 
-      <Box x={CX - 200} y={cfgMergeY} w={400} h={48}
-        label="Pump Configuration Locked"
-        sub="All systems → config + count finalized"
-        color={C.teal} />
+      <VArrow y1={out3Y + BH} y2={outTblY} />
 
-      <VArrow y1={cfgMergeY + 48} y2={step5Y} />
-
-      {/* Step 5: Header */}
-      <StepBadge x={BX - 28} y={step5Y + BH / 2} num={5} color={C.green.bd} />
-      <Box x={BX} y={step5Y} w={BW} h={BH}
-        label="Header Size Determination"
-        sub="Pipe diameter to keep velocity within safe limits (V ≤ 3.0 m/s)"
-        color={C.cyan} badge="INFRA" />
-      <NoteBox x={NOTE_X} y={step5Y + 4} w={NOTE_W} h={52}
-        text={["📐 V = Q / A → Select diameter", "   where V ≤ 3.0 m/s for domestic mains"]}
-        color={C.slate} />
-
-      <VArrow y1={step5Y + BH} y2={step6Y} />
-
-      {/* Step 6: Power */}
-      <StepBadge x={BX - 28} y={step6Y + BH / 2} num={6} color={C.green.bd} />
-      <Box x={BX} y={step6Y} w={BW} h={BH}
-        label="Power Requirement (kW / HP)"
-        sub="Motor sizing based on duty point (Q @ H)"
-        color={C.cyan} badge="INFRA" />
-      <FormulaBox x={NOTE_X} y={step6Y + 4} w={NOTE_W} h={52}
-        formula="P = (ρ × g × Q × H) / (η × 1000)"
-        note="η = pump efficiency (typically 60–75%)"
-        color={C.amber} />
-
-      <VArrow y1={step6Y + BH} y2={step7Y} />
-
-      {/* Step 7: Tank */}
-      <StepBadge x={BX - 28} y={step7Y + BH / 2} num={7} color={C.green.bd} />
-      <Box x={BX} y={step7Y} w={BW} h={BH}
-        label="Sump / Tank Volume & Dimensions"
-        sub="Finalizing L × W × D of pits and tanks"
-        color={C.cyan} badge="INFRA" />
-      <NoteBox x={NOTE_X} y={step7Y + 4} w={NOTE_W} h={52}
-        text={["📐 Volume from Water Demand (P3A)", "   Dimensions for pump room layout"]}
-        color={C.slate} />
-
-      <VArrow y1={step7Y + BH} y2={outTblY} />
-
-      {/* Output Summary Table */}
+      {/* Final Output Summary Table */}
       <rect x={CX - 460} y={outTblY - 6} width={920} height={162} rx={14}
         fill={C.green.bg} stroke={C.green.bd} strokeWidth={2.5} />
       <text x={CX} y={outTblY + 18} textAnchor="middle" fill={C.green.tx} fontSize={14} fontWeight={800}>
-        📋 Final Pump Schedule — Summary Output
+        Final Pump Schedule for Procurement
       </text>
       <TableBox x={CX - 430} y={outTblY + 28} w={860}
-        headers={["Parameter", "Domestic", "Flushing", "Sump", "Fire Main"]}
+        headers={["Parameter", "Domestic", "Fire Main", "Irrigation", "Sump"]}
         rows={[
-          ["Flow Rate Q", "13 m³/hr", "8 m³/hr", "17 Lps", "2850 LPM"],
-          ["TDH (H)", "45 m", "42 m", "15 m", "65 m"],
-          ["Motor Power", "5.5 kW", "3.7 kW", "2.2 kW", "37 kW"],
-          ["No. of Pumps", "1W + 1S", "1W + 1S", "3 Nos", "1E + 1D + 1J"],
-          ["Header Size", "65 mm", "50 mm", "80 mm", "150 mm"],
+          ["Flow Rate Q", "13 m³/hr", "2850 LPM", "5 m³/hr", "17 Lps"],
+          ["TDH (H)", "45 m", "65 m", "30 m", "15 m"],
+          ["Motor Power", "5.5 kW", "37 kW", "2.2 kW", "2.2 kW"],
+          ["Configuration", "1W + 1S", "1E + 1D + 1J", "1W + 1S", "3 Nos"],
+          ["Residual P", "1.0 Bar", "3.5 Bar", "1.0 Bar", "—"],
         ]}
         color={C.green} />
 
       <VArrow y1={outTblY + 158} y2={doneY} color={C.green.bd} />
 
       {/* DONE */}
-      <rect x={CX - 240} y={doneY} width={480} height={56} rx={28}
+      <rect x={CX - 260} y={doneY} width={520} height={56} rx={28}
         fill={C.green.bd} stroke="#34d399" strokeWidth={2.5} />
       <text x={CX} y={doneY + 24} textAnchor="middle" fill="#fff" fontSize={15} fontWeight={800}>
-        🏁 Domestic & Flushing Pump Calc — COMPLETE
+        Pump Head & Flow Rate Calculation — COMPLETE
       </text>
       <text x={CX} y={doneY + 42} textAnchor="middle" fill="#fff" fontSize={10} opacity={0.85}>
-        Results feed → Space Matrix + Electrical Load Sheet + BOQ
+        Final Pump Schedule {"→"} Procurement + Electrical Load Sheet + Space Matrix
       </text>
     </svg>
   );

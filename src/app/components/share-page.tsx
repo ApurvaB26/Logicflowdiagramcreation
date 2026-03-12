@@ -19,8 +19,6 @@ import {
 } from "lucide-react";
 import { ConceptStageChart } from "./concept-stage";
 import { DetailedDesignStageChart } from "./detailed-design-stage";
-import { TenderStageChart } from "./tender-stage";
-import { VFCStageChart } from "./vfc-stage";
 import { ServicesDashboard } from "./services-dashboard";
 import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
@@ -52,7 +50,7 @@ const CALC_META: Record<string, { title: string; icon: string; color: string; se
   P3B: { title: "Electrical Load Calculation", icon: "\u26A1", color: "#f59e0b", service: "Electrical" },
   OWC: { title: "OWC Calculations", icon: "\u267B\uFE0F", color: "#10b981", service: "Plumbing" },
   STP: { title: "STP Calculations", icon: "\uD83C\uDFED", color: "#06b6d4", service: "Plumbing" },
-  DFP: { title: "Domestic & Flushing Pump Calculations", icon: "\uD83D\uDD27", color: "#06b6d4", service: "Plumbing" },
+  DFP: { title: "Pump Head & Flow Rate Calculation", icon: "\uD83D\uDD27", color: "#06b6d4", service: "Plumbing" },
   FFP: { title: "Fire Pump Head Calculation", icon: "\uD83D\uDE92", color: "#dc2626", service: "Firefighting" },
   FTK: { title: "Fire Tank Size Estimation", icon: "\uD83D\uDEA8", color: "#dc2626", service: "Firefighting" },
   FJD: { title: "Jockey & Drencher Pump", icon: "\uD83D\uDD27", color: "#dc2626", service: "Firefighting" },
@@ -327,23 +325,17 @@ export function SharePage() {
   // Determine what we're showing
   const isConceptChart = type === "concept";
   const isDetailedChart = type === "detailed";
-  const isTenderChart = type === "tender";
-  const isVFCChart = type === "vfc";
   const isServices = type === "services";
   const isCalc = type === "calc" && id;
   const calcMeta = isCalc ? CALC_META[id] : null;
   const CalcComponent = isCalc ? CALC_COMPONENTS[id] : null;
-  const isStageChart = isConceptChart || isDetailedChart || isTenderChart || isVFCChart;
+  const isStageChart = isConceptChart || isDetailedChart;
 
   const shareUrl = window.location.href;
   const title = isConceptChart
     ? "MEP Concept Stage \u2014 Complete Workflow"
     : isDetailedChart
     ? "MEP Detailed Design Stage \u2014 Complete Workflow"
-    : isTenderChart
-    ? "MEP Tender Stage \u2014 Complete Workflow"
-    : isVFCChart
-    ? "MEP VFC Stage \u2014 Validated for Construction"
     : isServices
     ? "MEP Services Dashboard"
     : calcMeta
@@ -464,10 +456,6 @@ export function SharePage() {
               ? accentColor
               : isDetailedChart
               ? "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)"
-              : isTenderChart
-              ? "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)"
-              : isVFCChart
-              ? "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #10b981, #059669)"
               : "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)",
           }}
         />
@@ -668,16 +656,10 @@ export function SharePage() {
           const stageId = type || "";
           const stageLabel = MERMAID_STAGE_LABELS[stageId] || stageId;
           const StageComponent = isConceptChart ? ConceptStageChart
-            : isDetailedChart ? DetailedDesignStageChart
-            : isTenderChart ? TenderStageChart
-            : VFCStageChart;
+            : DetailedDesignStageChart;
           const stageGradient = isConceptChart
             ? "linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6, #f97316, #a78bfa)"
-            : isDetailedChart
-            ? "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)"
-            : isTenderChart
-            ? "linear-gradient(90deg, #14b8a6, #06b6d4, #8b5cf6, #f59e0b, #f97316)"
-            : "linear-gradient(90deg, #a78bfa, #8b5cf6, #06b6d4, #f97316, #10b981)";
+            : "linear-gradient(90deg, #f97316, #f59e0b, #8b5cf6, #06b6d4, #10b981)";
           const calcIds = STAGE_CALC_IDS[stageId] || [];
           const readyCalcIds = calcIds.filter((cid) => CALC_COMPONENTS[cid]);
 

@@ -129,7 +129,7 @@ const NODES: CNode[] = [
     ["P3B"],
     CL.amber),
   svc("SVC_P", "Plumbing", "\uD83D\uDCA7 Calculations",
-    ["Water Demand Calc", "OWC Calculations", "STP Calculations", "Dom. & Flush Pump", "Ext. Sewer & Storm", "RWH Calculator", "SWD Calculator"],
+    ["Water Demand Calc", "OWC Calculations", "STP Calculations", "Pump Head & Flow", "Ext. Sewer & Storm", "RWH Calculator", "SWD Calculator"],
     ["P3A", "OWC", "STP", "DFP", "P3E", "RWH", "SWD"],
     CL.blue),
   svc("SVC_H", "HVAC", "\u2744\uFE0F Calculations",
@@ -1136,7 +1136,7 @@ const CALC_FLOWS: Record<string, CalcFlow> = {
     ],
   },
   DFP: {
-    title: "Domestic & Flushing Pump Calculations",
+    title: "Pump Head & Flow Rate Calculation",
     icon: "\uD83D\uDD27",
     color: "#06b6d4",
     accentBg: "#cffafe",

@@ -184,7 +184,7 @@ const NODES: DNode[] = [
   proc("DD_HOLD", "Stage On Hold", "\u23F8 Pending items \u2192 loop back to checklist", CL.rose),
 
   // ── COMPLETE ──
-  term("DD_DONE", "DETAILED DESIGN COMPLETE", "Proceed to Tender Stage"),
+  term("DD_DONE", "DETAILED DESIGN COMPLETE", "Proceed to Construction"),
 ];
 
 // Build lookup

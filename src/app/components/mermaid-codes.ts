@@ -763,70 +763,57 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class P3A decision`,
   },
   DFP: {
-    title: "Domestic & Flushing Pump Calculations",
+    title: "Pump Head & Flow Rate Calculation Logic",
     code: `flowchart TD
-    INIT([🟢 Domestic & Flushing Pump Calc<br/>Start])
+    INIT([🟢 Pump Head & Flow Rate Calculation<br/>Start])
 
-    %% ═══ PHASE 1: PROJECT DATA & CAPACITY ═══
-    P1[/PHASE 1: Project Data & Capacity Inputs/]
+    %% ═══ PHASE 1: INPUT & DATA GATHERING ═══
+    P1[/PHASE 1: Input & Data Gathering/]
     INIT --> P1
-    P1 --> ENT[📥 Project Data Entry<br/>Building type, height, floors, population]
-    ENT --> STRAT{System Strategy Selection}
+    P1 --> START[📥 Project Architectural & Plumbing Data]
+    START --> INA[Building Height & Number of Floors<br/>Floor-to-Floor Height Reference]
+    INA --> INB[Tank Locations<br/>UGT Level vs OHT/Terrace Level]
+    INB --> INC[System Type Selection<br/>Domestic / Fire / Irrigation / STP]
 
-    STRAT -->|Type 1| GRV[Gravity System<br/>Pressure from elevation only]
-    STRAT -->|Type 2| PRV[PRV System<br/>High-pressure pump + PRVs]
-    STRAT -->|Type 3| MSMO[MSMO System<br/>Multi-stage multi-outlet]
+    %% ═══ PHASE 2: FLOW RATE (Q) CALCULATION ═══
+    P2[/PHASE 2: Flow Rate Q Calculation/]
+    INC --> P2
+    P2 --> DEC{Calculate Demand<br/>Based on System Type}
 
-    GRV --> SM[Strategy Selected]
-    PRV --> SM
-    MSMO --> SM
+    DEC -->|Domestic| PATH1[💧 Domestic/Grey Water<br/>Tank Vol ÷ 120 min = m³/hr]
+    DEC -->|Fire| PATH2[🔥 Fire System<br/>2850 LPM Main + 180 LPM Jockey]
+    DEC -->|Irrigation| PATH3[🌿 Irrigation<br/>Area × 5 L/m² ÷ 1-2 hrs]
+    DEC -->|Sump| PATH4[🔧 Sump/Drainage<br/>Inflow Rate vs Holding Volume]
 
-    SM --> CAT{Pump Category?}
-    CAT -->|Fire| FIRE[🔥 Fire System<br/>Main 2850 LPM / Booster 900 / Jockey 180]
-    CAT -->|Domestic| DOM[💧 Domestic/Transfer<br/>Q = V / t]
-    CAT -->|Sump| SUMP[🔧 Sump Pump<br/>max of sprinkler burst or tank drain]
+    PATH1 --> QM[Flow Rate Q Determined]
+    PATH2 --> QM
+    PATH3 --> QM
+    PATH4 --> QM
+    QM --> QOUT[📊 Phase 2 Output: Q in m³/hr or LPM]
 
-    FIRE --> QM[Flow Rate Q Determined]
-    DOM --> QM
-    SUMP --> QM
-    QM --> QOUT[📊 Phase 1 Output: Q in m³/hr or LPM]
+    %% ═══ PHASE 3: HEAD & PRESSURE LOSS ═══
+    P3[/PHASE 3: Head H & Pressure Loss Analysis/]
+    QOUT --> P3
+    P3 --> HS[Static Head Hs<br/>Pump Centerline → Highest Discharge Point]
+    HS --> HSF[Hs = Height m ÷ 10.2 bar]
+    HSF --> HF[Friction Loss Hf<br/>4 ft per 100 ft pipe run]
+    HF --> HM[Fitting Losses Hm<br/>Hm = 0.30 × Hf — 30% safety factor]
+    HM --> HR[Residual Pressure Hr<br/>1.0 Bar Domestic / 3.5 Bar Fire]
 
-    %% ═══ PHASE 2: TDH CALCULATIONS ═══
-    P2[/PHASE 2: Hydraulic Head - TDH/]
-    QOUT --> P2
-    P2 --> HS[Step A: Static Head Hs<br/>Height ÷ 10.2 = bar]
-    HS --> HF[Step B: Frictional Loss Hf<br/>Hazen-Williams, 4 ft/100 ft]
-    HF --> MAT{Pipe Material?}
-    MAT -->|Steel C=120| HFC[Friction Calculated]
-    MAT -->|Copper C=140| HFC
-    MAT -->|PVC C=150| HFC
-    HFC --> HM[Step C: Minor Losses Hm<br/>Hm = 0.30 × Hf]
-    HM --> HR[Step D: Residual Pressure Hr<br/>Fire 3.5 bar / Domestic 0.5 bar]
-    HR --> TDH[✅ TDH = Hs + Hf + Hm + Hr]
-    TDH --> TOUT[📊 Phase 2 Output: TDH in m or bar]
-
-    %% ═══ PHASE 3: SELECTION & OUTPUT ═══
-    P3[/PHASE 3: Pump Selection & Output/]
-    TOUT --> P3
-    P3 --> CFG{Pump Configuration}
-    CFG -->|Fire| FCFG[1 Electric + 1 Diesel + 1 Jockey]
-    CFG -->|Domestic| DCFG[1 Working + 1 Standby]
-    CFG -->|Sump| SCFG[3 Nos Duty Sharing]
-
-    FCFG --> CLK[Config Locked]
-    DCFG --> CLK
-    SCFG --> CLK
-
-    CLK --> HDR[Header Size<br/>V ≤ 3.0 m/s]
-    HDR --> PWR[Power: P = ρgQH / η×1000]
-    PWR --> VOL[Tank/Sump Volume L×W×D]
-    VOL --> SCHED[📋 Final Pump Schedule]
-    SCHED --> DONE([🏁 Domestic & Flushing Pump — COMPLETE])
+    %% ═══ PHASE 4: FINAL OUTPUT & PUMP SIZING ═══
+    P4[/PHASE 4: Final Output & Pump Sizing/]
+    HR --> P4
+    P4 --> TDH[✅ TDH = Hs + Hf + Hm + Hr]
+    TDH --> OUT1[🎯 Main Pump Duty Point<br/>Q in LPM @ H in Meters]
+    OUT1 --> OUT2[🔄 Standby Pump<br/>1 Working + 1 Standby Config]
+    OUT2 --> OUT3[⚡ Jockey Pump<br/>System pressure maintenance]
+    OUT3 --> SCHED[📋 Final Pump Schedule for Procurement]
+    SCHED --> DONE([🏁 Pump Calculation — COMPLETE])
 
     classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
     classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
     class INIT,DONE terminal
-    class STRAT,CAT,MAT,CFG decision`,
+    class DEC decision`,
   },
   FFP: {
     title: "Fire Pump Head Calculation",
@@ -1315,22 +1302,16 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
 export const STAGE_MERMAID_MAP: Record<string, string> = {
   concept: CONCEPT_STAGE_MERMAID,
   detailed: DETAILED_DESIGN_MERMAID,
-  tender: TENDER_STAGE_MERMAID,
-  vfc: VFC_STAGE_MERMAID,
 };
 
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
   concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
   detailed: ["DD_CB", "DD_PIP", "DD_PRV"], // Cable Sizing + Pipe Sizing + PRV ready; others coming soon
-  tender: [],
-  vfc: [],
 };
 
 // ── STAGE LABELS ──
 export const STAGE_LABELS: Record<string, string> = {
   concept: "Concept Stage",
   detailed: "Detailed Design Stage",
-  tender: "Tender Stage",
-  vfc: "VFC Stage",
 };

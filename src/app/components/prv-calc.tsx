@@ -58,16 +58,6 @@ function PhaseBand({ y, h, label, color, icon }: { y: number; h: number; label: 
   );
 }
 
-function StepBadge({ x, y, num, color }: { x: number; y: number; num: string; color: string }) {
-  return (
-    <g>
-      <circle cx={x} cy={y} r={18} fill={color} />
-      <circle cx={x} cy={y} r={18} fill="none" stroke="#fff" strokeWidth={2} opacity={0.25} />
-      <text x={x} y={y + 5} textAnchor="middle" fill="#fff" fontSize={12} fontWeight={700}>{num}</text>
-    </g>
-  );
-}
-
 function Box({ x, y, w, h, label, sub, color, badge }: {
   x: number; y: number; w: number; h: number;
   label: string; sub: string;
@@ -292,7 +282,6 @@ export function PRVCalcSVG() {
       <PhaseBand y={p1Y} h={p1H} label="PHASE 1 — PROJECT & STRUCTURAL INITIALIZATION" color={C.blue.bd} icon="🏗️" />
 
       {/* 1.1 Building Geometry */}
-      <StepBadge x={BX - 28} y={s11Y + BH / 2} num="1.1" color={C.blue.bd} />
       <Box x={BX} y={s11Y} w={BW} h={BH}
         label="Building Geometry"
         sub="Fetch Total Typ. Floors, Total Podiums & Building Name"
@@ -304,7 +293,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s11Y + BH} y2={s12Y} />
 
       {/* 1.2 Vertical Mapping */}
-      <StepBadge x={BX - 28} y={s12Y + BH / 2} num="1.2" color={C.blue.bd} />
       <Box x={BX} y={s12Y} w={BW} h={BH}
         label="Vertical Height Mapping"
         sub="Auto-populate: Typ Floor 3.35m, Podium, Service 2m, Ground 4.2m"
@@ -324,7 +312,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s12OverrideY + 48} y2={s13Y} />
 
       {/* 1.3 Reference Levels */}
-      <StepBadge x={BX - 28} y={s13Y + BH / 2} num="1.3" color={C.blue.bd} />
       <Box x={BX} y={s13Y} w={BW} h={BH}
         label="Reference Levels"
         sub="Enter OHT Bottom Level (relative to roof) and UGT Depth"
@@ -336,7 +323,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s13Y + BH} y2={s14Y} />
 
       {/* 1.4 Design Constraints */}
-      <StepBadge x={BX - 28} y={s14Y + BH / 2} num="1.4" color={C.orange.bd} />
       <Box x={BX} y={s14Y} w={BW} h={BH}
         label="Design Constraints"
         sub="Min Fixture Pressure: 1.5 Bar (default) | Max: 3.5 Bar (default)"
@@ -354,7 +340,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s14Y + BH} y2={s21Y} />
 
       {/* 2.1 Raw Head Calculation */}
-      <StepBadge x={BX - 28} y={s21Y + BH / 2} num="2.1" color={C.orange.bd} />
       <Box x={BX} y={s21Y} w={BW} h={BH}
         label="Calculation of Raw Static Head"
         sub="Pressure at each floor from OHT elevation"
@@ -370,7 +355,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s21FormulaY + 52} y2={s22Y} />
 
       {/* 2.2 Correction Factor */}
-      <StepBadge x={BX - 28} y={s22Y + BH / 2} num="2.2" color={C.orange.bd} />
       <Box x={BX} y={s22Y} w={BW} h={BH}
         label="Correction Factor Application"
         sub="Account for internal pipe friction losses per floor"
@@ -389,7 +373,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s22DiaY + 32} y2={s23Y} />
 
       {/* 2.3 Zone Logic Gate */}
-      <StepBadge x={BX - 28} y={s23Y + BH / 2} num="2.3" color={C.orange.bd} />
       <Box x={BX} y={s23Y} w={BW} h={BH}
         label="Zone Logic Gate"
         sub="Route each floor to Booster / Gravity / PRV based on corrected pressure"
@@ -433,7 +416,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s23MergeY + 48} y2={s31Y} />
 
       {/* 3.1 PRV Station Placement */}
-      <StepBadge x={BX - 28} y={s31Y + BH / 2} num="3.1" color={C.purple.bd} />
       <Box x={BX} y={s31Y} w={BW} h={BH}
         label="PRV Station Placement"
         sub="Identify each floor where pressure exceeds 3.5 Bar"
@@ -445,7 +427,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s31Y + BH} y2={s32Y} />
 
       {/* 3.2 Pressure Reset Logic */}
-      <StepBadge x={BX - 28} y={s32Y + BH / 2} num="3.2" color={C.purple.bd} />
       <Box x={BX} y={s32Y} w={BW} h={BH}
         label="Pressure Reset Logic"
         sub="At PRV floor, reset starting pressure to 1.5 Bar"
@@ -464,7 +445,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s32FormulaY + 52} y2={s33Y} />
 
       {/* 3.3 PRV Schedule Output */}
-      <StepBadge x={BX - 28} y={s33Y + BH / 2} num="3.3" color={C.purple.bd} />
       <Box x={BX} y={s33Y} w={BW} h={BH}
         label="PRV Schedule Output"
         sub="Generate Floor # | Inlet P | Outlet P (1.5) | PRV Model"
@@ -490,7 +470,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s33TableY + 100} y2={s41Y} />
 
       {/* 4.1 Unit Mapping */}
-      <StepBadge x={BX - 28} y={s41Y + BH / 2} num="4.1" color={C.cyan.bd} />
       <Box x={BX} y={s41Y} w={BW} h={BH}
         label="Flat Type Unit Mapping"
         sub="Select Flat Type (Type-1 through Type-19) for each floor"
@@ -502,7 +481,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s41Y + BH} y2={s42Y} />
 
       {/* 4.2 WSFU Accumulation */}
-      <StepBadge x={BX - 28} y={s42Y + BH / 2} num="4.2" color={C.cyan.bd} />
       <Box x={BX} y={s42Y} w={BW} h={BH}
         label="WSFU Accumulation (Top-Down Cumulative Sum)"
         sub="Auto-fetch fixture units: WC=3, Kitchen Sink=2, etc. from DB"
@@ -524,7 +502,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s42TableY + 140} y2={s43Y} />
 
       {/* 4.3 Hunter's Curve Conversion */}
-      <StepBadge x={BX - 28} y={s43Y + BH / 2} num="4.3" color={C.cyan.bd} />
       <Box x={BX} y={s43Y} w={BW} h={BH}
         label="Hunter's Curve Conversion"
         sub="Convert Σ WSFU → GPM using non-linear Hunter's Curve"
@@ -549,7 +526,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s43FormulaY + 52} y2={s51Y} />
 
       {/* 5.1 Diameter Selection */}
-      <StepBadge x={BX - 28} y={s51Y + BH / 2} num="5.1" color={C.green.bd} />
       <Box x={BX} y={s51Y} w={BW} h={BH}
         label="Pipe Diameter Selection"
         sub="User selects nominal size: 25, 32, 40, 50, 65, 80, 100 mm"
@@ -561,7 +537,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s51Y + BH} y2={s52Y} />
 
       {/* 5.2 Velocity & Friction Check */}
-      <StepBadge x={BX - 28} y={s52Y + BH / 2} num="5.2" color={C.green.bd} />
       <Box x={BX} y={s52Y} w={BW} h={BH}
         label="Velocity & Friction Check"
         sub="Calculate V = Q / Area — check against 2.4 m/s limit"
@@ -581,7 +556,6 @@ export function PRVCalcSVG() {
       <VArrow y1={s52DiaY + 32} y2={s53Y} />
 
       {/* 5.3 Output Generation */}
-      <StepBadge x={BX - 28} y={s53Y + BH / 2} num="5.3" color={C.green.bd} />
       <Box x={BX} y={s53Y} w={BW} h={BH}
         label="Output Generation"
         sub="Final Riser Schedule, Pump Duty Point (Q @ H), Total BOM"

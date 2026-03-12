@@ -35,14 +35,12 @@ interface Calculation {
   title: string;
   description: string;
   status: "ready" | "coming-soon";
-  stage: "concept" | "detailed" | "tender" | "vfc";
+  stage: "concept" | "detailed";
 }
 
 const STAGE_META: Record<string, { label: string; color: string; bg: string }> = {
   concept:  { label: "Concept Stage",         color: "#3b82f6", bg: "#dbeafe" },
   detailed: { label: "Detailed Design Stage", color: "#8b5cf6", bg: "#ede9fe" },
-  tender:   { label: "Tender Stage",          color: "#14b8a6", bg: "#ccfbf1" },
-  vfc:      { label: "VFC Stage",             color: "#f97316", bg: "#fed7aa" },
 };
 
 interface Service {
@@ -75,10 +73,6 @@ const SERVICES: Service[] = [
       { id: "DD_ERT", title: "Earthing Design", description: "IS 3043 electrode sizing, soil resistivity, earth pit layout", status: "coming-soon", stage: "detailed" },
       { id: "DD_LTN", title: "Lightning Protection", description: "IS/IEC 62305 risk assessment, rolling sphere & mesh method", status: "coming-soon", stage: "detailed" },
       { id: "DD_BUS", title: "Bus Bar Sizing", description: "Max demand current rating, Cu/Al selection from tables", status: "coming-soon", stage: "detailed" },
-      // ── Tender Stage ──
-      { id: "T_BOQ_EL", title: "Electrical BOQ", description: "Cable schedule, panel/DB, earthing/LP, switchgear & lighting quantities", status: "coming-soon", stage: "tender" },
-      // ── VFC Stage ──
-      { id: "V_VFC_EL", title: "Electrical VFC Update", description: "Cable schedule, panel revision, SLD & earthing updates per contractor", status: "coming-soon", stage: "vfc" },
     ],
   },
   {
@@ -94,17 +88,13 @@ const SERVICES: Service[] = [
       { id: "P3A", title: "Water Demand Calculations", description: "Population estimate, per capita demand, tank sizing & peak hour factor", status: "ready", stage: "concept" },
       { id: "OWC", title: "OWC Calculations", description: "Waste generation, bin sizing, garbage room & OWC capacity (CPHEEO/NBC)", status: "ready", stage: "concept" },
       { id: "STP", title: "STP Calculations", description: "Sewage generation (80/100 rule), STP sizing, area & treated water reuse", status: "ready", stage: "concept" },
-      { id: "DFP", title: "Domestic & Flushing Pump Calculations", description: "Pump head, flow rate & pump selection for domestic and flushing systems", status: "ready", stage: "concept" },
+      { id: "DFP", title: "Pump Head & Flow Rate Calculation", description: "Input gathering, flow rate Q by system type, head & pressure loss analysis, pump sizing & procurement schedule", status: "ready", stage: "concept" },
       { id: "P3E", title: "External Sewer & Storm Calculations", description: "Storm water flow, sewer pipe sizing, STP capacity & rainwater harvesting", status: "coming-soon", stage: "concept" },
       { id: "RWH", title: "Rainwater Harvesting & Tank Sizing", description: "Catchment runoff, downcomer sizing, velocity guard & NBC 2016 tank sizing", status: "ready", stage: "concept" },
       { id: "SWD", title: "Storm Water Drainage Calculator", description: "Rational method runoff, Manning's equation, velocity monitoring & pipe sizing", status: "ready", stage: "concept" },
       // ── Detailed Design Stage ──
       { id: "DD_PIP", title: "Transfer Pipe Sizing", description: "Hunter's method, velocity check, IS 2065 standard pipe diameter calc", status: "ready", stage: "detailed" },
       { id: "DD_PRV", title: "PRV Calculations", description: "Pressure gradient, zone logic, PRV reset mapping, riser sizing & WSFU diversity", status: "ready", stage: "detailed" },
-      // ── Tender Stage ──
-      { id: "T_BOQ_PL", title: "Plumbing BOQ", description: "Pipe/fitting, pump, sanitary fixture, tank & valve schedule quantities", status: "coming-soon", stage: "tender" },
-      // ── VFC Stage ──
-      { id: "V_VFC_PL", title: "Plumbing VFC Update", description: "Pipe schedule, pump reselection, drainage & valve updates per contractor", status: "coming-soon", stage: "vfc" },
     ],
   },
   {
@@ -126,10 +116,6 @@ const SERVICES: Service[] = [
       { id: "DD_VAV", title: "VAV/FCU Selection", description: "Variable air volume & fan coil unit sizing per zone", status: "coming-soon", stage: "detailed" },
       { id: "DD_BMS", title: "BMS Integration", description: "Building management system points list & architecture", status: "coming-soon", stage: "detailed" },
       { id: "DD_SMK", title: "Smoke Management", description: "Smoke extraction fan sizing & pressurisation calc", status: "coming-soon", stage: "detailed" },
-      // ── Tender Stage ──
-      { id: "T_BOQ_HV", title: "HVAC BOQ", description: "Duct/insulation, equipment, diffuser/grille, controls & refrigerant piping", status: "coming-soon", stage: "tender" },
-      // ── VFC Stage ──
-      { id: "V_VFC_HV", title: "HVAC VFC Update", description: "Duct revision, equipment confirmation, controls & diffuser updates", status: "coming-soon", stage: "vfc" },
     ],
   },
   {
@@ -153,10 +139,6 @@ const SERVICES: Service[] = [
       { id: "DD_DET", title: "Detection System", description: "Smoke/heat detector spacing, zone layout & panel sizing", status: "coming-soon", stage: "detailed" },
       { id: "DD_PAV", title: "PA/VA System", description: "Public address & voice alarm speaker layout & wiring", status: "coming-soon", stage: "detailed" },
       { id: "DD_SMX", title: "Smoke Exhaust", description: "Smoke extraction fan sizing & exhaust duct layout", status: "coming-soon", stage: "detailed" },
-      // ── Tender Stage ──
-      { id: "T_BOQ_FF", title: "Firefighting BOQ", description: "Sprinkler, hydrant, detection/alarm, suppression & fire pump quantities", status: "coming-soon", stage: "tender" },
-      // ── VFC Stage ──
-      { id: "V_VFC_FF", title: "Firefighting VFC Update", description: "Sprinkler revision, hydrant update, detection & pump reselection", status: "coming-soon", stage: "vfc" },
     ],
   },
 ];
@@ -459,32 +441,6 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
   DD_SMX: { title: "Smoke Exhaust", icon: "\uD83D\uDD25", color: "#e11d48", accentBg: "#ffe4e6",
     steps: [{ id: "SX1", label: "Input: Basement/Atrium Data", sub: "Area, height, ventilation openings", type: "input" }, { id: "SX2", label: "Extraction Rate Calc", sub: "6 ACH (basement) or CFD-based", type: "formula" }, { id: "SX3", label: "Fan & Duct Sizing", sub: "CFM + static pressure \u2192 equipment", type: "process" }, { id: "SX4", label: "Output: Smoke Exhaust Layout", sub: "Fan + duct + damper locations", type: "output" }],
     connections: [{ from: "SX1", to: "SX2" }, { from: "SX2", to: "SX3" }, { from: "SX3", to: "SX4" }] },
-  // ── Tender Stage BOQ Calcs ──
-  T_BOQ_EL: { title: "Electrical BOQ", icon: "\u26A1", color: "#14b8a6", accentBg: "#ccfbf1",
-    steps: [{ id: "TE1", label: "Input: Approved Drawings", sub: "All electrical drawings + schedules", type: "input" }, { id: "TE2", label: "Cable Schedule BOQ", sub: "Length \u00D7 qty per cable type", type: "process" }, { id: "TE3", label: "Panel & DB BOQ", sub: "Item-wise panel components", type: "process" }, { id: "TE4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TE5", label: "Output: Electrical BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
-    connections: [{ from: "TE1", to: "TE2" }, { from: "TE2", to: "TE3" }, { from: "TE3", to: "TE4" }, { from: "TE4", to: "TE5" }] },
-  T_BOQ_PL: { title: "Plumbing BOQ", icon: "\uD83D\uDCA7", color: "#14b8a6", accentBg: "#ccfbf1",
-    steps: [{ id: "TP1", label: "Input: Approved Drawings", sub: "All plumbing drawings + schedules", type: "input" }, { id: "TP2", label: "Pipe & Fitting BOQ", sub: "Length \u00D7 diameter per type", type: "process" }, { id: "TP3", label: "Fixture & Pump BOQ", sub: "Item-wise sanitary + pump qty", type: "process" }, { id: "TP4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TP5", label: "Output: Plumbing BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
-    connections: [{ from: "TP1", to: "TP2" }, { from: "TP2", to: "TP3" }, { from: "TP3", to: "TP4" }, { from: "TP4", to: "TP5" }] },
-  T_BOQ_HV: { title: "HVAC BOQ", icon: "\u2744\uFE0F", color: "#14b8a6", accentBg: "#ccfbf1",
-    steps: [{ id: "TH1", label: "Input: Approved Drawings", sub: "All HVAC drawings + schedules", type: "input" }, { id: "TH2", label: "Duct & Insulation BOQ", sub: "Area \u00D7 type per section", type: "process" }, { id: "TH3", label: "Equipment BOQ", sub: "AHU/FCU/chiller item-wise", type: "process" }, { id: "TH4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TH5", label: "Output: HVAC BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
-    connections: [{ from: "TH1", to: "TH2" }, { from: "TH2", to: "TH3" }, { from: "TH3", to: "TH4" }, { from: "TH4", to: "TH5" }] },
-  T_BOQ_FF: { title: "Firefighting BOQ", icon: "\uD83D\uDD25", color: "#14b8a6", accentBg: "#ccfbf1",
-    steps: [{ id: "TF1", label: "Input: Approved Drawings", sub: "All FF drawings + schedules", type: "input" }, { id: "TF2", label: "Sprinkler & Hydrant BOQ", sub: "Head count, pipe lengths, fittings", type: "process" }, { id: "TF3", label: "Detection & Alarm BOQ", sub: "Detector, MCP, panel item-wise", type: "process" }, { id: "TF4", label: "Rate Analysis", sub: "Material + labour + OH rates", type: "formula" }, { id: "TF5", label: "Output: FF BOQ", sub: "Complete item-wise quantities + rates", type: "output" }],
-    connections: [{ from: "TF1", to: "TF2" }, { from: "TF2", to: "TF3" }, { from: "TF3", to: "TF4" }, { from: "TF4", to: "TF5" }] },
-  // ── VFC Stage Calcs ──
-  V_VFC_EL: { title: "Electrical VFC Update", icon: "\u26A1", color: "#f97316", accentBg: "#fed7aa",
-    steps: [{ id: "VE1", label: "Input: Contractor Submittals", sub: "Shop drawings + material data sheets", type: "input" }, { id: "VE2", label: "Cable Schedule Revision", sub: "Update per actual makes/routes", type: "process" }, { id: "VE3", label: "Panel & SLD Update", sub: "Revise per contractor equipment", type: "process" }, { id: "VE4", label: "Output: VFC Electrical Set", sub: "Updated drawings for construction", type: "output" }],
-    connections: [{ from: "VE1", to: "VE2" }, { from: "VE2", to: "VE3" }, { from: "VE3", to: "VE4" }] },
-  V_VFC_PL: { title: "Plumbing VFC Update", icon: "\uD83D\uDCA7", color: "#f97316", accentBg: "#fed7aa",
-    steps: [{ id: "VP1", label: "Input: Contractor Submittals", sub: "Shop drawings + equipment selections", type: "input" }, { id: "VP2", label: "Pipe Schedule Revision", sub: "Update per actual makes/routes", type: "process" }, { id: "VP3", label: "Pump Reselection", sub: "Verify per contractor catalogue", type: "process" }, { id: "VP4", label: "Output: VFC Plumbing Set", sub: "Updated drawings for construction", type: "output" }],
-    connections: [{ from: "VP1", to: "VP2" }, { from: "VP2", to: "VP3" }, { from: "VP3", to: "VP4" }] },
-  V_VFC_HV: { title: "HVAC VFC Update", icon: "\u2744\uFE0F", color: "#f97316", accentBg: "#fed7aa",
-    steps: [{ id: "VH1", label: "Input: Contractor Submittals", sub: "Shop drawings + equipment data", type: "input" }, { id: "VH2", label: "Duct Revision", sub: "Update per actual equipment + routing", type: "process" }, { id: "VH3", label: "Equipment Confirmation", sub: "Verify capacity per actual models", type: "process" }, { id: "VH4", label: "Output: VFC HVAC Set", sub: "Updated drawings for construction", type: "output" }],
-    connections: [{ from: "VH1", to: "VH2" }, { from: "VH2", to: "VH3" }, { from: "VH3", to: "VH4" }] },
-  V_VFC_FF: { title: "Firefighting VFC Update", icon: "\uD83D\uDD25", color: "#f97316", accentBg: "#fed7aa",
-    steps: [{ id: "VF1", label: "Input: Contractor Submittals", sub: "Shop drawings + equipment data", type: "input" }, { id: "VF2", label: "Sprinkler Revision", sub: "Update per actual heads + pipe routing", type: "process" }, { id: "VF3", label: "Detection Update", sub: "Revise per actual detector models", type: "process" }, { id: "VF4", label: "Output: VFC FF Set", sub: "Updated drawings for construction", type: "output" }],
-    connections: [{ from: "VF1", to: "VF2" }, { from: "VF2", to: "VF3" }, { from: "VF3", to: "VF4" }] },
 };
 
 // =====================================================================
@@ -584,7 +540,7 @@ function CalcDetailOverlay({
     P3B: { title: "Electrical Load Calculation", icon: "\u26A1", color: "#f59e0b" },
     OWC: { title: "OWC Calculations", icon: "\u267B\uFE0F", color: "#10b981" },
     STP: { title: "STP Calculations", icon: "\uD83C\uDFED", color: "#06b6d4" },
-    DFP: { title: "Domestic & Flushing Pump Calculations", icon: "\uD83D\uDD27", color: "#06b6d4" },
+    DFP: { title: "Pump Head & Flow Rate Calculation", icon: "\uD83D\uDD27", color: "#06b6d4" },
     FFP: { title: "Fire Pump Head Calculation", icon: "\uD83D\uDE92", color: "#dc2626" },
     FTK: { title: "Fire Tank Size Estimation", icon: "\uD83D\uDEA8", color: "#dc2626" },
     FJD: { title: "Jockey & Drencher Pump", icon: "\uD83D\uDD27", color: "#dc2626" },
@@ -1060,7 +1016,7 @@ function ServiceCard({
               <div className="h-px w-full mb-3" style={{ backgroundColor: `${service.color}20` }} />
               <div className="space-y-2">
                 {(() => {
-                  const stages = ["concept", "detailed", "tender", "vfc"] as const;
+                  const stages = ["concept", "detailed"] as const;
                   let globalIdx = 0;
                   return stages.map((stage) => {
                     const calcs = service.calculations.filter((c) => c.stage === stage);
@@ -1177,8 +1133,6 @@ export function ServicesDashboard() {
   const stageCounts = {
     concept: allCalcs.filter((c) => c.stage === "concept").length,
     detailed: allCalcs.filter((c) => c.stage === "detailed").length,
-    tender: allCalcs.filter((c) => c.stage === "tender").length,
-    vfc: allCalcs.filter((c) => c.stage === "vfc").length,
   };
 
   return (
@@ -1210,7 +1164,7 @@ export function ServicesDashboard() {
           </span>
         </div>
         <div className="w-px h-5 bg-[#e2e8f0]" />
-        {(["concept", "detailed", "tender", "vfc"] as const).map((stage) => {
+        {(["concept", "detailed"] as const).map((stage) => {
           const sm = STAGE_META[stage];
           return (
             <div key={stage} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ backgroundColor: sm.bg, border: `1px solid ${sm.color}30` }}>
