@@ -40,6 +40,7 @@ import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { FireTerraceBoosterCalcSVG } from "./fire-terrace-booster-calc";
 import { HeatLoadCalcSVG } from "./heat-load-calc";
 import { EarthingCalcSVG } from "./earthing-calc";
+import { CoolingVentilationCalcSVG } from "./cooling-ventilation-calc";
 import {
   STAGE_MERMAID_MAP,
   CALC_MERMAID_CODES,
@@ -68,6 +69,7 @@ const CALC_META: Record<string, { title: string; icon: string; color: string; se
   DD_PRV: { title: "PRV Calculations", icon: "\uD83D\uDD27", color: "#7c3aed", service: "Plumbing" },
   DD_ERT: { title: "Short Circuit & Earthing Design", icon: "⚡", color: "#d97706", service: "Electrical" },
   P3D: { title: "Building Thermal Cooling Load", icon: "\uD83C\uDF21\uFE0F", color: "#ef4444", service: "HVAC" },
+  VENT: { title: "Cooling Load & Ventilation", icon: "\u2744\uFE0F", color: "#8b5cf6", service: "HVAC" },
 };
 
 const CALC_COMPONENTS: Record<string, React.FC> = {
@@ -89,6 +91,7 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
   FJD: FireJockeyDrencherCalcSVG,
   FTB: FireTerraceBoosterCalcSVG,
   P3D: HeatLoadCalcSVG,
+  VENT: CoolingVentilationCalcSVG,
 };
 
 // =====================================================================

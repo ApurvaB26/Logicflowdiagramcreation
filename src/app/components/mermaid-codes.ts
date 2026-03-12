@@ -1734,6 +1734,69 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class S3D,S5D,S9,S11D decision
     class DASH dashboard`,
   },
+
+  VENT: {
+    title: "Building Cooling Load, Ventilation & Pressurization",
+    code: `flowchart TD
+    %% ═══ PHASE 1: COOLING LOAD ═══
+    H["❄️ Building Cooling Load, Ventilation & Pressurization<br/>ASHRAE / NBC 2016 / NFPA 92"]
+
+    subgraph P1["PHASE 1 — COOLING LOAD"]
+      S1["§1 Input & Ambient Conditions<br/>Outdoor: 42°C DBT / 27°C WBT<br/>Indoor: 24°C / 50% RH"]
+
+      S2["§2 Conduction: Q = U × A × CLTD × LM × K<br/>Walls + Roof + Floor<br/>Total = 182,494 BTU/hr"]
+
+      S3["§3 Solar: Q = A × SC × SHGF × CLF<br/>Fenestration by orientation<br/>Total = 94,311 BTU/hr"]
+
+      S4["§4 Occupancy: Q_s = N × SHG × CLF<br/>Q_l = N × LHG<br/>Sensible = 93,053 | Latent = 122,750"]
+
+      S5["§5 Lighting: Q = W × BF × CLF × 3.412<br/>Office + Lab + Common<br/>Total = 259,251 BTU/hr"]
+
+      S6["§6 Equipment: Q = W × DF × UF × 3.412<br/>Diversity Factors applied<br/>Total = 323,099 BTU/hr"]
+
+      S7["§7 Ventilation & Infiltration<br/>Q_s = 1.08 × CFM × ΔT<br/>Q_l = 0.68 × CFM × ΔW<br/>BF = 0.15 (coil bypass)"]
+
+      S8["§8 ERSH = 1,023,838 BTU/hr<br/>GTH = 1,990,790 BTU/hr<br/>TR = GTH / 12,000 = 170 TR<br/>Supply CFM = 47,400"]
+    end
+
+    subgraph P2["PHASE 2 — PRESSURIZATION"]
+      S9{"§9 Select Type:<br/>Staircase | Lift Well | Lift Lobby"}
+
+      S10A["§10 Staircase: Leakage + Door Open<br/>Q = 0.827 × A_e × √ΔP<br/>v = 0.75 m/s through open door<br/>Fan: 25,000 CMH @ 60mm WG"]
+
+      S10B["§11 Lift Well: Q = L×T×√(2ΔP/ρ)×1000<br/>Doors + Cutouts + Ropes + Walls<br/>Fan: 24,000 CMH @ 40mm WG"]
+
+      S10C["§12 Lift Lobby: Pressure Sandwich<br/>50% safety on closed door leakage<br/>Fan: 41,000 CMH @ 50mm WG"]
+
+      S11["§13 Common Output<br/>Total: 115,000 CMH installed<br/>Diversified: 97,750 CMH (0.85)"]
+    end
+
+    H --> S1
+    S1 --> S2 --> S3 --> S4
+    S4 --> S5 --> S6 --> S7 --> S8
+    S8 --> S9
+    S9 -->|Staircase| S10A
+    S9 -->|Lift Well| S10B
+    S9 -->|Lift Lobby| S10C
+    S10A --> S11
+    S10B --> S11
+    S10C --> S11
+
+    %% Styles
+    classDef input fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+    classDef formula fill:#ede9fe,stroke:#8b5cf6,color:#5b21b6
+    classDef result fill:#d1fae5,stroke:#10b981,color:#065f46
+    classDef decision fill:#fef3c7,stroke:#f59e0b,color:#92400e
+    classDef alert fill:#fee2e2,stroke:#dc2626,color:#991b1b
+    classDef dashboard fill:#ccfbf1,stroke:#14b8a6,color:#134e4a
+
+    class H,S1 input
+    class S2,S3,S4,S5,S6,S7 formula
+    class S8,S11 result
+    class S9 decision
+    class S10A alert
+    class S10B,S10C dashboard`,
+  },
 };
 
 // ── STAGE → MERMAID CODE MAP ──
@@ -1746,7 +1809,7 @@ export const STAGE_MERMAID_MAP: Record<string, string> = {
 
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
-  concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD", "P3D"],
+  concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD", "P3D", "VENT"],
   detailed: ["DD_CB", "DD_PIP", "DD_PRV", "DD_ERT"], // Cable Sizing + Pipe Sizing + PRV + Earthing ready; others coming soon
   tender: [],
   vfc: [],

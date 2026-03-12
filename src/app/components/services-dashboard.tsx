@@ -18,6 +18,7 @@ import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
 import { FireTerraceBoosterCalcSVG } from "./fire-terrace-booster-calc";
 import { HeatLoadCalcSVG } from "./heat-load-calc";
 import { EarthingCalcSVG } from "./earthing-calc";
+import { CoolingVentilationCalcSVG } from "./cooling-ventilation-calc";
 import {
   Zap,
   Droplets,
@@ -120,8 +121,8 @@ const SERVICES: Service[] = [
     calculations: [
       // ── Concept Stage ──
       { id: "P3D", title: "Heat Load Calculations", description: "Sensible & latent heat, cooling load, TR calculation & equipment sizing", status: "ready", stage: "concept" },
-      { id: "VENT", title: "Ventilation Calculations", description: "Air change rate, duct sizing & fresh air requirements", status: "coming-soon", stage: "concept" },
-      { id: "PRESS", title: "Pressurisation Calculations", description: "Stairwell & lobby pressurisation system design", status: "coming-soon", stage: "concept" },
+      { id: "VENT", title: "Cooling Load & Ventilation", description: "ASHRAE cooling load, ventilation psychrometrics & staircase/lift/lobby pressurization design", status: "ready", stage: "concept" },
+      { id: "PRESS", title: "Pressurisation Calculations", description: "Stairwell & lobby pressurisation — covered in VENT calc above", status: "coming-soon", stage: "concept" },
       // ── Detailed Design Stage ──
       { id: "DD_DCT", title: "Duct Sizing", description: "Equal friction / velocity method, duct schedule per floor", status: "coming-soon", stage: "detailed" },
       { id: "DD_EQP", title: "Equipment Selection", description: "Chiller/AHU/FCU selection from manufacturer data", status: "coming-soon", stage: "detailed" },
@@ -246,24 +247,7 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
       { from: "H7", to: "H8" },
     ],
   },
-  VENT: {
-    title: "Ventilation Calculations",
-    icon: "\uD83C\uDF2C\uFE0F",
-    color: "#8b5cf6",
-    accentBg: "#ede9fe",
-    steps: [
-      { id: "V1", label: "Input: Room Data", sub: "Room volume, occupancy, activity type", type: "input" },
-      { id: "V2", label: "Air Change Rate (ACH)", sub: "NBC / ASHRAE lookup per room type", type: "process" },
-      { id: "V3", label: "Fresh Air Requirement", sub: "CFM = Volume \u00d7 ACH / 60", type: "formula" },
-      { id: "V4", label: "Duct Sizing", sub: "Equal friction / velocity method", type: "formula" },
-      { id: "V5", label: "Fan Selection", sub: "Total CFM + Static pressure \u2192 Fan model", type: "process" },
-      { id: "V6", label: "Output: Ventilation Schedule", sub: "Fan sizes + Duct layout \u2192 Space Matrix", type: "output" },
-    ],
-    connections: [
-      { from: "V1", to: "V2" }, { from: "V2", to: "V3" }, { from: "V3", to: "V4" },
-      { from: "V4", to: "V5" }, { from: "V5", to: "V6" },
-    ],
-  },
+  // VENT: now renders via full custom CoolingVentilationCalcSVG component
   PRESS: {
     title: "Pressurisation Calculations",
     icon: "\uD83C\uDFD7\uFE0F",
@@ -525,7 +509,7 @@ function CalcDetailOverlay({
   }, [calcId]);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","EBR","RWH","SWD","DD_CB","DD_PIP","DD_PRV","FFP","FTK","FJD","FTB","P3D","DD_ERT"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","EBR","RWH","SWD","DD_CB","DD_PIP","DD_PRV","FFP","FTK","FJD","FTB","P3D","DD_ERT","VENT"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
@@ -543,6 +527,7 @@ function CalcDetailOverlay({
   const isCustomFTB = calcId === "FTB";
   const isCustomP3D = calcId === "P3D";
   const isCustomDDERT = calcId === "DD_ERT";
+  const isCustomVENT = calcId === "VENT";
   const isCustom = CUSTOM_IDS.has(calcId);
 
   // For generic flows
@@ -566,6 +551,7 @@ function CalcDetailOverlay({
     FTB: { title: "Terrace Fire Booster Pump Head", icon: "\uD83C\uDFD7\uFE0F", color: "#dc2626" },
     P3D: { title: "Building Thermal Cooling Load", icon: "\uD83C\uDF21\uFE0F", color: "#ef4444" },
     DD_ERT: { title: "Short Circuit & Earthing Design", icon: "⚡", color: "#d97706" },
+    VENT: { title: "Cooling Load & Ventilation", icon: "\u2744\uFE0F", color: "#8b5cf6" },
   };
   const meta = CUSTOM_META[calcId];
   const flowTitle = meta?.title ?? flow?.title ?? "Calculation";
@@ -615,7 +601,7 @@ function CalcDetailOverlay({
           { label: "Sizing Output", bg: "#ffe4e6", bd: "#f43f5e", icon: "\u26A1" },
           { label: "Dashboard", bg: "#d1fae5", bd: "#10b981", icon: "\uD83D\uDCCA" },
         ]
-      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomEBR || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomP3D || isCustomDDERT
+      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomEBR || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomP3D || isCustomDDERT || isCustomVENT
       ? [
           { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
           { label: "Database", bg: "#ede9fe", bd: "#8b5cf6", icon: "\uD83D\uDDC3" },
@@ -872,6 +858,10 @@ function CalcDetailOverlay({
           ) : isCustomDDERT ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <EarthingCalcSVG />
+            </div>
+          ) : isCustomVENT ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <CoolingVentilationCalcSVG />
             </div>
           ) : flow ? (
             <svg
