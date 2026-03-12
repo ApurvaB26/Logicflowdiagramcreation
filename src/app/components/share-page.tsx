@@ -26,7 +26,7 @@ import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
 import { OWCCalcSVG } from "./owc-calc";
 import { STPCalcSVG } from "./stp-calc";
-import { FireFightingSystemCalcSVG } from "./fire-fighting-system-comprehensive";
+
 import { ElectricalBusRiserCalcSVG } from "./electrical-bus-riser-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
@@ -34,6 +34,11 @@ import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
 import { PRVCalcSVG } from "./prv-calc";
+import { FirePumpHeadCalcSVG } from "./fire-pump-head-calc";
+import { FireTankCalcSVG } from "./fire-tank-calc";
+import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
+import { FireTerraceBoosterCalcSVG } from "./fire-terrace-booster-calc";
+import { HeatLoadCalcSVG } from "./heat-load-calc";
 import {
   STAGE_MERMAID_MAP,
   CALC_MERMAID_CODES,
@@ -60,6 +65,7 @@ const CALC_META: Record<string, { title: string; icon: string; color: string; se
   DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706", service: "Electrical" },
   DD_PIP: { title: "Transfer Pipe Sizing Calculation", icon: "\uD83D\uDCA7", color: "#2563eb", service: "Plumbing" },
   DD_PRV: { title: "PRV Calculations", icon: "\uD83D\uDD27", color: "#7c3aed", service: "Plumbing" },
+  P3D: { title: "Building Thermal Cooling Load", icon: "\uD83C\uDF21\uFE0F", color: "#ef4444", service: "HVAC" },
 };
 
 const CALC_COMPONENTS: Record<string, React.FC> = {
@@ -68,13 +74,18 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
   OWC: OWCCalcSVG,
   STP: STPCalcSVG,
   DFP: DomesticFlushingPumpCalcSVG,
-  FFS: FireFightingSystemCalcSVG,
+
   EBR: ElectricalBusRiserCalcSVG,
   RWH: RWHCalcSVG,
   SWD: SWDCalcSVG,
   DD_CB: CableSizingCalcSVG,
   DD_PIP: PipeSizingCalcSVG,
   DD_PRV: PRVCalcSVG,
+  FFP: FirePumpHeadCalcSVG,
+  FTK: FireTankCalcSVG,
+  FJD: FireJockeyDrencherCalcSVG,
+  FTB: FireTerraceBoosterCalcSVG,
+  P3D: HeatLoadCalcSVG,
 };
 
 // =====================================================================

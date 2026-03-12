@@ -1,15 +1,15 @@
 import React from "react";
 
 // =====================================================================
-// STP (Sewage Treatment Plant) CALCULATOR — Custom SVG Flow Diagram
-// Full architecture: Project Data → Water Demand Cross-Link →
-// Sewer Generation (80/100 Rule) → STP Technology Selection →
-// Capacity Sizing → Area Calculation → Treated Water Reuse →
-// Excess Discharge → Compliance Check → Output Dashboard
+// STP (SEWAGE TREATMENT PLANT) COMPREHENSIVE CALCULATION
+// 3-Section Flow: Total Water Demand → Sewer Generation & STP Treatment
+// → Treated Water Balance & Reuse
+// Project: Multi-Tower Residential (Towers 1-14)
+// Values: 1647.21 CMD Total, 1126.48 Potable, 520.73 Flush
 // =====================================================================
 
 const W = 1600;
-const H = 8200;
+const H = 5400;
 const CX = W / 2;
 
 const C = {
@@ -27,6 +27,7 @@ const C = {
   reject: "#ef4444",
 };
 
+// ── Helper: Phase Band ──
 function PhaseBand({ y, h, label, color }: { y: number; h: number; label: string; color: string }) {
   return (
     <g>
@@ -39,6 +40,7 @@ function PhaseBand({ y, h, label, color }: { y: number; h: number; label: string
   );
 }
 
+// ── Helper: Rounded box ──
 function Box({ x, y, w, h, label, sub, color, badge, rx: rxProp }: {
   x: number; y: number; w: number; h: number;
   label: string; sub: string;
@@ -63,6 +65,7 @@ function Box({ x, y, w, h, label, sub, color, badge, rx: rxProp }: {
   );
 }
 
+// ── Helper: Diamond ──
 function Diamond({ cx, cy, rxD, ryD, label, sub, color }: {
   cx: number; cy: number; rxD: number; ryD: number;
   label: string; sub: string;
@@ -80,6 +83,7 @@ function Diamond({ cx, cy, rxD, ryD, label, sub, color }: {
   );
 }
 
+// ── Helper: Arrow ──
 function Arrow({ x1, y1, x2, y2, color, label, dash }: {
   x1: number; y1: number; x2: number; y2: number;
   color?: string; label?: string; dash?: boolean;
@@ -105,6 +109,7 @@ function Arrow({ x1, y1, x2, y2, color, label, dash }: {
   );
 }
 
+// ── Helper: Formula Block ──
 function FormulaBlock({ x, y, w, h, lines, color }: {
   x: number; y: number; w: number; h: number;
   lines: string[];
@@ -126,56 +131,7 @@ function FormulaBlock({ x, y, w, h, lines, color }: {
   );
 }
 
-function DataTable({ x, y, title, headers, rows, color }: {
-  x: number; y: number; title: string;
-  headers: string[]; rows: string[][];
-  color: { bg: string; bd: string; tx: string };
-}) {
-  const tw = 780, colW = tw / headers.length;
-  const rowH = 30, hdrY = y + 52;
-  const th = 52 + (rows.length + 1) * (rowH + 2) + 12;
-  return (
-    <g>
-      <rect x={x} y={y} width={tw} height={th} rx={14}
-        fill="#f8fafc" stroke={color.bd} strokeWidth={3} />
-      <rect x={x} y={y} width={tw} height={44} rx={14} fill={color.bd} />
-      <rect x={x} y={y + 32} width={tw} height={12} fill={color.bd} />
-      <text x={x + tw / 2} y={y + 28} textAnchor="middle" fill="#fff" fontSize={13} fontWeight={700}>
-        {title}
-      </text>
-      {headers.map((h, i) => (
-        <g key={`h-${i}`}>
-          <rect x={x + i * colW + 3} y={hdrY} width={colW - 6} height={rowH} rx={5}
-            fill={color.bg} stroke={color.bd} strokeWidth={1.5} />
-          <text x={x + i * colW + colW / 2} y={hdrY + 20} textAnchor="middle"
-            fill={color.tx} fontSize={10.5} fontWeight={700}>{h}</text>
-        </g>
-      ))}
-      {rows.map((row, ri) => (
-        <g key={`r-${ri}`}>
-          {row.map((cell, ci) => {
-            const isAuto = cell === "Auto" || cell === "Auto-calc";
-            const isFetch = cell === "Fetched";
-            return (
-              <g key={`c-${ri}-${ci}`}>
-                <rect x={x + ci * colW + 3} y={hdrY + (ri + 1) * (rowH + 2) + 2}
-                  width={colW - 6} height={rowH} rx={5}
-                  fill={isAuto ? C.green.bg : isFetch ? C.blue.bg : "#fff"}
-                  stroke={isAuto ? C.green.bd : isFetch ? C.blue.bd : "#e2e8f0"}
-                  strokeWidth={isAuto || isFetch ? 1.5 : 1} />
-                <text x={x + ci * colW + colW / 2} y={hdrY + (ri + 1) * (rowH + 2) + 21}
-                  textAnchor="middle"
-                  fill={isAuto ? C.green.tx : isFetch ? C.blue.tx : "#64748b"}
-                  fontSize={10.5} fontWeight={isAuto || isFetch ? 600 : 400}>{cell}</text>
-              </g>
-            );
-          })}
-        </g>
-      ))}
-    </g>
-  );
-}
-
+// ── Helper: Note Box ──
 function NoteBox({ x, y, w, h, icon, title, lines, color }: {
   x: number; y: number; w: number; h: number;
   icon: string; title: string; lines: string[];
@@ -196,54 +152,62 @@ function NoteBox({ x, y, w, h, icon, title, lines, color }: {
   );
 }
 
-// STP Technology comparison table
-function TechCompareTable({ x, y }: { x: number; y: number }) {
-  const tw = 900, th = 240;
-  const headers = ["Technology", "Area (m²/KLD)", "Power (kW/KLD)", "BOD Removal", "Sludge", "Cost Index"];
-  const rows = [
-    ["SBR", "0.8–1.0", "0.6–0.8", "95–98%", "Low", "Medium"],
-    ["MBR", "0.5–0.7", "1.0–1.5", "98–99%", "Very Low", "High"],
-    ["MBBR", "0.8–1.2", "0.5–0.7", "90–95%", "Medium", "Medium"],
-    ["Extended Aeration", "1.2–1.5", "0.8–1.0", "85–92%", "High", "Low"],
-    ["RBC", "1.0–1.3", "0.3–0.5", "80–90%", "Medium", "Low"],
-  ];
-  const colW = tw / 6;
-  const rowH = 28;
-  const hdrY = y + 50;
+// ── Reusable: Styled Data Table ──
+function DataTable({ x, y, title, headers, rows, color, colWidths }: {
+  x: number; y: number; title: string;
+  headers: string[]; rows: string[][];
+  color: { bg: string; bd: string; tx: string };
+  colWidths?: number[];
+}) {
+  const tw = 780;
+  const defaultColW = tw / headers.length;
+  const rowH = 30, hdrY = y + 52;
+  const th = 52 + (rows.length + 1) * (rowH + 2) + 12;
+
+  const getColX = (ci: number) => {
+    if (!colWidths) return x + ci * defaultColW + 3;
+    let offset = 0;
+    for (let i = 0; i < ci; i++) offset += (colWidths[i] || defaultColW);
+    return x + offset + 3;
+  };
+  const getColW = (ci: number) => {
+    if (!colWidths) return defaultColW - 6;
+    return (colWidths[ci] || defaultColW) - 6;
+  };
+
   return (
     <g>
       <rect x={x} y={y} width={tw} height={th} rx={14}
-        fill="#f8fafc" stroke={C.cyan.bd} strokeWidth={3} />
-      <rect x={x} y={y} width={tw} height={44} rx={14} fill={C.cyan.bd} />
-      <rect x={x} y={y + 32} width={tw} height={12} fill={C.cyan.bd} />
-      <text x={x + 18} y={y + 20} fill="#fff" fontSize={13} fontWeight={700}>
-        {"⚙️"} STP TECHNOLOGY COMPARISON — Auto-selection based on project parameters
-      </text>
-      <text x={x + 18} y={y + 38} fill="#fff" fontSize={10} opacity={0.8}>
-        System evaluates area constraint, power budget & treatment quality requirements
+        fill="#f8fafc" stroke={color.bd} strokeWidth={3} />
+      <rect x={x} y={y} width={tw} height={44} rx={14} fill={color.bd} />
+      <rect x={x} y={y + 32} width={tw} height={12} fill={color.bd} />
+      <text x={x + tw / 2} y={y + 28} textAnchor="middle" fill="#fff" fontSize={13} fontWeight={700}>
+        {title}
       </text>
       {headers.map((h, i) => (
         <g key={`h-${i}`}>
-          <rect x={x + i * colW + 3} y={hdrY} width={colW - 6} height={rowH} rx={5}
-            fill={C.cyan.bg} stroke={C.cyan.bd} strokeWidth={1.5} />
-          <text x={x + i * colW + colW / 2} y={hdrY + 19} textAnchor="middle"
-            fill={C.cyan.tx} fontSize={10} fontWeight={700}>{h}</text>
+          <rect x={getColX(i)} y={hdrY} width={getColW(i)} height={rowH} rx={5}
+            fill={color.bg} stroke={color.bd} strokeWidth={1.5} />
+          <text x={getColX(i) + getColW(i) / 2 + 3} y={hdrY + 20} textAnchor="middle"
+            fill={color.tx} fontSize={10.5} fontWeight={700}>{h}</text>
         </g>
       ))}
       {rows.map((row, ri) => (
         <g key={`r-${ri}`}>
           {row.map((cell, ci) => {
-            const isHighlight = ri === 0; // SBR as default recommendation
+            const isTotal = ri === rows.length - 1;
+            const isHighlight = cell.includes("1647") || cell.includes("1126") || cell.includes("520.73");
             return (
               <g key={`c-${ri}-${ci}`}>
-                <rect x={x + ci * colW + 3} y={hdrY + (ri + 1) * (rowH + 2) + 2}
-                  width={colW - 6} height={rowH} rx={5}
-                  fill={isHighlight ? C.teal.bg : "#fff"}
-                  stroke={isHighlight ? C.teal.bd : "#e2e8f0"} strokeWidth={isHighlight ? 1.5 : 1} />
-                <text x={x + ci * colW + colW / 2} y={hdrY + (ri + 1) * (rowH + 2) + 20}
+                <rect x={getColX(ci)} y={hdrY + (ri + 1) * (rowH + 2) + 2}
+                  width={getColW(ci)} height={rowH} rx={5}
+                  fill={isTotal ? C.amber.bg : isHighlight ? C.green.bg : "#fff"}
+                  stroke={isTotal ? C.amber.bd : isHighlight ? C.green.bd : "#e2e8f0"}
+                  strokeWidth={isTotal || isHighlight ? 1.5 : 1} />
+                <text x={getColX(ci) + getColW(ci) / 2 + 3} y={hdrY + (ri + 1) * (rowH + 2) + 21}
                   textAnchor="middle"
-                  fill={isHighlight ? C.teal.tx : "#64748b"} fontSize={10}
-                  fontWeight={isHighlight ? 600 : 400}>{cell}</text>
+                  fill={isTotal ? C.amber.tx : isHighlight ? C.green.tx : "#64748b"}
+                  fontSize={10.5} fontWeight={isTotal || isHighlight ? 700 : 400}>{cell}</text>
               </g>
             );
           })}
@@ -253,81 +217,93 @@ function TechCompareTable({ x, y }: { x: number; y: number }) {
   );
 }
 
-// Final dashboard
-function STPDashboard({ x, y }: { x: number; y: number }) {
-  const dw = 1000, dh = 300;
-  const sections = [
-    { label: "Total Sewage\nGenerated", icon: "💧", color: C.blue },
-    { label: "Proposed STP\nCapacity", icon: "🏭", color: C.teal },
-    { label: "Treated Water\nOutput", icon: "♻️", color: C.green },
-    { label: "Area Required\n(Sq.m)", icon: "📐", color: C.purple },
-    { label: "Power Required\n(kW)", icon: "⚡", color: C.amber },
-  ];
-  const metrics = [
-    { label: "Flushing Reuse", value: "XX KLD", color: C.blue },
-    { label: "Irrigation", value: "XX KLD", color: C.green },
-    { label: "CT Makeup", value: "XX KLD", color: C.cyan },
-    { label: "Excess Discharge", value: "XX KLD", color: C.rose },
-  ];
-  const cardW = (dw - 60) / 5;
-  const metricW = (dw - 60) / 4;
-
+// ── Big Value Block ──
+function ValueBlock({ x, y, w, h, label, value, unit, color, icon }: {
+  x: number; y: number; w: number; h: number;
+  label: string; value: string; unit: string;
+  color: { bg: string; bd: string; tx: string };
+  icon?: string;
+}) {
+  const cx = x + w / 2;
   return (
     <g>
-      <rect x={x} y={y} width={dw} height={dh} rx={16}
-        fill="#f8fafc" stroke={C.teal.bd} strokeWidth={3} />
-      <rect x={x} y={y} width={dw} height={42} rx={16} fill={C.teal.bd} />
-      <rect x={x} y={y + 28} width={dw} height={14} fill={C.teal.bd} />
-      <text x={x + dw / 2} y={y + 28} textAnchor="middle" fill="#fff" fontSize={15} fontWeight={700}>
-        {"📊"} STP FINAL OUTPUT DASHBOARD — Complete Sewage & Reuse Summary
-      </text>
-      {sections.map((s, i) => {
-        const cx = x + 12 + i * (cardW + 8);
-        const cy = y + 52;
-        return (
-          <g key={i}>
-            <rect x={cx} y={cy} width={cardW} height={55} rx={8}
-              fill={s.color.bg} stroke={s.color.bd} strokeWidth={1.5} />
-            <text x={cx + cardW / 2} y={cy + 18} textAnchor="middle" fontSize={16}>{s.icon}</text>
-            <text x={cx + cardW / 2} y={cy + 34} textAnchor="middle"
-              fill={s.color.tx} fontSize={9} fontWeight={600}>{s.label.split("\n")[0]}</text>
-            <text x={cx + cardW / 2} y={cy + 46} textAnchor="middle"
-              fill={s.color.tx} fontSize={9} fontWeight={600}>{s.label.split("\n")[1]}</text>
-          </g>
-        );
-      })}
-      {metrics.map((m, i) => {
-        const cx = x + 12 + i * (metricW + 10);
-        const cy = y + 120;
-        return (
-          <g key={`m-${i}`}>
-            <rect x={cx} y={cy} width={metricW} height={56} rx={10}
-              fill={m.color.bg} stroke={m.color.bd} strokeWidth={2} />
-            <text x={cx + metricW / 2} y={cy + 22} textAnchor="middle"
-              fill={m.color.tx} fontSize={13} fontWeight={700}>{m.label}</text>
-            <text x={cx + metricW / 2} y={cy + 42} textAnchor="middle"
-              fill={m.color.bd} fontSize={16} fontWeight={800}>{m.value}</text>
-          </g>
-        );
-      })}
-      <text x={x + dw / 2} y={y + 200} textAnchor="middle" fill={C.teal.tx} fontSize={10} opacity={0.6}>
-        Sewage = DW×0.80 + FW×1.00 | STP Cap = Sewage + 10% safety | Reuse priority: Flushing → Irrigation → CT
-      </text>
-      <rect x={x + 20} y={y + 220} width={dw - 40} height={56} rx={8}
-        fill={C.violet.bg} stroke={C.violet.bd} strokeWidth={1.5} />
-      <text x={x + dw / 2} y={y + 240} textAnchor="middle" fill={C.violet.tx} fontSize={12} fontWeight={700}>
-        ✅ Compliance: CPCB Guidelines | NBC 2016 | State PCB Discharge Norms | IS 11624
-      </text>
-      <text x={x + dw / 2} y={y + 256} textAnchor="middle" fill={C.violet.tx} fontSize={10} opacity={0.7}>
-        Export → Concept Report | STP Room Drawing | BOQ Input | IGBC/GRIHA Water Credit Submission
-      </text>
-      <text x={x + dw / 2} y={y + 270} textAnchor="middle" fill={C.violet.tx} fontSize={10} opacity={0.7}>
-        Cross-links → Water Demand (P3A) for flushing balance | OWC for leachate input
-      </text>
+      <rect x={x} y={y} width={w} height={h} rx={14}
+        fill={color.bg} stroke={color.bd} strokeWidth={2.5} />
+      {icon && <text x={cx} y={y + 24} textAnchor="middle" fontSize={20}>{icon}</text>}
+      <text x={cx} y={y + (icon ? 44 : 28)} textAnchor="middle" fill={color.tx} fontSize={11} fontWeight={600}>{label}</text>
+      <text x={cx} y={y + (icon ? 68 : 52)} textAnchor="middle" fill={color.bd} fontSize={22} fontWeight={800}>{value}</text>
+      <text x={cx} y={y + (icon ? 84 : 68)} textAnchor="middle" fill={color.tx} fontSize={10} opacity={0.7}>{unit}</text>
     </g>
   );
 }
 
+// ── Sub-flowchart: STP Capacity box ──
+function STPCapacitySubChart({ x, y }: { x: number; y: number }) {
+  const bw = 380, bh = 260;
+  return (
+    <g>
+      <rect x={x} y={y} width={bw} height={bh} rx={16}
+        fill="#f0fdfa" stroke={C.teal.bd} strokeWidth={3} strokeDasharray="10,5" />
+      <rect x={x} y={y} width={bw} height={38} rx={16} fill={C.teal.bd} />
+      <rect x={x} y={y + 26} width={bw} height={12} fill={C.teal.bd} />
+      <text x={x + bw / 2} y={y + 26} textAnchor="middle" fill="#fff" fontSize={13} fontWeight={700}>
+        {"🏗️"} PROPOSED STP CAPACITY
+      </text>
+
+      {/* STP Input */}
+      <rect x={x + 30} y={y + 52} width={bw - 60} height={36} rx={8}
+        fill={C.blue.bg} stroke={C.blue.bd} strokeWidth={2} />
+      <text x={x + bw / 2} y={y + 68} textAnchor="middle" fill={C.blue.tx} fontSize={12} fontWeight={700}>
+        STP Input: 1478.23 CMD
+      </text>
+      <text x={x + bw / 2} y={y + 82} textAnchor="middle" fill={C.blue.tx} fontSize={9} opacity={0.7}>
+        Total sewer generated
+      </text>
+
+      {/* Arrow */}
+      <line x1={x + bw / 2} y1={y + 88} x2={x + bw / 2} y2={y + 102}
+        stroke={C.teal.bd} strokeWidth={2} markerEnd="url(#stp-a)" />
+
+      {/* +10% Buffer */}
+      <rect x={x + 30} y={y + 102} width={bw - 60} height={36} rx={8}
+        fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={2} />
+      <text x={x + bw / 2} y={y + 118} textAnchor="middle" fill={C.amber.tx} fontSize={12} fontWeight={700}>
+        + 10% Extra Buffer: 147.82 CMD
+      </text>
+      <text x={x + bw / 2} y={y + 132} textAnchor="middle" fill={C.amber.tx} fontSize={9} opacity={0.7}>
+        Safety margin for peak loads
+      </text>
+
+      {/* Arrow */}
+      <line x1={x + bw / 2} y1={y + 138} x2={x + bw / 2} y2={y + 152}
+        stroke={C.teal.bd} strokeWidth={2} markerEnd="url(#stp-a)" />
+
+      {/* Total STP Capacity */}
+      <rect x={x + 20} y={y + 152} width={bw - 40} height={40} rx={10}
+        fill={C.teal.bg} stroke={C.teal.bd} strokeWidth={2.5} />
+      <text x={x + bw / 2} y={y + 170} textAnchor="middle" fill={C.teal.tx} fontSize={14} fontWeight={800}>
+        TOTAL STP CAPACITY: 1626.06 CMD
+      </text>
+      <text x={x + bw / 2} y={y + 186} textAnchor="middle" fill={C.teal.tx} fontSize={9} opacity={0.7}>
+        1478.23 + 147.82 = 1626.06
+      </text>
+
+      {/* Arrow */}
+      <line x1={x + bw / 2} y1={y + 192} x2={x + bw / 2} y2={y + 206}
+        stroke={C.teal.bd} strokeWidth={2} markerEnd="url(#stp-a)" />
+
+      {/* Area */}
+      <rect x={x + 40} y={y + 206} width={bw - 80} height={36} rx={8}
+        fill={C.purple.bg} stroke={C.purple.bd} strokeWidth={2} />
+      <text x={x + bw / 2} y={y + 222} textAnchor="middle" fill={C.purple.tx} fontSize={12} fontWeight={700}>
+        Approx Area: 1300.85 Sq.mtr
+      </text>
+      <text x={x + bw / 2} y={y + 236} textAnchor="middle" fill={C.purple.tx} fontSize={9} opacity={0.7}>
+        @ 0.8 m²/KLD (SBR technology)
+      </text>
+    </g>
+  );
+}
 
 // =====================================================================
 // MAIN EXPORTED COMPONENT
@@ -335,64 +311,45 @@ function STPDashboard({ x, y }: { x: number; y: number }) {
 export function STPCalcSVG() {
   const nh = 70;
 
+  // Y positions for each section
   const Y = {
-    entry:          50,
-    // Section 1: Data Integration
-    mod1Header:     200,
-    fetchTable:     320,
-    crossLink:      650,
-    // Section 2: Sewer Generation (80/100)
-    mod2Header:     820,
-    sewDomFormula:  940,
-    sewFlushFormula:1120,
-    sewTotal:       1300,
-    sewBreakdown:   1410,
-    // Section 3: Safety & Peak Factor
-    peakHeader:     1720,
-    peakDecision:   1860,
-    peakYes:        1980,
-    peakNo:         1980,
-    peakConverge:   2130,
-    // Section 4: Technology Selection
-    techHeader:     2250,
-    techTable:      2370,
-    techDecision:   2680,
-    techAuto:       2800,
-    techManual:     2800,
-    techConverge:   2950,
-    // Section 5: STP Capacity & Area
-    capHeader:      3070,
-    capFormula:     3190,
-    areaFormula:    3360,
-    powerFormula:   3530,
-    // Section 6: Treated Water Quality
-    qualityHeader:  3700,
-    qualityTable:   3820,
-    qualityDecision:4160,
-    qualityPass:    4280,
-    qualityFail:    4280,
-    qualityConverge:4430,
-    // Section 7: Reuse Strategy
-    reuseHeader:    4550,
-    reuseStreams:    4700,
-    reuseBalance:   4960,
-    // Section 8: Excess Discharge
-    excessHeader:   5130,
-    excessFormula:  5250,
-    excessDecision: 5420,
-    excessSewer:    5540,
-    excessWater:    5540,
-    excessConverge: 5690,
-    // Section 9: Sludge Handling
-    sludgeHeader:   5800,
-    sludgeCalc:     5920,
-    sludgeDisposal: 6090,
-    // Section 10: Dashboard
-    dashboard:      6280,
-    terminal:       6630,
+    // Master header
+    header:           40,
+    // Section 1: Total Water Demand
+    sec1Band:         180,
+    sec1Header:       210,
+    demandTable:      310,
+    totalDemand:      650,
+    splitNode:        770,
+    potableBlock:     890,
+    flushBlock:       890,
+    // Section 2: Sewer Generation & STP Treatment
+    sec2Band:         1060,
+    sec2Header:       1090,
+    sewerDomBox:      1190,
+    sewerDomFormula:  1290,
+    sewerFlushBox:    1430,
+    sewerFlushFormula:1530,
+    sewerMerge:       1680,
+    sewerTotal:       1770,
+    stpCapacity:      1920,
+    treatedWater:     2220,
+    treatedFormula:   2310,
+    // Section 3: Treated Water Balance & Reuse
+    sec3Band:         2480,
+    sec3Header:       2510,
+    treatedNode:      2610,
+    reuseFanout:      2740,
+    reuseCards:       2790,
+    excessCalc:       3100,
+    // Final Summary Dashboard
+    dashBand:         3310,
+    dashboard:        3340,
+    complianceNote:   3740,
+    terminal:         3870,
   };
 
-  const nw = 440;
+  const nw = 500;
   const nx = CX - nw / 2;
   const tableX = CX - 390;
 
@@ -405,330 +362,388 @@ export function STPCalcSVG() {
         <marker id="stp-green" viewBox="0 0 10 10" refX={10} refY={5} markerWidth={9} markerHeight={9} orient="auto-start-reverse">
           <path d="M 0 0 L 10 5 L 0 10 z" fill={C.green.bd} />
         </marker>
-        <marker id="stp-red" viewBox="0 0 10 10" refX={10} refY={5} markerWidth={9} markerHeight={9} orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill={C.reject} />
+        <marker id="stp-blue" viewBox="0 0 10 10" refX={10} refY={5} markerWidth={9} markerHeight={9} orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={C.blue.bd} />
         </marker>
+        <marker id="stp-amber" viewBox="0 0 10 10" refX={10} refY={5} markerWidth={9} markerHeight={9} orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={C.amber.bd} />
+        </marker>
+        <marker id="stp-teal" viewBox="0 0 10 10" refX={10} refY={5} markerWidth={9} markerHeight={9} orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={C.teal.bd} />
+        </marker>
+        <marker id="stp-rose" viewBox="0 0 10 10" refX={10} refY={5} markerWidth={9} markerHeight={9} orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={C.rose.bd} />
+        </marker>
+        <linearGradient id="stpHeaderGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style={{ stopColor: "#0891b2", stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: "#155e75", stopOpacity: 1 }} />
+        </linearGradient>
+        <filter id="stpShadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+          <feOffset dx="0" dy="2" result="offsetblur" />
+          <feFlood floodColor="#000000" floodOpacity="0.12" />
+          <feComposite in2="offsetblur" operator="in" />
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
-      {/* PHASE BANDS */}
-      <PhaseBand y={Y.entry - 15}         h={120} label="ENTRY — STP CALCULATION MODULE" color={C.blue.bd} />
-      <PhaseBand y={Y.mod1Header - 20}    h={Y.mod2Header - Y.mod1Header - 30} label="SECTION 1 — DATA INTEGRATION (CROSS-MODULE FETCH)" color={C.purple.bd} />
-      <PhaseBand y={Y.mod2Header - 20}    h={Y.peakHeader - Y.mod2Header - 30} label="SECTION 2 — SEWER GENERATION ENGINE (80/100 RULE)" color={C.amber.bd} />
-      <PhaseBand y={Y.peakHeader - 20}    h={Y.techHeader - Y.peakHeader - 30} label="SECTION 3 — PEAK FACTOR & SAFETY MARGIN" color={C.orange.bd} />
-      <PhaseBand y={Y.techHeader - 20}    h={Y.capHeader - Y.techHeader - 30} label="SECTION 4 — STP TECHNOLOGY SELECTION" color={C.cyan.bd} />
-      <PhaseBand y={Y.capHeader - 20}     h={Y.qualityHeader - Y.capHeader - 30} label="SECTION 5 — STP CAPACITY, AREA & POWER SIZING" color={C.teal.bd} />
-      <PhaseBand y={Y.qualityHeader - 20} h={Y.reuseHeader - Y.qualityHeader - 30} label="SECTION 6 — TREATED WATER QUALITY CHECK" color={C.green.bd} />
-      <PhaseBand y={Y.reuseHeader - 20}   h={Y.excessHeader - Y.reuseHeader - 30} label="SECTION 7 — TREATED WATER REUSE STRATEGY" color={C.blue.bd} />
-      <PhaseBand y={Y.excessHeader - 20}  h={Y.sludgeHeader - Y.excessHeader - 30} label="SECTION 8 — EXCESS DISCHARGE CALCULATION" color={C.rose.bd} />
-      <PhaseBand y={Y.sludgeHeader - 20}  h={Y.dashboard - Y.sludgeHeader - 30} label="SECTION 9 — SLUDGE HANDLING & DISPOSAL" color={C.slate.bd} />
-      <PhaseBand y={Y.dashboard - 20}     h={Y.terminal - Y.dashboard + 80} label="SECTION 10 — FINAL OUTPUT DASHBOARD" color={C.teal.bd} />
+      {/* ════════════════════════════════════════════════════ */}
+      {/* MASTER HEADER                                       */}
+      {/* ════════════════════════════════════════════════════ */}
+      <g>
+        <rect x={40} y={Y.header} width={W - 80} height={100} fill="url(#stpHeaderGrad)" stroke="#155e75" strokeWidth={3} rx={12} filter="url(#stpShadow)" />
+        <text x={80} y={Y.header + 32} fontSize={28} fontWeight={800} fill="#ffffff">
+          {"🏭"} STP — SEWAGE TREATMENT PLANT CALCULATION
+        </text>
+        <text x={80} y={Y.header + 56} fontSize={14} fontWeight={600} fill="#a5f3fc">
+          Total Water Demand → Sewer Generation → STP Sizing → Treated Water Balance & Reuse
+        </text>
+        <text x={80} y={Y.header + 78} fontSize={12} fontWeight={500} fill="#67e8f9">
+          Project: Multi-Tower Residential Complex (Towers 1–14) | Standards: CPHEEO Manual / NBC 2016 / CPCB Guidelines / IS 1172
+        </text>
+        <rect x={W - 260} y={Y.header + 10} width={170} height={32} rx={16} fill="#ffffff" opacity={0.15} />
+        <text x={W - 175} y={Y.header + 30} textAnchor="middle" fill="#fff" fontSize={12} fontWeight={700}>
+          {"📐"} 3-SECTION FLOW
+        </text>
+      </g>
 
-      {/* ═══ ENTRY ═══ */}
-      <Box x={nx} y={Y.entry} w={nw} h={nh}
-        label="Start: STP Calculation Module"
-        sub="Sewage Treatment Plant — Sizing, Technology & Reuse"
-        color={C.blue} badge="ENTRY" />
-      <Arrow x1={CX} y1={Y.entry + nh} x2={CX} y2={Y.mod1Header} />
+      {/* ════════════════════════════════════════════════════ */}
+      {/* SECTION 1: TOTAL WATER DEMAND                       */}
+      {/* ════════════════════════════════════════════════════ */}
+      <PhaseBand y={Y.sec1Band} h={Y.sec2Band - Y.sec1Band - 20} label="SECTION 1 — TOTAL WATER DEMAND (CMD) — Towers 1–14" color={C.blue.bd} />
 
-      {/* ═══ SECTION 1: DATA INTEGRATION ═══ */}
-      <Box x={nx} y={Y.mod1Header} w={nw} h={nh}
-        label="Module 1: Cross-Module Data Integration"
-        sub="Fetch water demand values from P3A (Water Demand Calc)"
-        color={C.purple} badge="AUTO-FETCH" />
-      <Arrow x1={CX} y1={Y.mod1Header + nh} x2={CX} y2={Y.fetchTable} />
+      <Box x={nx} y={Y.sec1Header} w={nw} h={nh}
+        label="TOTAL PROJECT WATER DEMAND (CMD)"
+        sub="Multi-Tower Residential — Towers 1 through 14"
+        color={C.blue} badge="SECTION 1" />
+      <Arrow x1={CX} y1={Y.sec1Header + nh} x2={CX} y2={Y.demandTable} />
 
-      <DataTable x={tableX} y={Y.fetchTable}
-        title={"📄 AUTO-FETCHED FROM WATER DEMAND CALCULATION (P3A)"}
-        headers={["Parameter", "Source Module", "Value", "Unit"]}
+      {/* Occupancy Breakdown Table */}
+      <DataTable x={tableX} y={Y.demandTable}
+        title={"📊 OCCUPANCY-WISE WATER DEMAND BREAKDOWN — Towers 1–14"}
+        headers={["Occupancy Type", "Units", "Persons/Unit", "Total Persons", "L/Person/Day", "Demand (CMD)"]}
+        colWidths={[160, 90, 110, 120, 120, 180]}
         rows={[
-          ["Domestic Water (DW)", "P3A Water Demand", "Fetched", "KLD"],
-          ["Flushing Water (FW)", "P3A Water Demand", "Fetched", "KLD"],
-          ["Total Population", "P3A Water Demand", "Fetched", "Persons"],
-          ["Total Flats", "Main DB", "Fetched", "Nos"],
-          ["Commercial Area", "Main DB", "Fetched", "Sq.m"],
-          ["Swimming Pool Volume", "Main DB", "Fetched", "CUM"],
-          ["Irrigation Area", "Main DB", "Fetched", "Sq.m"],
-          ["Cooling Tower Capacity", "Main DB", "Fetched", "TR"],
+          ["Studio",    "200", "3.0", "600",   "135", "81.00"],
+          ["1 BHK",     "300", "4.0", "1,200", "135", "162.00"],
+          ["2 BHK",     "400", "5.0", "2,000", "135", "270.00"],
+          ["3 BHK",     "200", "5.0", "1,000", "135", "135.00"],
+          ["Penthouse", "50",  "6.0", "300",   "150", "45.00"],
+          ["Amenity Club", "—", "—",  "500",   "45",  "22.50"],
+          ["Swimming Pool", "2", "—",  "—",    "—",   "30.00"],
+          ["Landscape/Irrig.", "—", "—", "—",  "—",   "112.00"],
+          ["Commercial", "80", "—",   "400",   "45",  "18.00"],
+          ["Staff/Service", "—", "—",  "350",  "45",  "15.75"],
+          ["Firefighting Reserve", "—", "—", "—", "—", "10.00"],
+          ["TOTAL PROJECT", "1,232+", "—", "6,350+", "—", "1,647.21"],
         ]}
-        color={C.purple}
+        color={C.blue}
       />
 
-      {/* Cross-link indicator */}
-      <NoteBox x={CX + 310} y={Y.fetchTable + 40} w={240} h={90}
-        icon="🔗" title="Cross-Module Link"
-        lines={["Water Demand Calc (P3A)", "Values auto-synced", "Any P3A change updates STP"]}
+      <NoteBox x={CX + 310} y={Y.demandTable + 60} w={240} h={100}
+        icon="📋" title="Standards Applied"
+        lines={["IS 1172:1993", "NBC 2016 Part 8", "CPHEEO Manual 2016", "Local Body Norms"]}
         color={C.violet} />
-      <line x1={tableX + 780} y1={Y.fetchTable + 85} x2={CX + 310} y2={Y.fetchTable + 85}
+      <line x1={tableX + 780} y1={Y.demandTable + 110} x2={CX + 310} y2={Y.demandTable + 110}
         stroke={C.violet.bd} strokeWidth={2} strokeDasharray="5,3" />
 
-      <Arrow x1={CX} y1={Y.fetchTable + 340} x2={CX} y2={Y.mod2Header} />
+      {/* Total Demand result */}
+      <Arrow x1={CX} y1={Y.demandTable + 440} x2={CX} y2={Y.totalDemand} />
 
-      {/* ═══ SECTION 2: SEWER GENERATION (80/100 RULE) ═══ */}
-      <Box x={nx} y={Y.mod2Header} w={nw} h={nh}
-        label="Module 2: Sewer Generation Engine"
-        sub="The 80/100 Rule — Industry Standard Sewage Conversion"
-        color={C.amber} badge="ENGINE" />
-      <Arrow x1={CX} y1={Y.mod2Header + nh} x2={CX} y2={Y.sewDomFormula} />
+      <g>
+        <rect x={CX - 260} y={Y.totalDemand} width={520} height={80} rx={14}
+          fill={C.green.bg} stroke={C.green.bd} strokeWidth={3} filter="url(#stpShadow)" />
+        <text x={CX} y={Y.totalDemand + 28} textAnchor="middle" fill={C.green.tx} fontSize={13} fontWeight={700}>
+          {"💧"} TOTAL PROJECT WATER DEMAND
+        </text>
+        <text x={CX} y={Y.totalDemand + 52} textAnchor="middle" fill={C.green.bd} fontSize={26} fontWeight={800}>
+          1,647.21 CMD
+        </text>
+        <text x={CX} y={Y.totalDemand + 70} textAnchor="middle" fill={C.green.tx} fontSize={10} opacity={0.7}>
+          Cubic Metres per Day (all towers combined)
+        </text>
+      </g>
 
-      <FormulaBlock x={CX - 320} y={Y.sewDomFormula} w={640} h={90}
+      {/* Split node */}
+      <Arrow x1={CX} y1={Y.totalDemand + 80} x2={CX} y2={Y.splitNode} />
+
+      <Diamond cx={CX} cy={Y.splitNode} rxD={200} ryD={46}
+        label="DEMAND SPLIT"
+        sub="Potable vs. Flushing"
+        color={C.amber} />
+
+      {/* Left branch: Potable Water (68.4%) */}
+      <path d={`M${CX - 140},${Y.splitNode + 35} L${CX - 340},${Y.splitNode + 35} L${CX - 340},${Y.potableBlock}`}
+        fill="none" stroke={C.blue.bd} strokeWidth={2.5} markerEnd="url(#stp-blue)" />
+      <g>
+        <rect x={CX - 380} y={Y.splitNode + 15} width={80} height={20} rx={4} fill="#fff" opacity={0.92} />
+        <text x={CX - 340} y={Y.splitNode + 29} textAnchor="middle" fill={C.blue.bd} fontSize={11} fontWeight={700}>68.4%</text>
+      </g>
+
+      <ValueBlock x={CX - 520} y={Y.potableBlock} w={360} h={100}
+        label="POTABLE WATER (68.4%)"
+        value="1,126.48" unit="CMD — Domestic / Drinking / Cooking"
+        color={C.blue} icon="🚰" />
+
+      <NoteBox x={CX - 520} y={Y.potableBlock + 115} w={360} h={60}
+        icon="💡" title="Potable = Total × 0.684"
+        lines={["1,647.21 × 0.684 = 1,126.48 CMD"]}
+        color={C.blue} />
+
+      {/* Right branch: Flush Water (31.6%) */}
+      <path d={`M${CX + 140},${Y.splitNode + 35} L${CX + 340},${Y.splitNode + 35} L${CX + 340},${Y.flushBlock}`}
+        fill="none" stroke={C.amber.bd} strokeWidth={2.5} markerEnd="url(#stp-amber)" />
+      <g>
+        <rect x={CX + 300} y={Y.splitNode + 15} width={80} height={20} rx={4} fill="#fff" opacity={0.92} />
+        <text x={CX + 340} y={Y.splitNode + 29} textAnchor="middle" fill={C.amber.bd} fontSize={11} fontWeight={700}>31.6%</text>
+      </g>
+
+      <ValueBlock x={CX + 160} y={Y.flushBlock} w={360} h={100}
+        label="FLUSH WATER (31.6%)"
+        value="520.73" unit="CMD — Toilet Flushing"
+        color={C.amber} icon="🚿" />
+
+      <NoteBox x={CX + 160} y={Y.flushBlock + 115} w={360} h={60}
+        icon="💡" title="Flush = Total × 0.316"
+        lines={["1,647.21 × 0.316 = 520.73 CMD"]}
+        color={C.amber} />
+
+      {/* ════════════════════════════════════════════════════ */}
+      {/* SECTION 2: SEWER GENERATION & STP TREATMENT          */}
+      {/* ════════════════════════════════════════════════════ */}
+      <PhaseBand y={Y.sec2Band} h={Y.sec3Band - Y.sec2Band - 20} label="SECTION 2 — SEWER GENERATION & STP TREATMENT" color={C.teal.bd} />
+
+      <Box x={nx} y={Y.sec2Header} w={nw} h={nh}
+        label="SEWER GENERATION ENGINE"
+        sub="85% Domestic + 100% Flushing → Total Sewage Calculation"
+        color={C.teal} badge="SECTION 2" />
+
+      {/* Potable path into Sewer calculation (left side) */}
+      <Arrow x1={CX - 340} y1={Y.potableBlock + 175} x2={CX - 340} y2={Y.sewerDomBox} color={C.blue.bd} />
+
+      <g>
+        <rect x={CX - 540} y={Y.sewerDomBox} width={400} height={70} rx={12}
+          fill={C.blue.bg} stroke={C.blue.bd} strokeWidth={2.5} />
+        <text x={CX - 340} y={Y.sewerDomBox + 26} textAnchor="middle" fill={C.blue.tx} fontSize={14} fontWeight={700}>
+          SEWER from Domestic (85%)
+        </text>
+        <text x={CX - 340} y={Y.sewerDomBox + 46} textAnchor="middle" fill={C.blue.tx} fontSize={12} opacity={0.8}>
+          0.85 × 1,126.48 = 957.51 CMD
+        </text>
+        <text x={CX - 340} y={Y.sewerDomBox + 62} textAnchor="middle" fill={C.blue.tx} fontSize={10} opacity={0.6}>
+          15% consumed/evaporated/absorbed
+        </text>
+      </g>
+
+      <Arrow x1={CX - 340} y1={Y.sewerDomBox + 70} x2={CX - 340} y2={Y.sewerDomFormula} color={C.blue.bd} />
+
+      <FormulaBlock x={CX - 540} y={Y.sewerDomFormula} w={400} h={90}
         lines={[
-          "S_domestic = DW × 0.80",
-          "80% of domestic water converts to sewage",
-          "Remaining 20% consumed/evaporated/absorbed",
+          "S_domestic = Potable × 0.85",
+          "= 1,126.48 × 0.85",
+          "= 957.51 CMD",
+          "Source: CPHEEO Manual 2016",
+        ]}
+        color={C.blue} />
+
+      {/* Flush path into Sewer calculation (right side) */}
+      <Arrow x1={CX + 340} y1={Y.flushBlock + 175} x2={CX + 340} y2={Y.sewerFlushBox} color={C.amber.bd} />
+
+      <g>
+        <rect x={CX + 140} y={Y.sewerFlushBox} width={400} height={70} rx={12}
+          fill={C.amber.bg} stroke={C.amber.bd} strokeWidth={2.5} />
+        <text x={CX + 340} y={Y.sewerFlushBox + 26} textAnchor="middle" fill={C.amber.tx} fontSize={14} fontWeight={700}>
+          SEWER from Flushing (100%)
+        </text>
+        <text x={CX + 340} y={Y.sewerFlushBox + 46} textAnchor="middle" fill={C.amber.tx} fontSize={12} opacity={0.8}>
+          1.00 × 520.73 = 520.73 CMD
+        </text>
+        <text x={CX + 340} y={Y.sewerFlushBox + 62} textAnchor="middle" fill={C.amber.tx} fontSize={10} opacity={0.6}>
+          100% enters sewage — no loss
+        </text>
+      </g>
+
+      <Arrow x1={CX + 340} y1={Y.sewerFlushBox + 70} x2={CX + 340} y2={Y.sewerFlushFormula} color={C.amber.bd} />
+
+      <FormulaBlock x={CX + 140} y={Y.sewerFlushFormula} w={400} h={90}
+        lines={[
+          "S_flushing = Flush × 1.00",
+          "= 520.73 × 1.00",
+          "= 520.73 CMD",
+          "All flush water → STP inlet",
         ]}
         color={C.amber} />
 
-      <NoteBox x={CX + 360} y={Y.sewDomFormula} w={220} h={90}
-        icon="💡" title="80% Rule"
-        lines={["CPHEEO Manual 2016", "IS 1172:1993 basis", "Conservative estimate"]}
-        color={C.rose} />
-      <line x1={CX + 320} y1={Y.sewDomFormula + 45} x2={CX + 360} y2={Y.sewDomFormula + 45}
-        stroke={C.rose.bd} strokeWidth={2} strokeDasharray="5,3" />
+      {/* Merge lines to center */}
+      <path d={`M${CX - 340},${Y.sewerDomFormula + 90} L${CX - 340},${Y.sewerMerge} L${CX},${Y.sewerMerge}`}
+        fill="none" stroke={C.blue.bd} strokeWidth={2.5} />
+      <path d={`M${CX + 340},${Y.sewerFlushFormula + 90} L${CX + 340},${Y.sewerMerge} L${CX},${Y.sewerMerge}`}
+        fill="none" stroke={C.amber.bd} strokeWidth={2.5} />
 
-      <Arrow x1={CX} y1={Y.sewDomFormula + 90} x2={CX} y2={Y.sewFlushFormula} />
+      {/* Merge indicator circle */}
+      <circle cx={CX} cy={Y.sewerMerge} r={18} fill={C.teal.bg} stroke={C.teal.bd} strokeWidth={3} />
+      <text x={CX} y={Y.sewerMerge + 5} textAnchor="middle" fill={C.teal.tx} fontSize={16} fontWeight={800}>+</text>
 
-      <FormulaBlock x={CX - 320} y={Y.sewFlushFormula} w={640} h={90}
+      <Arrow x1={CX} y1={Y.sewerMerge + 18} x2={CX} y2={Y.sewerTotal} color={C.teal.bd} />
+
+      {/* Total Sewer Generated */}
+      <g>
+        <rect x={CX - 280} y={Y.sewerTotal} width={560} height={100} rx={16}
+          fill={C.teal.bg} stroke={C.teal.bd} strokeWidth={3} filter="url(#stpShadow)" />
+        <text x={CX} y={Y.sewerTotal + 24} textAnchor="middle" fill={C.teal.tx} fontSize={12} fontWeight={700}>
+          {"🔗"} TOTAL SEWER GENERATED / STP INPUT (CMD)
+        </text>
+        <text x={CX} y={Y.sewerTotal + 52} textAnchor="middle" fill={C.teal.bd} fontSize={28} fontWeight={800}>
+          1,478.23 CMD
+        </text>
+        <text x={CX} y={Y.sewerTotal + 72} textAnchor="middle" fill={C.teal.tx} fontSize={12} fontWeight={600}>
+          957.51 (Domestic) + 520.73 (Flushing)
+        </text>
+        <text x={CX} y={Y.sewerTotal + 88} textAnchor="middle" fill={C.teal.tx} fontSize={10} opacity={0.6}>
+          This feeds into STP capacity sizing & treated water output
+        </text>
+      </g>
+
+      {/* Branch to STP Capacity sub-chart (right side) */}
+      <path d={`M${CX + 280},${Y.sewerTotal + 50} L${CX + 360},${Y.sewerTotal + 50} L${CX + 360},${Y.stpCapacity}`}
+        fill="none" stroke={C.teal.bd} strokeWidth={2.5} strokeDasharray="8,4" markerEnd="url(#stp-teal)" />
+      <g>
+        <rect x={CX + 290} y={Y.sewerTotal + 36} width={60} height={18} rx={4} fill="#fff" opacity={0.92} />
+        <text x={CX + 320} y={Y.sewerTotal + 49} textAnchor="middle" fill={C.teal.bd} fontSize={9} fontWeight={700}>SIZING</text>
+      </g>
+
+      <STPCapacitySubChart x={CX + 180} y={Y.stpCapacity} />
+
+      {/* Main flow continues down to Treated Water */}
+      <Arrow x1={CX} y1={Y.sewerTotal + 100} x2={CX} y2={Y.treatedWater} />
+
+      <g>
+        <rect x={CX - 300} y={Y.treatedWater} width={340} height={70} rx={12}
+          fill={C.green.bg} stroke={C.green.bd} strokeWidth={2.5} />
+        <text x={CX - 130} y={Y.treatedWater + 24} textAnchor="middle" fill={C.green.tx} fontSize={13} fontWeight={700}>
+          Treated Water Generated
+        </text>
+        <text x={CX - 130} y={Y.treatedWater + 44} textAnchor="middle" fill={C.green.tx} fontSize={11}>
+          90% Efficiency of STP Treatment
+        </text>
+        <text x={CX - 130} y={Y.treatedWater + 62} textAnchor="middle" fill={C.green.bd} fontSize={10} fontWeight={600}>
+          Technology: SBR (Sequencing Batch Reactor)
+        </text>
+      </g>
+
+      <Arrow x1={CX - 130} y1={Y.treatedWater + 70} x2={CX - 130} y2={Y.treatedFormula} color={C.green.bd} />
+
+      <FormulaBlock x={CX - 370} y={Y.treatedFormula} w={480} h={110}
         lines={[
-          "S_flushing = FW × 1.00",
-          "100% of flushing water converts to sewage",
-          "All flush water enters drainage → STP inlet",
+          "Treated Water = STP Input × Efficiency",
+          "= 1,478.23 × 0.90",
+          "= 1,330.41 CMD",
+          "Remaining 10% = sludge + process losses",
+          "Reject: 1,478.23 − 1,330.41 = 147.82 CMD",
         ]}
-        color={C.amber} />
-
-      <NoteBox x={CX + 360} y={Y.sewFlushFormula} w={220} h={90}
-        icon="💡" title="100% Rule"
-        lines={["All flushing → sewage", "Grey water pathway", "No evaporation loss"]}
-        color={C.cyan} />
-      <line x1={CX + 320} y1={Y.sewFlushFormula + 45} x2={CX + 360} y2={Y.sewFlushFormula + 45}
-        stroke={C.cyan.bd} strokeWidth={2} strokeDasharray="5,3" />
-
-      <Arrow x1={CX} y1={Y.sewFlushFormula + 90} x2={CX} y2={Y.sewTotal} />
-
-      <Box x={CX - 280} y={Y.sewTotal} w={560} h={nh}
-        label="Total Sewage = S_domestic + S_flushing"
-        sub="Combined daily sewage generation (KLD / CUM per day)"
-        color={C.green} badge="SUMMATION" />
-      <Arrow x1={CX} y1={Y.sewTotal + nh} x2={CX} y2={Y.sewBreakdown} />
-
-      <DataTable x={tableX} y={Y.sewBreakdown}
-        title={"📊 SEWER GENERATION BREAKDOWN"}
-        headers={["Source", "Water Input (KLD)", "Conversion", "Sewage (KLD)"]}
-        rows={[
-          ["Domestic Water", "Fetched", "× 0.80", "Auto-calc"],
-          ["Flushing Water", "Fetched", "× 1.00", "Auto-calc"],
-          ["Swimming Pool Backwash", "Fetched", "× 0.05", "Auto-calc"],
-          ["Commercial (if any)", "Fetched", "× 0.80", "Auto-calc"],
-          ["TOTAL SEWAGE", "—", "—", "Auto-calc"],
-        ]}
-        color={C.amber}
-      />
-      <Arrow x1={CX} y1={Y.sewBreakdown + 250} x2={CX} y2={Y.peakHeader} />
-
-      {/* ═══ SECTION 3: PEAK FACTOR ═══ */}
-      <Box x={nx} y={Y.peakHeader} w={nw} h={nh}
-        label="Peak Factor & Safety Margin"
-        sub="Apply peaking factor for design capacity"
-        color={C.orange} badge="SAFETY" />
-      <Arrow x1={CX} y1={Y.peakHeader + nh} x2={CX} y2={Y.peakDecision - 48} />
-
-      <Diamond cx={CX} cy={Y.peakDecision} rxD={210} ryD={48}
-        label="Apply Peak Factor?"
-        sub="Population > 500 persons?"
-        color={C.orange} />
-
-      <Arrow x1={CX - 140} y1={Y.peakDecision + 40} x2={CX - 300} y2={Y.peakYes}
-        label="Yes (>500)" color={C.green.bd} />
-      <Box x={CX - 520} y={Y.peakYes} w={420} h={nh}
-        label="Apply Peak Factor = 1.5"
-        sub="Design Sewage = Total × 1.5 for peak hour flow"
-        color={C.orange} badge="PEAK" />
-
-      <Arrow x1={CX + 140} y1={Y.peakDecision + 40} x2={CX + 300} y2={Y.peakNo}
-        label="No (≤500)" color={C.reject} />
-      <Box x={CX + 100} y={Y.peakNo} w={420} h={nh}
-        label="Apply Safety Factor = 1.10"
-        sub="10% margin only for small developments"
-        color={C.green} badge="SAFETY" />
-
-      <Arrow x1={CX - 300} y1={Y.peakYes + nh} x2={CX} y2={Y.peakConverge} />
-      <Arrow x1={CX + 300} y1={Y.peakNo + nh} x2={CX} y2={Y.peakConverge} />
-      <Box x={nx} y={Y.peakConverge} w={nw} h={60}
-        label="Design Sewage Capacity Locked"
-        sub="Peak-adjusted capacity for STP sizing"
-        color={C.orange} badge="LOCKED" />
-      <Arrow x1={CX} y1={Y.peakConverge + 60} x2={CX} y2={Y.techHeader} />
-
-      {/* ═══ SECTION 4: TECHNOLOGY SELECTION ═══ */}
-      <Box x={nx} y={Y.techHeader} w={nw} h={nh}
-        label="STP Technology Selection"
-        sub="Evaluate treatment technologies against project constraints"
-        color={C.cyan} badge="TECHNOLOGY" />
-      <Arrow x1={CX} y1={Y.techHeader + nh} x2={CX} y2={Y.techTable} />
-
-      <TechCompareTable x={CX - 450} y={Y.techTable} />
-
-      <Arrow x1={CX} y1={Y.techTable + 240} x2={CX} y2={Y.techDecision - 48} />
-
-      <Diamond cx={CX} cy={Y.techDecision} rxD={210} ryD={48}
-        label="Auto-Select Technology?"
-        sub="System recommendation acceptable?"
-        color={C.cyan} />
-
-      <Arrow x1={CX - 140} y1={Y.techDecision + 40} x2={CX - 300} y2={Y.techAuto}
-        label="Auto" color={C.green.bd} />
-      <Box x={CX - 520} y={Y.techAuto} w={420} h={nh}
-        label="System Recommends: SBR Technology"
-        sub="Best balance of area, power & treatment quality"
-        color={C.teal} badge="RECOMMENDED" />
-
-      <Arrow x1={CX + 140} y1={Y.techDecision + 40} x2={CX + 300} y2={Y.techManual}
-        label="Manual" color={C.reject} />
-      <Box x={CX + 100} y={Y.techManual} w={420} h={nh}
-        label="User Selects Alternative Technology"
-        sub="Manual selection → parameters update accordingly"
-        color={C.rose} badge="OVERRIDE" />
-
-      <Arrow x1={CX - 300} y1={Y.techAuto + nh} x2={CX} y2={Y.techConverge} />
-      <Arrow x1={CX + 300} y1={Y.techManual + nh} x2={CX} y2={Y.techConverge} />
-      <Box x={nx} y={Y.techConverge} w={nw} h={60}
-        label="Technology Locked"
-        sub="Area/power coefficients set per selected technology"
-        color={C.cyan} badge="LOCKED" />
-      <Arrow x1={CX} y1={Y.techConverge + 60} x2={CX} y2={Y.capHeader} />
-
-      {/* ═══ SECTION 5: CAPACITY, AREA & POWER ═══ */}
-      <Box x={nx} y={Y.capHeader} w={nw} h={nh}
-        label="STP Capacity & Infrastructure Sizing"
-        sub="Calculate capacity, area & power from design sewage"
-        color={C.teal} badge="SIZING" />
-      <Arrow x1={CX} y1={Y.capHeader + nh} x2={CX} y2={Y.capFormula} />
-
-      <FormulaBlock x={CX - 340} y={Y.capFormula} w={680} h={90}
-        lines={[
-          "STP Capacity (KLD) = Design Sewage (KLD)",
-          "Round up to nearest standard size: 50/100/150/200/300/500 KLD",
-          "Standard sizes per CPHEEO / manufacturer catalogue",
-        ]}
-        color={C.teal} />
-      <Arrow x1={CX} y1={Y.capFormula + 90} x2={CX} y2={Y.areaFormula} />
-
-      <FormulaBlock x={CX - 340} y={Y.areaFormula} w={680} h={90}
-        lines={[
-          "STP Area (sqm) = Capacity (KLD) × Area Factor (m²/KLD)",
-          "SBR: 0.8–1.0 m²/KLD | MBR: 0.5–0.7 m²/KLD",
-          "Add 20% for utility corridor & pump room",
-        ]}
-        color={C.teal} />
-      <Arrow x1={CX} y1={Y.areaFormula + 90} x2={CX} y2={Y.powerFormula} />
-
-      <FormulaBlock x={CX - 340} y={Y.powerFormula} w={680} h={90}
-        lines={[
-          "STP Power (kW) = Capacity (KLD) × Power Factor (kW/KLD)",
-          "SBR: 0.6–0.8 kW/KLD | MBR: 1.0–1.5 kW/KLD",
-          "Include blower, pump, control panel, lighting loads",
-        ]}
-        color={C.teal} />
-      <Arrow x1={CX} y1={Y.powerFormula + 90} x2={CX} y2={Y.qualityHeader} />
-
-      {/* ═══ SECTION 6: TREATED WATER QUALITY ═══ */}
-      <Box x={nx} y={Y.qualityHeader} w={nw} h={nh}
-        label="Treated Water Quality Parameters"
-        sub="CPCB discharge norms & reuse standards verification"
-        color={C.green} badge="QUALITY" />
-      <Arrow x1={CX} y1={Y.qualityHeader + nh} x2={CX} y2={Y.qualityTable} />
-
-      <DataTable x={tableX} y={Y.qualityTable}
-        title={"📋 TREATED WATER QUALITY STANDARDS (CPCB / NBC)"}
-        headers={["Parameter", "Inlet (mg/L)", "Outlet Target", "Reuse Std", "Status"]}
-        rows={[
-          ["BOD", "200–300", "< 10", "< 10", "Auto"],
-          ["COD", "400–600", "< 50", "< 50", "Auto"],
-          ["TSS", "200–400", "< 20", "< 10", "Auto"],
-          ["pH", "6.5–8.0", "6.5–8.5", "6.5–8.5", "Auto"],
-          ["Turbidity (NTU)", "50–100", "< 5", "< 2", "Auto"],
-          ["Faecal Coliform", "10⁶–10⁸", "< 1000", "< 230", "Auto"],
-          ["Total Nitrogen", "30–50", "< 10", "< 10", "Auto"],
-        ]}
-        color={C.green}
-      />
-      <Arrow x1={CX} y1={Y.qualityTable + 310} x2={CX} y2={Y.qualityDecision - 48} />
-
-      <Diamond cx={CX} cy={Y.qualityDecision} rxD={220} ryD={48}
-        label="Quality Meets Standards?"
-        sub="All parameters within CPCB limits?"
         color={C.green} />
 
-      <Arrow x1={CX - 150} y1={Y.qualityDecision + 40} x2={CX - 300} y2={Y.qualityPass}
-        label="Pass" color={C.green.bd} />
-      <Box x={CX - 520} y={Y.qualityPass} w={420} h={nh}
-        label="Quality Approved — Proceed to Reuse"
-        sub="All parameters within CPCB discharge & reuse limits"
-        color={C.green} badge="APPROVED" />
+      <NoteBox x={CX + 160} y={Y.treatedFormula} w={260} h={100}
+        icon="♻️" title="90% SBR Efficiency"
+        lines={["BOD Removal: 95–98%", "TSS < 10 mg/L", "CPCB Compliant Output", "Reuse-grade water"]}
+        color={C.green} />
+      <line x1={CX + 110} y1={Y.treatedFormula + 50} x2={CX + 160} y2={Y.treatedFormula + 50}
+        stroke={C.green.bd} strokeWidth={2} strokeDasharray="5,3" />
 
-      <Arrow x1={CX + 150} y1={Y.qualityDecision + 40} x2={CX + 300} y2={Y.qualityFail}
-        label="Fail" color={C.reject} />
-      <Box x={CX + 100} y={Y.qualityFail} w={420} h={nh}
-        label="Upgrade Technology / Add Tertiary"
-        sub="Add sand filter/UV/ozone → re-evaluate quality"
-        color={C.rose} badge="UPGRADE" />
+      {/* ════════════════════════════════════════════════════ */}
+      {/* SECTION 3: TREATED WATER BALANCE & REUSE             */}
+      {/* ════════════════════════════════════════════════════ */}
+      <PhaseBand y={Y.sec3Band} h={Y.dashBand - Y.sec3Band - 20} label="SECTION 3 — TREATED WATER BALANCE & REUSE" color={C.green.bd} />
 
-      <Arrow x1={CX - 300} y1={Y.qualityPass + nh} x2={CX} y2={Y.qualityConverge} />
-      <Arrow x1={CX + 300} y1={Y.qualityFail + nh} x2={CX} y2={Y.qualityConverge} />
-      <Box x={nx} y={Y.qualityConverge} w={nw} h={60}
-        label="Treated Water Quality Validated"
-        sub="Quality locked → proceed to reuse allocation"
-        color={C.green} badge="PROCEED" />
-      <Arrow x1={CX} y1={Y.qualityConverge + 60} x2={CX} y2={Y.reuseHeader} />
+      <Box x={nx - 50} y={Y.sec3Header} w={nw + 100} h={nh}
+        label="TREATED WATER DISTRIBUTION"
+        sub="Allocate 1,330.41 CMD across reuse purposes"
+        color={C.green} badge="SECTION 3" />
 
-      {/* ═══ SECTION 7: REUSE STRATEGY ═══ */}
-      <Box x={nx} y={Y.reuseHeader} w={nw} h={nh}
-        label="Treated Water Reuse Strategy"
-        sub="Allocate treated water to multiple reuse streams"
-        color={C.blue} badge="REUSE" />
-      <Arrow x1={CX} y1={Y.reuseHeader + nh} x2={CX} y2={Y.reuseStreams - 30} />
+      <Arrow x1={CX - 130} y1={Y.treatedFormula + 110} x2={CX} y2={Y.sec3Header} />
 
-      {/* 4-way fan-out */}
+      {/* Treated Water Source Node */}
+      <g>
+        <rect x={CX - 200} y={Y.treatedNode} width={400} height={70} rx={14}
+          fill={C.green.bg} stroke={C.green.bd} strokeWidth={3} filter="url(#stpShadow)" />
+        <text x={CX} y={Y.treatedNode + 26} textAnchor="middle" fill={C.green.tx} fontSize={12} fontWeight={700}>
+          {"♻️"} TREATED WATER AVAILABLE
+        </text>
+        <text x={CX} y={Y.treatedNode + 50} textAnchor="middle" fill={C.green.bd} fontSize={22} fontWeight={800}>
+          1,330.41 CMD
+        </text>
+        <text x={CX} y={Y.treatedNode + 64} textAnchor="middle" fill={C.green.tx} fontSize={10} opacity={0.7}>
+          SBR-treated, reuse-grade quality
+        </text>
+      </g>
+
+      <Arrow x1={CX} y1={Y.treatedNode + 70} x2={CX} y2={Y.reuseFanout} />
+
+      {/* Fan-out bar */}
+      <line x1={CX} y1={Y.reuseFanout} x2={CX} y2={Y.reuseFanout + 20}
+        stroke={C.arrow} strokeWidth={2.5} />
+
+      {/* 4 Reuse branches */}
       {(() => {
-        const streams = [
-          { label: "Flushing", sub: "Auto-balance vs FW demand", color: C.blue, icon: "🚿" },
-          { label: "Irrigation", sub: "Landscape water supply", color: C.green, icon: "🌱" },
-          { label: "CT Makeup", sub: "Cooling tower water", color: C.cyan, icon: "❄️" },
-          { label: "Misc. / Reserve", sub: "Car wash, fire reserve", color: C.amber, icon: "📦" },
+        const branches = [
+          { label: "FLUSHING PURPOSE",    sub: "100% of Requirement",       value: "520.73 CMD",  pct: "39.1%", color: C.blue,  icon: "🚿", note: "Loops back to Section 1 flush req." },
+          { label: "IRRIGATION PURPOSE",  sub: "Landscape & Garden",        value: "112.00 CMD",  pct: "8.4%",  color: C.green, icon: "🌱", note: "Fixed landscape area demand" },
+          { label: "SLUDGE (5% STP IN)",  sub: "5% of STP Input",          value: "73.91 CMD",   pct: "5.6%",  color: C.slate, icon: "🪨", note: "1,478.23 × 0.05 = 73.91" },
+          { label: "EXCESS → SEWER",      sub: "Discharged to Muni. Sewer", value: "623.77 CMD",  pct: "46.9%", color: C.rose,  icon: "🔻", note: "1,330.41 − (520.73+112+73.91)" },
         ];
-        const cardW = 250, cardH = 100, gapX = 30;
-        const totalW = streams.length * cardW + (streams.length - 1) * gapX;
-        const sx = CX - totalW / 2;
-        const barY = Y.reuseStreams;
-        const centers = streams.map((_, i) => sx + i * (cardW + gapX) + cardW / 2);
+        const cardW = 300, cardH = 190, gapX = 24;
+        const totalBW = branches.length * cardW + (branches.length - 1) * gapX;
+        const sx = CX - totalBW / 2;
+        const barY = Y.reuseFanout + 20;
+        const centers = branches.map((_, i) => sx + i * (cardW + gapX) + cardW / 2);
 
         return (
           <g>
-            <line x1={CX} y1={barY - 30} x2={CX} y2={barY}
-              stroke={C.arrow} strokeWidth={2.5} />
+            {/* Horizontal bar */}
             <line x1={centers[0]} y1={barY} x2={centers[centers.length - 1]} y2={barY}
               stroke={C.arrow} strokeWidth={2.5} />
+            {/* Drop-down arrows to each card */}
             {centers.map((cx, i) => (
-              <line key={`rs-${i}`} x1={cx} y1={barY} x2={cx} y2={barY + 20}
-                stroke={C.arrow} strokeWidth={2.5} markerEnd="url(#stp-a)" />
+              <line key={`drop-${i}`} x1={cx} y1={barY} x2={cx} y2={barY + 30}
+                stroke={branches[i].color.bd} strokeWidth={2.5} markerEnd="url(#stp-a)" />
             ))}
-            {streams.map((s, i) => {
-              const cx = sx + i * (cardW + gapX);
+            {/* Cards */}
+            {branches.map((b, i) => {
+              const bx = sx + i * (cardW + gapX);
+              const by = barY + 30;
               return (
-                <g key={`sc-${i}`}>
-                  <rect x={cx} y={barY + 20} width={cardW} height={cardH} rx={12}
-                    fill={s.color.bg} stroke={s.color.bd} strokeWidth={2.5} />
-                  <rect x={cx} y={barY + 20} width={cardW} height={30} rx={12} fill={s.color.bd} />
-                  <rect x={cx} y={barY + 38} width={cardW} height={12} fill={s.color.bd} />
-                  <text x={cx + cardW / 2} y={barY + 40} textAnchor="middle" fill="#fff" fontSize={12} fontWeight={700}>
-                    {s.icon} {s.label}
+                <g key={`br-${i}`}>
+                  <rect x={bx} y={by} width={cardW} height={cardH} rx={14}
+                    fill={b.color.bg} stroke={b.color.bd} strokeWidth={2.5} />
+                  {/* Header bar */}
+                  <rect x={bx} y={by} width={cardW} height={34} rx={14} fill={b.color.bd} />
+                  <rect x={bx} y={by + 20} width={cardW} height={14} fill={b.color.bd} />
+                  <text x={bx + cardW / 2} y={by + 22} textAnchor="middle" fill="#fff" fontSize={12} fontWeight={700}>
+                    {b.icon} {b.label}
                   </text>
-                  <text x={cx + cardW / 2} y={barY + 72} textAnchor="middle" fill={s.color.tx} fontSize={11}>
-                    {s.sub}
+                  {/* Percentage badge */}
+                  <rect x={bx + cardW - 60} y={by + 40} width={50} height={18} rx={9} fill={b.color.bd} opacity={0.2} />
+                  <text x={bx + cardW - 35} y={by + 52} textAnchor="middle" fill={b.color.bd} fontSize={10} fontWeight={700}>{b.pct}</text>
+                  {/* Sub description */}
+                  <text x={bx + cardW / 2} y={by + 58} textAnchor="middle" fill={b.color.tx} fontSize={11} fontWeight={600}>
+                    {b.sub}
                   </text>
-                  <rect x={cx + cardW / 2 - 36} y={barY + cardH - 4} width={72} height={20} rx={10}
-                    fill={s.color.bd} opacity={0.15} />
-                  <text x={cx + cardW / 2} y={barY + cardH + 10} textAnchor="middle"
-                    fill={s.color.bd} fontSize={10} fontWeight={600}>ALLOCATED</text>
+                  {/* Big value */}
+                  <text x={bx + cardW / 2} y={by + 90} textAnchor="middle" fill={b.color.bd} fontSize={24} fontWeight={800}>
+                    {b.value}
+                  </text>
+                  {/* Formula / note */}
+                  <rect x={bx + 10} y={by + 110} width={cardW - 20} height={36} rx={8}
+                    fill="#fff" stroke={b.color.bd} strokeWidth={1} strokeDasharray="4,3" />
+                  <text x={bx + cardW / 2} y={by + 132} textAnchor="middle" fill={b.color.tx} fontSize={10} fontWeight={500}>
+                    {b.note}
+                  </text>
+                  {/* Status */}
+                  <rect x={bx + cardW / 2 - 40} y={by + 155} width={80} height={22} rx={11} fill={b.color.bd} opacity={0.15} />
+                  <text x={bx + cardW / 2} y={by + 169} textAnchor="middle" fill={b.color.bd} fontSize={10} fontWeight={700}>ALLOCATED</text>
                 </g>
               );
             })}
@@ -736,103 +751,149 @@ export function STPCalcSVG() {
         );
       })()}
 
-      {/* Water balance */}
-      <Arrow x1={CX} y1={Y.reuseStreams + 150} x2={CX} y2={Y.reuseBalance} />
-      <FormulaBlock x={CX - 340} y={Y.reuseBalance} w={680} h={90}
-        lines={[
-          "Water Balance: Treated Output = Σ(Reuse Streams) + Excess",
-          "Priority: Flushing (1st) → Irrigation (2nd) → CT (3rd) → Misc",
-          "Flushing reuse auto-reduces fresh flushing water demand",
-        ]}
+      {/* Flushing loop-back arrow (left card → annotation) */}
+      <NoteBox x={40} y={Y.reuseCards + 230} w={260} h={80}
+        icon="🔄" title="Flushing Loop-Back"
+        lines={["520.73 CMD recycled back to", "match Section 1 Flush Demand", "Zero fresh water for flushing!"]}
         color={C.blue} />
-      <Arrow x1={CX} y1={Y.reuseBalance + 90} x2={CX} y2={Y.excessHeader} />
 
-      {/* ═══ SECTION 8: EXCESS DISCHARGE ═══ */}
-      <Box x={nx} y={Y.excessHeader} w={nw} h={nh}
-        label="Excess Water Calculation"
-        sub="Treated water remaining after all reuse allocation"
-        color={C.rose} badge="EXCESS" />
-      <Arrow x1={CX} y1={Y.excessHeader + nh} x2={CX} y2={Y.excessFormula} />
+      {/* Excess Discharge Calculation Detail */}
+      <Arrow x1={CX} y1={Y.reuseCards + 230} x2={CX} y2={Y.excessCalc} />
 
-      <FormulaBlock x={CX - 320} y={Y.excessFormula} w={640} h={90}
-        lines={[
-          "Excess = Total Treated − Σ(All Reuse Streams)",
-          "If Excess > 0 → route to discharge point",
-          "If Excess ≤ 0 → zero liquid discharge achieved (ZLD)",
-        ]}
-        color={C.rose} />
-      <Arrow x1={CX} y1={Y.excessFormula + 90} x2={CX} y2={Y.excessDecision - 48} />
+      <g>
+        <rect x={CX - 380} y={Y.excessCalc} width={760} height={140} rx={14}
+          fill="#fff8f8" stroke={C.rose.bd} strokeWidth={3} />
+        <rect x={CX - 380} y={Y.excessCalc} width={760} height={38} rx={14} fill={C.rose.bd} />
+        <rect x={CX - 380} y={Y.excessCalc + 26} width={760} height={12} fill={C.rose.bd} />
+        <text x={CX} y={Y.excessCalc + 26} textAnchor="middle" fill="#fff" fontSize={13} fontWeight={700}>
+          {"🔻"} EXCESS DISCHARGE CALCULATION — Water Balance Verification
+        </text>
 
-      <Diamond cx={CX} cy={Y.excessDecision} rxD={210} ryD={48}
-        label="Excess Water > 0?"
-        sub="Is there surplus treated water?"
-        color={C.rose} />
+        <text x={CX - 340} y={Y.excessCalc + 62} fill={C.rose.tx} fontSize={12} fontWeight={700} fontFamily="monospace">
+          Treated Water Available:           1,330.41 CMD
+        </text>
+        <text x={CX - 340} y={Y.excessCalc + 82} fill={C.blue.tx} fontSize={12} fontWeight={600} fontFamily="monospace">
+          − Flushing Reuse:                   520.73 CMD
+        </text>
+        <text x={CX - 340} y={Y.excessCalc + 98} fill={C.green.tx} fontSize={12} fontWeight={600} fontFamily="monospace">
+          − Irrigation:                       112.00 CMD
+        </text>
+        <text x={CX - 340} y={Y.excessCalc + 114} fill={C.slate.tx} fontSize={12} fontWeight={600} fontFamily="monospace">
+          − Sludge (5% of 1,478.23):           73.91 CMD
+        </text>
+        <line x1={CX - 340} y1={Y.excessCalc + 120} x2={CX + 340} y2={Y.excessCalc + 120}
+          stroke={C.rose.bd} strokeWidth={1.5} strokeDasharray="4,3" />
+        <text x={CX - 340} y={Y.excessCalc + 136} fill={C.rose.bd} fontSize={14} fontWeight={800} fontFamily="monospace">
+          = EXCESS DISCHARGED TO SEWER:       623.77 CMD
+        </text>
+      </g>
 
-      <Arrow x1={CX - 140} y1={Y.excessDecision + 40} x2={CX - 300} y2={Y.excessSewer}
-        label="Yes" color={C.reject} />
-      <Box x={CX - 520} y={Y.excessSewer} w={420} h={nh}
-        label="Route to Municipal Sewer / Stormwater"
-        sub="Discharge per CPCB norms → consent required"
-        color={C.rose} badge="DISCHARGE" />
+      {/* ════════════════════════════════════════════════════ */}
+      {/* FINAL SUMMARY DASHBOARD                              */}
+      {/* ════════════════════════════════════════════════════ */}
+      <PhaseBand y={Y.dashBand} h={Y.terminal - Y.dashBand + 80} label="FINAL OUTPUT — STP DESIGN SUMMARY DASHBOARD" color={C.teal.bd} />
 
-      <Arrow x1={CX + 140} y1={Y.excessDecision + 40} x2={CX + 300} y2={Y.excessWater}
-        label="No (ZLD)" color={C.green.bd} />
-      <Box x={CX + 100} y={Y.excessWater} w={420} h={nh}
-        label="Zero Liquid Discharge Achieved"
-        sub="100% reuse — IGBC/GRIHA bonus credit eligible"
-        color={C.green} badge="ZLD ✓" />
+      <Arrow x1={CX} y1={Y.excessCalc + 140} x2={CX} y2={Y.dashboard} />
 
-      <Arrow x1={CX - 300} y1={Y.excessSewer + nh} x2={CX} y2={Y.excessConverge} />
-      <Arrow x1={CX + 300} y1={Y.excessWater + nh} x2={CX} y2={Y.excessConverge} />
-      <Box x={nx} y={Y.excessConverge} w={nw} h={60}
-        label="Discharge Strategy Finalized"
-        sub="Excess volume & discharge point locked"
-        color={C.rose} badge="LOCKED" />
-      <Arrow x1={CX} y1={Y.excessConverge + 60} x2={CX} y2={Y.sludgeHeader} />
+      {/* Dashboard */}
+      {(() => {
+        const dx = 60, dw = W - 120, dy = Y.dashboard;
+        const cards = [
+          { label: "Total Water\nDemand", value: "1,647.21", unit: "CMD", icon: "💧", color: C.blue },
+          { label: "Total Sewer\nGenerated", value: "1,478.23", unit: "CMD", icon: "🔗", color: C.amber },
+          { label: "STP Capacity\n(+10%)", value: "1,626.06", unit: "CMD", icon: "🏗️", color: C.teal },
+          { label: "Treated Water\nOutput", value: "1,330.41", unit: "CMD", icon: "♻️", color: C.green },
+          { label: "STP Area\nRequired", value: "1,300.85", unit: "Sq.mtr", icon: "📐", color: C.purple },
+        ];
+        const reuse = [
+          { label: "Flushing Reuse", value: "520.73 CMD", color: C.blue },
+          { label: "Irrigation", value: "112.00 CMD", color: C.green },
+          { label: "Sludge", value: "73.91 CMD", color: C.slate },
+          { label: "Excess Discharge", value: "623.77 CMD", color: C.rose },
+        ];
+        const cardW = (dw - 60) / cards.length;
+        const reuseW = (dw - 60) / reuse.length;
 
-      {/* ═══ SECTION 9: SLUDGE HANDLING ═══ */}
-      <Box x={nx} y={Y.sludgeHeader} w={nw} h={nh}
-        label="Sludge Generation & Handling"
-        sub="Estimate sludge quantity and disposal strategy"
-        color={C.slate} badge="SLUDGE" />
-      <Arrow x1={CX} y1={Y.sludgeHeader + nh} x2={CX} y2={Y.sludgeCalc} />
+        return (
+          <g>
+            <rect x={dx} y={dy} width={dw} height={340} rx={16}
+              fill="#f8fafc" stroke={C.teal.bd} strokeWidth={3} />
+            <rect x={dx} y={dy} width={dw} height={44} rx={16} fill={C.teal.bd} />
+            <rect x={dx} y={dy + 30} width={dw} height={14} fill={C.teal.bd} />
+            <text x={CX} y={dy + 30} textAnchor="middle" fill="#fff" fontSize={15} fontWeight={700}>
+              {"📊"} STP FINAL OUTPUT DASHBOARD — Complete Sewage & Reuse Summary
+            </text>
 
-      <FormulaBlock x={CX - 340} y={Y.sludgeCalc} w={680} h={90}
-        lines={[
-          "Sludge Volume = STP Capacity × Sludge Factor",
-          "SBR: 3–5% of flow | MBR: 1–3% of flow",
-          "Dewatered sludge: press cake → compost or disposal",
-        ]}
-        color={C.slate} />
-      <Arrow x1={CX} y1={Y.sludgeCalc + 90} x2={CX} y2={Y.sludgeDisposal} />
+            {/* Top row: 5 KPI cards */}
+            {cards.map((c, i) => {
+              const cx = dx + 12 + i * (cardW + 8);
+              const cy = dy + 56;
+              return (
+                <g key={`dc-${i}`}>
+                  <rect x={cx} y={cy} width={cardW} height={90} rx={10}
+                    fill={c.color.bg} stroke={c.color.bd} strokeWidth={2} />
+                  <text x={cx + cardW / 2} y={cy + 18} textAnchor="middle" fontSize={18}>{c.icon}</text>
+                  <text x={cx + cardW / 2} y={cy + 36} textAnchor="middle" fill={c.color.tx} fontSize={10} fontWeight={600}>
+                    {c.label.split("\n")[0]}
+                  </text>
+                  <text x={cx + cardW / 2} y={cy + 48} textAnchor="middle" fill={c.color.tx} fontSize={10} fontWeight={600}>
+                    {c.label.split("\n")[1]}
+                  </text>
+                  <text x={cx + cardW / 2} y={cy + 68} textAnchor="middle" fill={c.color.bd} fontSize={16} fontWeight={800}>
+                    {c.value}
+                  </text>
+                  <text x={cx + cardW / 2} y={cy + 82} textAnchor="middle" fill={c.color.tx} fontSize={9} opacity={0.7}>
+                    {c.unit}
+                  </text>
+                </g>
+              );
+            })}
 
-      <DataTable x={tableX} y={Y.sludgeDisposal}
-        title={"📋 SLUDGE HANDLING STRATEGY"}
-        headers={["Stage", "Process", "Output", "Disposal"]}
-        rows={[
-          ["Primary", "Screening & Grit", "Screenings", "Landfill"],
-          ["Secondary", "Bio Sludge", "Thickened sludge", "Dewatering"],
-          ["Dewatering", "Filter Press/Belt", "Press cake (20% DS)", "Composting"],
-          ["Final", "Sun drying/Composting", "Dry sludge", "Garden/Disposal"],
-        ]}
-        color={C.slate}
-      />
+            {/* Separator */}
+            <line x1={dx + 20} y1={dy + 160} x2={dx + dw - 20} y2={dy + 160}
+              stroke="#e2e8f0" strokeWidth={1.5} />
+            <text x={CX} y={dy + 178} textAnchor="middle" fill="#94a3b8" fontSize={11} fontWeight={600}>
+              TREATED WATER REUSE ALLOCATION
+            </text>
 
-      <NoteBox x={CX + 310} y={Y.sludgeDisposal + 20} w={240} h={80}
-        icon="♻️" title="Sludge Reuse"
-        lines={["Composted sludge →", "Garden/landscape manure", "Per SWM Rules 2016"]}
-        color={C.teal} />
-      <line x1={tableX + 780} y1={Y.sludgeDisposal + 60} x2={CX + 310} y2={Y.sludgeDisposal + 60}
-        stroke={C.teal.bd} strokeWidth={2} strokeDasharray="5,3" />
+            {/* Bottom row: 4 reuse metric cards */}
+            {reuse.map((r, i) => {
+              const rx = dx + 12 + i * (reuseW + 10);
+              const ry = dy + 192;
+              return (
+                <g key={`rm-${i}`}>
+                  <rect x={rx} y={ry} width={reuseW} height={56} rx={10}
+                    fill={r.color.bg} stroke={r.color.bd} strokeWidth={2} />
+                  <text x={rx + reuseW / 2} y={ry + 22} textAnchor="middle"
+                    fill={r.color.tx} fontSize={12} fontWeight={700}>{r.label}</text>
+                  <text x={rx + reuseW / 2} y={ry + 42} textAnchor="middle"
+                    fill={r.color.bd} fontSize={15} fontWeight={800}>{r.value}</text>
+                </g>
+              );
+            })}
 
-      <Arrow x1={CX} y1={Y.sludgeDisposal + 200} x2={CX} y2={Y.dashboard} />
+            {/* Formula summary line */}
+            <text x={CX} y={dy + 274} textAnchor="middle" fill={C.teal.tx} fontSize={10} opacity={0.6}>
+              Sewer = Potable×0.85 + Flush×1.00 | STP Cap = Sewer + 10% | Treated = STP Input × 0.90 | Excess = Treated − Σ(Reuse)
+            </text>
 
-      {/* ═══ SECTION 10: FINAL DASHBOARD ═══ */}
-      <STPDashboard x={CX - 500} y={Y.dashboard} />
+            {/* Compliance bar */}
+            <rect x={dx + 20} y={dy + 290} width={dw - 40} height={36} rx={8}
+              fill={C.violet.bg} stroke={C.violet.bd} strokeWidth={1.5} />
+            <text x={CX} y={dy + 308} textAnchor="middle" fill={C.violet.tx} fontSize={11} fontWeight={700}>
+              {"✅"} Compliance: CPCB Guidelines | NBC 2016 | State PCB Discharge Norms | IS 11624 | CPHEEO Manual
+            </text>
+            <text x={CX} y={dy + 322} textAnchor="middle" fill={C.violet.tx} fontSize={10} opacity={0.7}>
+              Export → Concept Report | STP Room Drawing | BOQ Input | IGBC/GRIHA Water Credit Submission
+            </text>
+          </g>
+        );
+      })()}
 
-      <Arrow x1={CX} y1={Y.dashboard + 300} x2={CX} y2={Y.terminal} />
+      {/* Terminal */}
+      <Arrow x1={CX} y1={Y.dashboard + 340} x2={CX} y2={Y.terminal} />
 
-      <Box x={nx} y={Y.terminal} w={nw} h={60}
+      <Box x={CX - 220} y={Y.terminal} w={440} h={60}
         label="STP CALCULATION COMPLETE"
         sub="All outputs locked → Export to Report & BOQ"
         color={C.teal} badge="DONE" rx={30} />

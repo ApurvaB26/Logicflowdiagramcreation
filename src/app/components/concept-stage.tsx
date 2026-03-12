@@ -5,11 +5,16 @@ import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
 import { OWCCalcSVG } from "./owc-calc";
 import { STPCalcSVG } from "./stp-calc";
-import { FireFightingSystemCalcSVG } from "./fire-fighting-system-comprehensive";
+
 import { ElectricalBusRiserCalcSVG } from "./electrical-bus-riser-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
+import { FirePumpHeadCalcSVG } from "./fire-pump-head-calc";
+import { FireTankCalcSVG } from "./fire-tank-calc";
+import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
+import { FireTerraceBoosterCalcSVG } from "./fire-terrace-booster-calc";
+import { HeatLoadCalcSVG } from "./heat-load-calc";
 import { CALC_MERMAID_CODES } from "./mermaid-codes";
 import { copyToClipboard } from "./clipboard-utils";
 
@@ -1537,7 +1542,7 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
                 </div>
               ))}
             </>
-          ) : ["OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD"].includes(calcId) ? (
+          ) : ["OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD","P3D"].includes(calcId) ? (
             <>
               {[
                 { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
@@ -1586,12 +1591,8 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
             <div style={{ minWidth: "1600px", padding: "10px 0" }}>
               <DomesticFlushingPumpCalcSVG />
             </div>
-          ) : calcId === "FFS" ? (
-            <div style={{ minWidth: "2400px", padding: "10px 0" }}>
-              <FireFightingSystemCalcSVG />
-            </div>
           ) : calcId === "EBR" ? (
-            <div style={{ minWidth: "2400px", padding: "10px 0" }}>
+            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
               <ElectricalBusRiserCalcSVG />
             </div>
           ) : calcId === "RWH" ? (
@@ -1601,6 +1602,26 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
           ) : calcId === "SWD" ? (
             <div style={{ minWidth: "1600px", padding: "10px 0" }}>
               <SWDCalcSVG />
+            </div>
+          ) : calcId === "FFP" ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
+              <FirePumpHeadCalcSVG />
+            </div>
+          ) : calcId === "FTK" ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
+              <FireTankCalcSVG />
+            </div>
+          ) : calcId === "FJD" ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
+              <FireJockeyDrencherCalcSVG />
+            </div>
+          ) : calcId === "FTB" ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
+              <FireTerraceBoosterCalcSVG />
+            </div>
+          ) : calcId === "P3D" ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
+              <HeatLoadCalcSVG />
             </div>
           ) : (
             /* Generic linear flow for other calculations */

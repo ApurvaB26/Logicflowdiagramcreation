@@ -4,7 +4,7 @@ import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
 import { OWCCalcSVG } from "./owc-calc";
 import { STPCalcSVG } from "./stp-calc";
-import { FireFightingSystemCalcSVG } from "./fire-fighting-system-comprehensive";
+
 import { ElectricalBusRiserCalcSVG } from "./electrical-bus-riser-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
@@ -12,6 +12,11 @@ import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
 import { PRVCalcSVG } from "./prv-calc";
+import { FirePumpHeadCalcSVG } from "./fire-pump-head-calc";
+import { FireTankCalcSVG } from "./fire-tank-calc";
+import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
+import { FireTerraceBoosterCalcSVG } from "./fire-terrace-booster-calc";
+import { HeatLoadCalcSVG } from "./heat-load-calc";
 import {
   Zap,
   Droplets,
@@ -113,7 +118,7 @@ const SERVICES: Service[] = [
     colorDark: "#5b21b6",
     calculations: [
       // ── Concept Stage ──
-      { id: "P3D", title: "Heat Load Calculations", description: "Sensible & latent heat, cooling load, TR calculation & equipment sizing", status: "coming-soon", stage: "concept" },
+      { id: "P3D", title: "Heat Load Calculations", description: "Sensible & latent heat, cooling load, TR calculation & equipment sizing", status: "ready", stage: "concept" },
       { id: "VENT", title: "Ventilation Calculations", description: "Air change rate, duct sizing & fresh air requirements", status: "coming-soon", stage: "concept" },
       { id: "PRESS", title: "Pressurisation Calculations", description: "Stairwell & lobby pressurisation system design", status: "coming-soon", stage: "concept" },
       // ── Detailed Design Stage ──
@@ -134,7 +139,10 @@ const SERVICES: Service[] = [
     colorDark: "#991b1b",
     calculations: [
       // ── Concept Stage ──
-      { id: "FFS", title: "Fire Fighting System — Complete Design", description: "Comprehensive: Pump Head + Tank + Jockey/Drencher + Terrace Booster + Multi-Zone Hydraulics + Pressure Profile + BOM", status: "ready", stage: "concept" },
+      { id: "FFP", title: "Firefighting Pump Calculations", description: "NBC flow rates, Hazen-Williams friction, static head, pump duty point & jockey sizing", status: "ready", stage: "concept" },
+      { id: "FTK", title: "Fire Tank Size Estimation", description: "IS-15105/NFPA-13 sprinkler/hydrant/drencher volumes, 300 m³ safety gate, total capacity", status: "ready", stage: "concept" },
+      { id: "FJD", title: "Jockey & Drencher Pump Calculations", description: "Small-bore friction, water curtain supply, +20% safety factor, system pressure", status: "ready", stage: "concept" },
+      { id: "FTB", title: "Terrace Fire Booster Pump Head", description: "GI Class C pipe, Hazen-Williams, fitting equiv. lengths, +20% safety, total head bar/m", status: "ready", stage: "concept" },
 
       // ── Detailed Design Stage ──
       { id: "DD_SPR", title: "Sprinkler Hydraulic Calc", description: "K-factor, design density, hydraulic calc & pipe network sizing", status: "coming-soon", stage: "detailed" },
@@ -531,19 +539,23 @@ function CalcDetailOverlay({
   }, [calcId]);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","FFS","EBR","RWH","SWD","DD_CB","DD_PIP","DD_PRV"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","EBR","RWH","SWD","DD_CB","DD_PIP","DD_PRV","FFP","FTK","FJD","FTB","P3D"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
   const isCustomSTP = calcId === "STP";
   const isCustomDFP = calcId === "DFP";
-  const isCustomFFS = calcId === "FFS";
   const isCustomEBR = calcId === "EBR";
   const isCustomRWH = calcId === "RWH";
   const isCustomSWD = calcId === "SWD";
   const isCustomDDCB = calcId === "DD_CB";
   const isCustomDDPIP = calcId === "DD_PIP";
   const isCustomDDPRV = calcId === "DD_PRV";
+  const isCustomFFP = calcId === "FFP";
+  const isCustomFTK = calcId === "FTK";
+  const isCustomFJD = calcId === "FJD";
+  const isCustomFTB = calcId === "FTB";
+  const isCustomP3D = calcId === "P3D";
   const isCustom = CUSTOM_IDS.has(calcId);
 
   // For generic flows
@@ -555,13 +567,17 @@ function CalcDetailOverlay({
     OWC: { title: "OWC Calculations", icon: "\u267B\uFE0F", color: "#10b981" },
     STP: { title: "STP Calculations", icon: "\uD83C\uDFED", color: "#06b6d4" },
     DFP: { title: "Pump Head & Flow Rate Calculation", icon: "\uD83D\uDD27", color: "#06b6d4" },
-    FFS: { title: "Fire Fighting System — Complete Design Package", icon: "\uD83D\uDD25", color: "#dc2626" },
     EBR: { title: "Electrical Bus Riser System", icon: "\u26A1", color: "#eab308" },
     RWH: { title: "Rainwater Harvesting & Tank Sizing", icon: "\uD83C\uDF27\uFE0F", color: "#3b82f6" },
     SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6" },
     DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706" },
     DD_PIP: { title: "Transfer Pipe Sizing", icon: "\uD83D\uDCA7", color: "#2563eb" },
     DD_PRV: { title: "PRV Calculations", icon: "\uD83D\uDD27", color: "#7c3aed" },
+    FFP: { title: "Fire Pump Head Calculation", icon: "\uD83D\uDE92", color: "#dc2626" },
+    FTK: { title: "Fire Tank Size Estimation", icon: "\uD83D\uDEA8", color: "#dc2626" },
+    FJD: { title: "Jockey & Drencher Pump Calculation", icon: "\uD83D\uDD27", color: "#dc2626" },
+    FTB: { title: "Terrace Fire Booster Pump Head", icon: "\uD83C\uDFD7\uFE0F", color: "#dc2626" },
+    P3D: { title: "Building Thermal Cooling Load", icon: "\uD83C\uDF21\uFE0F", color: "#ef4444" },
   };
   const meta = CUSTOM_META[calcId];
   const flowTitle = meta?.title ?? flow?.title ?? "Calculation";
@@ -611,7 +627,7 @@ function CalcDetailOverlay({
           { label: "Sizing Output", bg: "#ffe4e6", bd: "#f43f5e", icon: "\u26A1" },
           { label: "Dashboard", bg: "#d1fae5", bd: "#10b981", icon: "\uD83D\uDCCA" },
         ]
-      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomFFS || isCustomEBR || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP
+      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomEBR || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomP3D
       ? [
           { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
           { label: "Database", bg: "#ede9fe", bd: "#8b5cf6", icon: "\uD83D\uDDC3" },
@@ -821,12 +837,8 @@ function CalcDetailOverlay({
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <DomesticFlushingPumpCalcSVG />
             </div>
-          ) : isCustomFFS ? (
-            <div style={{ minWidth: "2400px", padding: "10px 0", zoom }}>
-              <FireFightingSystemCalcSVG />
-            </div>
           ) : isCustomEBR ? (
-            <div style={{ minWidth: "2400px", padding: "10px 0", zoom }}>
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <ElectricalBusRiserCalcSVG />
             </div>
           ) : isCustomRWH ? (
@@ -848,6 +860,26 @@ function CalcDetailOverlay({
           ) : isCustomDDPRV ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <PRVCalcSVG />
+            </div>
+          ) : isCustomFFP ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <FirePumpHeadCalcSVG />
+            </div>
+          ) : isCustomFTK ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <FireTankCalcSVG />
+            </div>
+          ) : isCustomFJD ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <FireJockeyDrencherCalcSVG />
+            </div>
+          ) : isCustomFTB ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <FireTerraceBoosterCalcSVG />
+            </div>
+          ) : isCustomP3D ? (
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
+              <HeatLoadCalcSVG />
             </div>
           ) : flow ? (
             <svg

@@ -958,37 +958,331 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class INIT,DONE terminal
     class P2B,P4A,P4D decision`,
   },
-  FFS: {
-    title: "Fire Fighting System — Hydraulic Dashboard",
+  FFP: {
+    title: "Fire Pump Head Calculation — Comprehensive",
     code: `flowchart TD
-    INIT([🟢 Fire Fighting System<br/>Hydraulic Calculation])
-    P1[/PHASE 1: Water Storage Inputs/]
-    P1A[Hazard Class: Ordinary II<br/>Density: 12.2 L/min/m²]
-    P2[/PHASE 2: Hydraulic Constants/]
-    P2A[C=120, Cd=0.62, g=9.81<br/>Pr=3.5 Bar, Safety=1.20]
-    P3[/PHASE 3: Calculation Stack/]
-    P3A[Q = Density × Area<br/>Hf via Hazen-Williams]
-    P3B[TDH = Hs + Hf + Pr + 20%]
-    P4[/PHASE 4: Multi-Zone/]
-    P4A[High Zone: 250m<br/>Low Zone: 180m]
-    P5[/PHASE 5: Pressure Profile/]
-    P5A{P > 7 Bar?}
-    P5B[Orifice Required]
-    P6[/PHASE 6: Tank Sizing/]
-    P6A[Total = 510 KL]
-    P7[/PHASE 7: Pump BOM/]
-    P7A[Total Load: 381 kW]
-    P8([📥 Design Package])
-    INIT --> P1 --> P1A --> P2 --> P2A --> P3 --> P3A --> P3B --> P4 --> P4A --> P5 --> P5A
-    P5A -->|Yes| P5B --> P6
-    P5A -->|No| P6
-    P6 --> P6A --> P7 --> P7A --> P8
-    DONE([🏁 Complete])
-    P8 --> DONE
+    %% ══════════════════════════════════════
+    %% FFP — FIRE PUMP HEAD CALCULATION
+    %% IS-15105 / NFPA-13 / IS-5290 / NBC Part 4
+    %% ══════════════════════════════════════
+
+    INIT([🟢 Fire Pump Head Calculation])
+
+    %% Section 1: Project & Hazard
+    S1H[/SECTION 1: Project Data & Hazard Classification/]
+    FF1[Step 1: Fetch Project Profile<br/>Lodha Crown Tower-B | 32F+2B | 112.2m]
+    FF2[Step 2: Occupancy & Hazard<br/>NBC Part 4 → Ordinary Hazard Group II]
+    INIT --> S1H --> FF1 --> FF2
+
+    HZ{Hazard Class?}
+    FF2 --> HZ
+    HZL[Light Hazard<br/>2.25 L/min/m² | 30 min]
+    HZH[High Hazard<br/>12.2 L/min/m² | 90 min]
+    HZO[Ordinary-II Selected<br/>5.0 L/min/m² | 216 m² | 60 min]
+    HZ -->|Light| HZL
+    HZ -->|High| HZH
+    HZ -->|Ordinary-II| HZO
+
+    %% Section 2: Water Storage
+    S2H[/SECTION 2: Water Storage Demand/]
+    FF3[Sprinkler Volume<br/>5.0 × 216 × 60 = 64,800 L = 64.8 m³]
+    FF4[Hydrant Volume<br/>1800 LPM × 60 = 108,000 L = 108.0 m³]
+    FF5[Drencher Volume<br/>42m × 35 × 60 = 88,200 L = 88.2 m³]
+    FF6[Total = 261.0 m³ → max 261,300 = 300 m³]
+    HZO --> S2H --> FF3 --> FF4 --> FF5 --> FF6
+
+    %% Section 3-4: System Demand
+    S3H[/SECTION 3-4: Hydrant & Sprinkler Demand/]
+    FF7[Hydrant: 1800 LPM @ DN150<br/>Static: 115.7m]
+    FF8[Sprinkler: 1080 LPM @ DN100<br/>Static: 116.0m]
+    FF6 --> S3H --> FF7 --> FF8
+
+    %% Section 5: Hazen-Williams
+    S5H[/SECTION 5: Hazen-Williams Friction Engine/]
+    FF9[Constants: C=120, g=9.81, Cd=0.62]
+    FF10[P = 6.05×10⁴ × Q/C^1.85 / D^4.8657]
+    FF11[Fitting Equiv Lengths Table<br/>Elbows + Tees + NRVs + BFVs]
+    FF8 --> S5H --> FF9 --> FF10 --> FF11
+
+    %% Section 6-7: TDH
+    S6H[/SECTION 6-7: Friction Loss & TDH/]
+    FF12[Hydrant Friction: 3.77 mWC<br/>Equiv Length: 254.8m]
+    FF13[Hydrant TDH: 3.77+115.7+35.7+0.75 = 156m]
+    FF14[Sprinkler Friction: 6.81 mWC<br/>Equiv Length: 236.9m]
+    FF15[Sprinkler TDH: 6.81+116.0+5.1+1.36 = 130m]
+    FF11 --> S6H --> FF12 --> FF13 --> FF14 --> FF15
+
+    %% Section 9: Pressure Profile
+    S9H[/SECTION 9: Pressure Profile & Orifice/]
+    FF16[Floor-by-Floor Pressure Analysis]
+    PD{Floor P > 7.0 Bar?}
+    FF17[Orifice Required<br/>Cd=0.62 | 25-40mm plates]
+    FF18[No Orifice Needed]
+    FF15 --> S9H --> FF16 --> PD
+    PD -->|YES| FF17
+    PD -->|NO| FF18
+
+    %% Section 10: Zone Compare
+    S10H[/SECTION 10: High/Low Zone Comparison/]
+    FF19[High Zone Hydrant: 1800 LPM @ 156m | 75 HP]
+    FF20[High Zone Sprinkler: 1080 LPM @ 130m | 50 HP]
+    FF21[Low Zone Booster: 900 LPM @ 90m | 30 HP]
+    FF17 --> S10H
+    FF18 --> S10H
+    S10H --> FF19 --> FF20 --> FF21
+
+    %% Dashboard
+    BOM[📦 Pump BOM<br/>Main + Sprinkler + Jockey + Booster + Tank + Orifice]
+    FF21 --> BOM
+    DONE([🏁 FFP Calculation Complete])
+    BOM --> DONE
+
     classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
     classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    classDef section fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b
     class INIT,DONE terminal
-    class P5A decision`,
+    class HZ,PD decision
+    class S1H,S2H,S3H,S5H,S6H,S9H,S10H section`,
+  },
+  FTK: {
+    title: "Fire Tank Size Estimation — Comprehensive",
+    code: `flowchart TD
+    %% ══════════════════════════════════════
+    %% FTK — FIRE TANK SIZE ESTIMATION
+    %% IS-15105 / NFPA-13 / IS-5290
+    %% ══════════════════════════════════════
+
+    INIT([🟢 Fire Tank Size Estimation])
+
+    %% Section 1: Building Data
+    S1H[/SECTION 1: Building & Occupancy Data/]
+    FT1[Step 1: Building Profile<br/>32F+2B | 320 units | 112.2m | 45,000 m²]
+    FT2[Step 2: Occupancy & Basement<br/>High-Rise | Basement: 8,400 m² | Ordinary-II]
+    INIT --> S1H --> FT1 --> FT2
+
+    %% Section 2: Standards
+    S2H[/SECTION 2: Fire Water Standards Lookup/]
+    FT3[IS-15105 Sprinkler: 1080 LPM × 60 min]
+    FT4[IS-5290 Hydrant: 1800 LPM × 60 min]
+    FT5[IS-15105 Drencher: 42m × 35 L/min/m × 60 min]
+    FT2 --> S2H --> FT3 --> FT4 --> FT5
+
+    %% Section 3: Sprinkler Volume
+    S3H[/SECTION 3: Sprinkler Water Volume/]
+    FT6[Q = 5.0 × 216 = 1,080 LPM]
+    FT7[V_spr = 1,080 × 60 = 64,800 L = 64.8 m³]
+    FT5 --> S3H --> FT6 --> FT7
+
+    %% Section 4: Hydrant Volume
+    S4H[/SECTION 4: Hydrant Water Volume/]
+    FT8[V_hyd = 1,800 × 60 = 108,000 L = 108.0 m³]
+    FT7 --> S4H --> FT8
+
+    %% Section 5: Drencher Volume
+    S5H[/SECTION 5: Drencher Water Volume/]
+    FT9[Q = 42.0 × 35 = 1,470 LPM]
+    FT10[V_drench = 1,470 × 60 = 88,200 L = 88.2 m³]
+    FT8 --> S5H --> FT9 --> FT10
+
+    %% Section 6: Safety Gate
+    S6H[/SECTION 6: 300 m³ Safety Gate/]
+    FT11[Raw Total = 64.8 + 108.0 + 88.2 = 261.0 m³]
+    SG{V ≥ 300 m³?}
+    FT12[Apply Safety Gate → 300 m³]
+    FT13[Use Calculated Volume]
+    FT14[Design Vol = 300 × 1.10 = 330 m³ with freeboard]
+    FT10 --> S6H --> FT11 --> SG
+    SG -->|NO: 261 < 300| FT12 --> FT14
+    SG -->|YES| FT13 --> FT14
+
+    %% Section 7: Tank Dimensioning
+    S7H[/SECTION 7: Tank Dimensioning/]
+    FT15[Option B Selected: 11.0m × 10.0m × 3.0m]
+    FT16[Type: UG RCC M30 | Waterproof concrete]
+    FT17[Specs: DN200 outlet | DN150 inlet/overflow | Manholes]
+    FT14 --> S7H --> FT15 --> FT16 --> FT17
+
+    %% Section 8: Dashboard
+    S8H[/SECTION 8: Output Dashboard/]
+    FT18[📊 Sprinkler: 64.8 | Hydrant: 108.0 | Drencher: 88.2]
+    FT19[📦 Tank BOM: RCC Tank + Header + Pipes + Level]
+    FT17 --> S8H --> FT18 --> FT19
+
+    DONE([🏁 FTK Calculation Complete])
+    FT19 --> DONE
+
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    classDef section fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b
+    class INIT,DONE terminal
+    class SG decision
+    class S1H,S2H,S3H,S4H,S5H,S6H,S7H,S8H section`,
+  },
+  FJD: {
+    title: "Jockey & Drencher Pump — Comprehensive",
+    code: `flowchart TD
+    %% ══════════════════════════════════════
+    %% FJD — JOCKEY & DRENCHER PUMP CALCULATION
+    %% IS-15105 / NBC Part 4
+    %% ══════════════════════════════════════
+
+    INIT([🟢 Jockey & Drencher Pump Calculation])
+
+    %% Section 1: Input Data
+    S1H[/SECTION 1: Input from Main Fire Pump/]
+    JD1[Fetch Main Pump Data<br/>Hydrant TDH=156m | Sprinkler TDH=130m]
+    JD2[Building Data: 112.2m | 32F+2B<br/>Jockey DN50/80 | Drencher DN100]
+    INIT --> S1H --> JD1 --> JD2
+
+    %% Section 2: Jockey Purpose
+    S2H[/SECTION 2: Jockey Pump Design/]
+    JD3[Purpose: Pressure maintenance<br/>Compensates leakages | Prevents main cycling]
+    JD4[Hydrant Jockey: 120 LPM @ 165m | 7.5 HP]
+    JD5[Sprinkler Jockey: 60 LPM @ 140m | 5.0 HP]
+    JD2 --> S2H --> JD3 --> JD4 --> JD5
+
+    %% Section 3: Small-bore Friction
+    S3H[/SECTION 3: Jockey Small-bore Friction/]
+    JD6[DN50: P=0.892 kPa/m × 8.5m = 7.58 kPa]
+    JD7[DN80: P=0.128 kPa/m × 7.0m = 0.90 kPa]
+    JD8[Total Jockey Friction = 8.48 kPa = 0.86 mWC]
+    JD5 --> S3H --> JD6 --> JD7 --> JD8
+
+    %% Section 4-5: Drencher
+    S4H[/SECTION 4-5: Drencher Pump Design & Friction/]
+    JD9[Drencher: 42m × 35 L/min/m = 1,470 LPM]
+    JD10[DN100 Friction: 19.74 kPa]
+    JD11[DN80 Friction: 31.98 kPa]
+    JD12[DN50 Friction: 89.28 kPa]
+    JD13[Total Drencher Friction = 141.0 kPa = 14.38 mWC]
+    JD8 --> S4H --> JD9 --> JD10 --> JD11 --> JD12 --> JD13
+
+    %% Section 6: Safety Factor
+    S6H[/SECTION 6: +20% Safety Factor/]
+    JD14[Jockey: 0.86 × 1.20 = 1.03 mWC]
+    JD15[Drencher: 14.38 × 1.20 = 17.26 mWC]
+    JD13 --> S6H --> JD14 --> JD15
+
+    %% Section 7: System Pressure
+    S7H[/SECTION 7: Total Head & Pressure/]
+    JD16[Jockey Hyd TDH: 1.03+115.7+5.1 = 122m]
+    JD17[Jockey Spr TDH: 0.78+116.0+5.1 = 122m]
+    JD18[Drencher TDH: 17.26+48.0+35.7 = 101m]
+    PV{Jockey < Shutoff?}
+    JD19[✅ 122 < 185 Hydrant OK]
+    JD20[✅ 122 < 150 Sprinkler OK]
+    JD15 --> S7H --> JD16 --> JD17 --> JD18 --> PV
+    PV -->|YES| JD19
+    PV -->|YES| JD20
+
+    %% Section 8-9: Controls & Equipment
+    S8H[/SECTION 8-9: Controls & Equipment/]
+    JD21[Pressure Switches<br/>Start -0.3 Bar | Stop at set | Main -1.0 Bar]
+    JD22[Equipment: Jockey 7.5+5 HP<br/>Drencher 2×60 HP | Pressure Vessels]
+    JD19 --> S8H
+    JD20 --> S8H
+    S8H --> JD21 --> JD22
+
+    %% Dashboard
+    BOM[📦 BOM: Jockeys + Drencher + Vessels + Switches + Controller]
+    JD22 --> BOM
+    DONE([🏁 FJD Calculation Complete])
+    BOM --> DONE
+
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    classDef section fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b
+    class INIT,DONE terminal
+    class PV decision
+    class S1H,S2H,S3H,S4H,S6H,S7H,S8H section`,
+  },
+  FTB: {
+    title: "Terrace Fire Booster Pump — Comprehensive",
+    code: `flowchart TD
+    %% ══════════════════════════════════════
+    %% FTB — TERRACE FIRE BOOSTER PUMP HEAD
+    %% GI Class C | C=120 | 900 LPM
+    %% ══════════════════════════════════════
+
+    INIT([🟢 Terrace Fire Booster Pump Head])
+
+    %% Section 1: Building & Tank
+    S1H[/SECTION 1: Building & Terrace Tank Data/]
+    TB1[Building: 32F+2B | 112.2m<br/>Terrace Tank LWL: 109.5m | HWL: 112.0m]
+    TB2[Tank Cap: 30 m³ fire reserve<br/>Lowest outlet 1F: 3.35m | Highest 32F: 108.85m]
+    INIT --> S1H --> TB1 --> TB2
+
+    %% Section 2: Pipe Material
+    S2H[/SECTION 2: Pipe Material & Constants/]
+    TB3[GI Class C IS-1239 | DN100 | ID: 100.3mm]
+    TB4[C=120 | Q=900 LPM | V=1.90 m/s ✅ < 3.0]
+    TB2 --> S2H --> TB3 --> TB4
+
+    %% Section 3: Straight Run
+    S3H[/SECTION 3: Straight Pipe Run/]
+    TB5[Tank to Pump: 8.0m | Pump Discharge: 3.0m]
+    TB6[Down Riser 32F→15F: 56.95m | Branch: 12.0m]
+    TB7[Total Straight: 79.95m]
+    TB4 --> S3H --> TB5 --> TB6 --> TB7
+
+    %% Section 4: Fitting Equiv
+    S4H[/SECTION 4: Fitting Equivalent Lengths/]
+    TB8[6× 90° Elbow: 18.0m | 2× 45° Elbow: 3.0m]
+    TB9[3× Tee: 18.0m | 4× Gate: 2.8m | 1× NRV: 7.5m]
+    TB10[2× BFV: 5.0m | 1× Strainer: 5.0m]
+    TB11[Total Fittings: 59.3m]
+    TB7 --> S4H --> TB8 --> TB9 --> TB10 --> TB11
+
+    %% Section 5: Hazen-Williams
+    S5H[/SECTION 5: Hazen-Williams Friction/]
+    TB12[L_eq = 79.95 + 59.3 = 139.25m]
+    TB13[P = 6.05e4 × 900/120^1.85 / 100.3^4.8657]
+    TB14[P = 0.0856 kPa/m × 139.25 = 11.92 kPa = 1.22 mWC]
+    TB11 --> S5H --> TB12 --> TB13 --> TB14
+
+    %% Section 6: Safety Factor
+    S6H[/SECTION 6: +20% Safety Factor/]
+    TB15[Safety = 1.22 × 0.20 = 0.24 mWC]
+    TB16[Final Friction = 1.22 + 0.24 = 1.46 mWC]
+    TB14 --> S6H --> TB15 --> TB16
+
+    %% Section 7: Static Head
+    S7H[/SECTION 7: Static Head Analysis/]
+    TB17[Gravity Available: 109.5 - 3.35 = 106.15m]
+    GD{Gravity ≥ 3.5 Bar?}
+    TB18[Above 15F: Gravity OK ✅]
+    TB19[Below 15F: Booster Required 🔴]
+    TB16 --> S7H --> TB17 --> GD
+    GD -->|Above 15F| TB18
+    GD -->|Below 15F| TB19
+
+    %% Section 8: Total Head
+    S8H[/SECTION 8: Total Head Summation/]
+    TB20[Booster TDH = Friction + Residual]
+    TB21[= 1.46 + 35.7 = 37.16m ≈ 38m = 3.7 Bar]
+    TB19 --> S8H --> TB20 --> TB21
+
+    %% Section 9: Floor Profile
+    S9H[/SECTION 9: Floor Pressure Profile/]
+    TB22[20F-32F: Gravity OK | 15F-19F: Marginal]
+    TB23[1F-14F: Booster zone | 1F-4F: Orifice needed]
+    TB21 --> S9H --> TB22 --> TB23
+
+    %% Section 10: Dashboard
+    S10H[/SECTION 10: Output Dashboard/]
+    TB24[Booster: 900 LPM @ 38m | 15 HP]
+    TB25[📦 BOM: 2× Pump + Header + Valves + Orifice]
+    TB23 --> S10H --> TB24 --> TB25
+
+    DONE([🏁 FTB Calculation Complete])
+    TB25 --> DONE
+
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    classDef section fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b
+    class INIT,DONE terminal
+    class GD decision
+    class S1H,S2H,S3H,S4H,S5H,S6H,S7H,S8H,S9H,S10H section`,
   },
   EBR: {
     title: "Electrical Bus Riser System",
@@ -1253,6 +1547,117 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class VFLAG reject
     class Z1,Z2,Z3 zone`,
   },
+
+  P3D: {
+    title: "Building Thermal Cooling Load Calculation",
+    code: `flowchart TD
+    %% ══════════════════════════════════════════════════
+    %% BUILDING THERMAL COOLING LOAD — ASHRAE CLTD METHOD
+    %% ══════════════════════════════════════════════════
+
+    START([🌡️ HEAT LOAD CALCULATION START])
+
+    %% ── SECTION 1: PROJECT & CLIMATE ──
+    S1[/"📍 Project Location & Climate Zone"/]
+    S1A["Outdoor DB: 38.5°C, WB: 28.2°C<br/>Indoor: 24°C, RH: 50%<br/>ΔT = 14.5°C"]
+    START --> S1 --> S1A
+
+    %% ── SECTION 2: BUILDING ENVELOPE ──
+    S2[/"🏗️ Building Envelope Data"/]
+    S2A["Wall U-values: 1.82 W/m²K<br/>Roof U-value: 1.46 W/m²K<br/>Glass U-value: 5.80 W/m²K"]
+    S1A --> S2 --> S2A
+
+    %% ── SECTION 3: OPAQUE GAIN ──
+    S3[/"🧱 Opaque Surface Heat Gain"/]
+    S3F["Q = U × A × CLTD<br/>Walls + Roof + Floor"]
+    S3R["Total Q_opaque = 50,083 W"]
+    S2A --> S3 --> S3F --> S3R
+
+    %% ── SECTION 4: FENESTRATION ──
+    S4[/"🪟 Fenestration Heat Gain"/]
+    S4F["Q_solar = A × SC × SHGF<br/>Q_cond = U × A × ΔT"]
+    S4R["Total Q_fen = 90,105 W"]
+    S3R --> S4 --> S4F --> S4R
+
+    %% ── SECTION 5: OCCUPANCY ──
+    S5[/"🧑‍💼 Internal Gain: People"/]
+    S5F["Sensible: 75 W/person (seated)<br/>Latent: 55 W/person<br/>260 people"]
+    S5R["Q_people = 38,075 W<br/>(20,325 S + 17,750 L)"]
+    S4R --> S5 --> S5F --> S5R
+
+    %% ── SECTION 6: LIGHTING ──
+    S6[/"💡 Internal Gain: Lighting"/]
+    S6F["Q = W × BF × CLF<br/>LPD: 10 W/m², BF: 1.0 (LED)"]
+    S6R["Q_lighting = 10,260 W"]
+    S5R --> S6 --> S6F --> S6R
+
+    %% ── SECTION 7: EQUIPMENT ──
+    S7[/"🖥️ Internal Gain: Equipment"/]
+    S7F["Q = kW × UF × 1000<br/>Computers + Servers + Kitchen"]
+    S7R["Q_equipment = 32,140 W"]
+    S6R --> S7 --> S7F --> S7R
+
+    %% ── SECTION 8: VENTILATION ──
+    S8[/"🌬️ Ventilation & Infiltration"/]
+    S8S["Q_sensible = 1.08 × CFM × ΔT<br/>= 1.08 × 6500 × 14.5 = 29,825 W"]
+    S8L["Q_latent = 0.68 × CFM × ΔW × 7000<br/>= 89,761 W"]
+    S8R["Total Vent = 135,235 W<br/>(33,726 S + 101,509 L)"]
+    S7R --> S8 --> S8S & S8L --> S8R
+
+    %% ── SECTION 9: ROOM TOTALS ──
+    S9[/"📊 Room Heat Summation"/]
+    S9RSH["RSH = 236,639 W"]
+    S9RLH["RLH = 119,259 W"]
+    S9RTH["RTH = RSH + RLH = 355,898 W<br/>SHR = 0.665"]
+    S8R --> S9 --> S9RSH & S9RLH --> S9RTH
+
+    %% ── SECTION 10: SHR CHECK ──
+    S10{SHR < 0.75?}
+    S10Y["Deep Cooling Coil Required<br/>6-row coil, CHW @ 6°C"]
+    S10N["Standard DX Coil OK"]
+    S9RTH --> S10
+    S10 -->|YES 0.665| S10Y
+    S10 -->|NO| S10N
+
+    %% ── SECTION 11: GTH ──
+    S11[/"🔥 Grand Total Heat"/]
+    S11F["GTH = RTH × (1 + 2% + 3% + 1% + 5%)<br/>= 355,898 × 1.11 = 395,047 W"]
+    S10Y --> S11 --> S11F
+
+    %% ── SECTION 12: TR & CFM ──
+    S12[/"❄️ TR & CFM Calculation"/]
+    S12TR["TR = GTH / 3517 = 112.3 TR"]
+    S12CFM["CFM = RSH × 3.41 / (1.08 × ΔT_supply)<br/>= 74,520 CFM"]
+    S11F --> S12 --> S12TR & S12CFM
+
+    %% ── SECTION 13: EQUIPMENT ──
+    S13[/"🏭 Equipment Selection"/]
+    S13SEL["Selected: 120 TR Screw Chiller<br/>COP: 5.2, R-134a, Water-Cooled"]
+    S12TR --> S13 --> S13SEL
+
+    %% ── SECTION 14: VALIDATION ──
+    S14{All Checks Pass?}
+    S14P["✅ Load < Capacity<br/>✅ COP > ECBC Min<br/>✅ Comfort: 24°C/50%RH<br/>✅ Fresh Air: ASHRAE 62.1"]
+    S13SEL --> S14 -->|PASS| S14P
+
+    DONE([🏁 HEAT LOAD CALC COMPLETE<br/>112.3 TR | 74,520 CFM])
+    S14P --> DONE
+
+    %% ── STYLES ──
+    classDef input fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af
+    classDef calc fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    classDef formula fill:#ede9fe,stroke:#8b5cf6,stroke-width:2px,color:#5b21b6
+    classDef result fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+    classDef alert fill:#ffe4e6,stroke:#f43f5e,stroke-width:2px,color:#9f1239
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:#92400e
+
+    class S1,S2,S1A,S2A input
+    class S3,S4,S5,S6,S7,S8,S9,S11,S12,S13 calc
+    class S3F,S4F,S5F,S6F,S7F,S8S,S8L,S11F,S12TR,S12CFM formula
+    class S3R,S4R,S5R,S6R,S7R,S8R,S9RSH,S9RLH,S9RTH,S13SEL,S14P result
+    class S10Y,S10N alert
+    class S10,S14 decision`,
+  },
 };
 
 // ── STAGE → MERMAID CODE MAP ──
@@ -1265,7 +1670,7 @@ export const STAGE_MERMAID_MAP: Record<string, string> = {
 
 // ── STAGE → CALCULATION IDS ──
 export const STAGE_CALC_IDS: Record<string, string[]> = {
-  concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD"],
+  concept: ["P3A", "P3B", "OWC", "STP", "DFP", "FFP", "FTK", "FJD", "FTB", "RWH", "SWD", "P3D"],
   detailed: ["DD_CB", "DD_PIP", "DD_PRV"], // Cable Sizing + Pipe Sizing + PRV ready; others coming soon
   tender: [],
   vfc: [],
