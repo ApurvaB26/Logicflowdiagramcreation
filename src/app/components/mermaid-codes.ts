@@ -815,176 +815,6 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class INIT,DONE terminal
     class DEC decision`,
   },
-  FFP: {
-    title: "Fire Pump Head Calculation",
-    code: `flowchart TD
-    INIT([🟢 Fire Pump Head Calculation<br/>Start])
-
-    P1[/PHASE 1: System Parameters/]
-    P1A[Building Height<br/>🤖 Auto-fetch from project]
-    P1B[Pipe Material & Size<br/>📋 GI/SS/HDPE selection]
-    P1C[System Type<br/>📋 Sprinkler/Hydrant/Combined]
-    INIT --> P1 --> P1A --> P1B --> P1C
-
-    P2[/PHASE 2: Static Head/]
-    P2A[Pump Room Level<br/>Basement/Ground level]
-    P2B[Highest Outlet Level<br/>Terrace / top floor]
-    P2C[Static Head<br/>H = Outlet Level − Pump Level]
-    P1C --> P2 --> P2A --> P2B --> P2C
-
-    P3[/PHASE 3: Friction Loss/]
-    P3A[Hazen-Williams C Factor<br/>Pipe material → C value from DB]
-    P3B[Pipe Length Calc<br/>Vertical + horizontal runs]
-    P3C[Equivalent Length<br/>Fittings → equivalent pipe length]
-    P3D[Friction Loss<br/>Hf = (6.05 × Q^1.85) / (C^1.85 × D^4.87)]
-    P2C --> P3 --> P3A --> P3B --> P3C --> P3D
-
-    P4[/PHASE 4: System Pressure/]
-    P4A[Residual Pressure<br/>Nozzle pressure requirement]
-    P4B[Total Head<br/>Static + Friction + Residual + Safety]
-    P4C[Safety Factor<br/>+20% margin per IS-15105]
-    P4D{Head > 120m?<br/>Multi-zone Check}
-    P4E[Single Zone Pump<br/>One pump serves all floors]
-    P4F[Multi-Zone System<br/>Break tank + booster per zone]
-    P3D --> P4 --> P4A --> P4B --> P4C --> P4D
-    P4D -->|No| P4E
-    P4D -->|Yes| P4F
-
-    P5[/PHASE 5: Pump Selection/]
-    P5A[Flow Rate<br/>As per IS-15105 / NFPA-13]
-    P5B[Pump Selection<br/>DB lookup → head vs flow curve match]
-    P5C([📥 Pump Schedule Report])
-    P4E & P4F --> P5 --> P5A --> P5B --> P5C
-    DONE([🏁 Fire Pump Head Complete])
-    P5C --> DONE
-
-    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
-    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
-    class INIT,DONE terminal
-    class P4D decision`,
-  },
-  FTK: {
-    title: "Fire Tank Size Estimation",
-    code: `flowchart TD
-    INIT([🟢 Fire Tank Size Estimation<br/>Start])
-
-    P1[/PHASE 1: Standards Selection/]
-    P1A{Standard?<br/>IS-15105 / NFPA-13}
-    P1B[IS-15105 Parameters<br/>Indian standard durations & flows]
-    P1C[NFPA-13 Parameters<br/>NFPA durations & flows]
-    INIT --> P1 --> P1A
-    P1A -->|IS-15105| P1B
-    P1A -->|NFPA-13| P1C
-
-    P2[/PHASE 2: Volume Components/]
-    P2A[Sprinkler Volume<br/>Flow × Duration (30-60 min)]
-    P2B[Hydrant Volume<br/>Flow × Duration (30-60 min)]
-    P2C[Drencher Volume<br/>Flow × Duration (if applicable)]
-    P2D[Standpipe Volume<br/>Hose reel flow × duration]
-    P1B & P1C --> P2 --> P2A & P2B & P2C & P2D
-
-    P3[/PHASE 3: Total Volume/]
-    P3A[Sum All Volumes<br/>Sprinkler + Hydrant + Drencher + Standpipe]
-    P3B{Volume > 300m³?<br/>Safety Gate}
-    P3C[Use 300m³ Minimum<br/>Per regulation]
-    P3D[Use Calculated Volume<br/>Exceeds minimum]
-    P2A & P2B & P2C & P2D --> P3 --> P3A --> P3B
-    P3B -->|≤300m³| P3C
-    P3B -->|>300m³| P3D
-
-    P4[/PHASE 4: Tank Design/]
-    P4A[Tank Dimensions<br/>L × W × H based on volume]
-    P4B[Underground vs Overhead<br/>Split allocation]
-    P3C & P3D --> P4 --> P4A --> P4B
-
-    P5([📥 Tank Size Report])
-    P4B --> P5
-    DONE([🏁 Fire Tank Complete])
-    P5 --> DONE
-
-    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
-    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
-    class INIT,DONE terminal
-    class P1A,P3B decision`,
-  },
-  FJD: {
-    title: "Jockey & Drencher Pump Calculation",
-    code: `flowchart TD
-    INIT([🟢 Jockey & Drencher Pump<br/>Calculation Start])
-
-    %% Jockey Pump
-    P1[/PHASE 1: Jockey Pump/]
-    P1A[System Pressure<br/>🤖 From fire pump head calc]
-    P1B[Jockey Flow Rate<br/>1-2% of main pump flow]
-    P1C[Jockey Head<br/>Main pump head + 10%]
-    P1D[Jockey Pump Selection<br/>DB lookup]
-    INIT --> P1 --> P1A --> P1B --> P1C --> P1D
-
-    %% Drencher Pump
-    P2[/PHASE 2: Drencher Pump/]
-    P2A[Facade Area<br/>🤖 Auto-fetch building envelope]
-    P2B[Drencher Flow Rate<br/>Area × application rate]
-    P2C[Drencher Head Loss<br/>Hazen-Williams pipe friction]
-    P2D[Static Head<br/>Pump level to highest drencher]
-    P2E[Total Drencher Head<br/>Static + Friction + Residual + 20% Safety]
-    P2F[Drencher Pump Selection<br/>DB lookup]
-    P1D --> P2 --> P2A --> P2B --> P2C --> P2D --> P2E --> P2F
-
-    P3([📥 Jockey & Drencher Report])
-    P2F --> P3
-    DONE([🏁 Jockey & Drencher Complete])
-    P3 --> DONE
-
-    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
-    class INIT,DONE terminal`,
-  },
-  FTB: {
-    title: "Balcony & Terrace Rainwater Pipe Sizing",
-    code: `flowchart TD
-    INIT([🟢 Balcony & Terrace RWP Sizing<br/>Start])
-
-    %% Phase 1: Catchment Area Analysis
-    P1[/PHASE 1: Catchment Area Analysis/]
-    P1A[Define Area Served<br/>Balcony, terrace, mumty segments]
-    P1B[Segment Breakdown<br/>Multiple catchment zones]
-    P1C[Assign Run-off Coefficient<br/>C = 1.0 for concrete/tiled decks]
-    P1D[Surface Type Table<br/>Concrete=1.0, Metal=0.95, Green=0.30]
-    INIT --> P1 --> P1A --> P1B --> P1C --> P1D
-
-    %% Phase 2: Hydraulic Load Calculation
-    P2[/PHASE 2: Hydraulic Load Calculation/]
-    P2A[Rainfall Intensity Input<br/>Peak I in mm/hr from local data]
-    P2B[Peak Flow Formula<br/>Q = Area × I × C / 3600]
-    P2C[Unit Conversion Check<br/>Ensure L/sec consistency]
-    P1D --> P2 --> P2A --> P2B --> P2C
-
-    %% Phase 3: Riser Distribution Logic
-    P3[/PHASE 3: Riser Distribution/]
-    P3A[Number of Pipes Input<br/>Based on architectural constraints]
-    P3B[Duty Flow per Pipe<br/>Qp = Total Q ÷ N pipes]
-    P3C[Max Area Rule<br/>50-70 m² per 100mm pipe]
-    P2C --> P3 --> P3A --> P3B --> P3C
-
-    %% Phase 4: Pipe Diameter Determination
-    P4[/PHASE 4: Pipe Sizing/]
-    P4A[Theoretical Diameter<br/>Based on gravity-fed flow capacity]
-    P4B[NBC 2016 Capacity Table<br/>75mm, 100mm, 150mm, 200mm]
-    P4C[Safety Factor<br/>2/3rd fill ratio for vertical risers]
-    P3C --> P4 --> P4A --> P4B --> P4C
-
-    %% Phase 5: Final Output & Selection
-    P5[/PHASE 5: Final Selection/]
-    P5A[Calculated Size<br/>Exact mathematical requirement]
-    P5B[Selected Size<br/>Round up to standard commercial size]
-    P5C([📥 RWP Schedule<br/>Site Installation Ready])
-    P4C --> P5 --> P5A --> P5B --> P5C
-
-    DONE([🏁 RWP Sizing Complete])
-    P5C --> DONE
-
-    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
-    class INIT,DONE terminal`,
-  },
   RWH: {
     title: "Rainwater Harvesting & Tank Sizing",
     code: `flowchart TD
@@ -1159,6 +989,37 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
     class INIT,DONE terminal
     class P5A decision`,
+  },
+  EBR: {
+    title: "Electrical Bus Riser System",
+    code: `flowchart TD
+    INIT([🟢 Electrical Bus Riser<br/>System Design])
+    A[/PHASE A: Flat Unit Load/]
+    A1[Fixtures: Lights, Fans, Sockets, ACs<br/>CL = 10.3 kW]
+    A2[Diversity Factor DF = 0.60<br/>MD = 6.18 kW per flat]
+    B[/PHASE B: Bus Riser Loading/]
+    B1[33 Floors × 4 Flats × 6.18 kW]
+    B2[Riser DF = 0.40<br/>Total Load = 326.3 kW]
+    B3[Current Calc<br/>I = kW/(√3×V×pf) = 534A]
+    B4[90% Loading Safety<br/>Selected: 630A Bus Bar]
+    C[/PHASE C: Voltage Drop/]
+    C1[mV/mtr/A = 0.029<br/>Length = 125.55m]
+    C2[Vd = 1.95V = 0.47%]
+    C3{Validation}
+    C4[✓ I: 534A < 630A<br/>✓ VD: 0.47% < 3%<br/>✓ Loading: 84.8%]
+    D[/PHASE D: Derating/]
+    D1[Ambient 45°C<br/>Factor = 0.91 → 573A]
+    E[/PHASE E: Hardware BOM/]
+    E1[126m Bus Duct<br/>33 Tap-offs 125A<br/>45 Support Brackets]
+    OUT([📥 Complete BOM])
+    INIT --> A --> A1 --> A2 --> B --> B1 --> B2 --> B3 --> B4 --> C --> C1 --> C2 --> C3
+    C3 -->|Pass| C4 --> D --> D1 --> E --> E1 --> OUT
+    DONE([🏁 Design Complete])
+    OUT --> DONE
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    class INIT,DONE terminal
+    class C3 decision`,
   },
   DD_CB: {
     title: "Cable Sizing & Voltage Drop Calculation",

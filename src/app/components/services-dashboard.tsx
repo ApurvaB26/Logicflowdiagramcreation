@@ -4,10 +4,8 @@ import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
 import { OWCCalcSVG } from "./owc-calc";
 import { STPCalcSVG } from "./stp-calc";
-import { FirePumpHeadCalcSVG } from "./fire-pump-head-calc";
-import { FireTankCalcSVG } from "./fire-tank-calc";
-import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
-import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
+import { FireFightingSystemCalcSVG } from "./fire-fighting-system-comprehensive";
+import { ElectricalBusRiserCalcSVG } from "./electrical-bus-riser-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
@@ -73,13 +71,14 @@ const SERVICES: Service[] = [
     calculations: [
       // ── Concept Stage ──
       { id: "P3B", title: "Electrical Load Calculations", description: "Supply norms, apartment/common/MLCP loads, transformer & DG sizing", status: "ready", stage: "concept" },
+      { id: "EBR", title: "Electrical Bus Riser System", description: "Flat unit load, floor aggregation, bus duct sizing, current & voltage drop validation, hardware BOM", status: "ready", stage: "concept" },
       // ── Detailed Design Stage ──
       { id: "DD_CB", title: "Cable Sizing Calculation", description: "IS 3961/IEC 60502 current rating, voltage drop & short circuit withstand", status: "ready", stage: "detailed" },
       { id: "DD_PNL", title: "Panel Schedule Design", description: "R-Y-B phase balancing, MCB/MCCB selection per circuit", status: "coming-soon", stage: "detailed" },
       { id: "DD_SLD", title: "SLD (Single Line Diagram)", description: "Transformer to outgoing feeders, protection coordination", status: "coming-soon", stage: "detailed" },
       { id: "DD_ERT", title: "Earthing Design", description: "IS 3043 electrode sizing, soil resistivity, earth pit layout", status: "coming-soon", stage: "detailed" },
       { id: "DD_LTN", title: "Lightning Protection", description: "IS/IEC 62305 risk assessment, rolling sphere & mesh method", status: "coming-soon", stage: "detailed" },
-      { id: "DD_BUS", title: "Bus Bar Sizing", description: "Max demand current rating, Cu/Al selection from tables", status: "coming-soon", stage: "detailed" },
+      { id: "DD_BUS", title: "Bus Bar Sizing", description: "Max demand current rating, Cu/AL selection from tables", status: "coming-soon", stage: "detailed" },
     ],
   },
   {
@@ -135,10 +134,7 @@ const SERVICES: Service[] = [
     colorDark: "#991b1b",
     calculations: [
       // ── Concept Stage ──
-      { id: "FFP", title: "Fire Pump Head Calculations", description: "Static head, Hazen-Williams friction, system pressure & multi-zone pump output", status: "ready", stage: "concept" },
-      { id: "FTK", title: "Fire Tank Size Estimation", description: "IS-15105/NFPA-13 standards, sprinkler/hydrant/drencher volume & 300m\u00B3 safety gate", status: "ready", stage: "concept" },
-      { id: "FJD", title: "Jockey & Drencher Pump Calculations", description: "Jockey/drencher head loss, 20% safety factor & system pressure summation", status: "ready", stage: "concept" },
-      { id: "FTB", title: "Terrace Fire Booster Pump Head", description: "Hazen-Williams friction, pipe fittings, static head & residual pressure calc", status: "ready", stage: "concept" },
+      { id: "FFS", title: "Fire Fighting System — Complete Design", description: "Comprehensive: Pump Head + Tank + Jockey/Drencher + Terrace Booster + Multi-Zone Hydraulics + Pressure Profile + BOM", status: "ready", stage: "concept" },
 
       // ── Detailed Design Stage ──
       { id: "DD_SPR", title: "Sprinkler Hydraulic Calc", description: "K-factor, design density, hydraulic calc & pipe network sizing", status: "coming-soon", stage: "detailed" },
@@ -535,16 +531,14 @@ function CalcDetailOverlay({
   }, [calcId]);
 
   // Check if it's a fully built custom SVG
-  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","FFP","FTK","FJD","FTB","RWH","SWD","DD_CB","DD_PIP","DD_PRV"]);
+  const CUSTOM_IDS = new Set(["P3A","P3B","OWC","STP","DFP","FFS","EBR","RWH","SWD","DD_CB","DD_PIP","DD_PRV"]);
   const isCustomP3A = calcId === "P3A";
   const isCustomP3B = calcId === "P3B";
   const isCustomOWC = calcId === "OWC";
   const isCustomSTP = calcId === "STP";
   const isCustomDFP = calcId === "DFP";
-  const isCustomFFP = calcId === "FFP";
-  const isCustomFTK = calcId === "FTK";
-  const isCustomFJD = calcId === "FJD";
-  const isCustomFTB = calcId === "FTB";
+  const isCustomFFS = calcId === "FFS";
+  const isCustomEBR = calcId === "EBR";
   const isCustomRWH = calcId === "RWH";
   const isCustomSWD = calcId === "SWD";
   const isCustomDDCB = calcId === "DD_CB";
@@ -561,10 +555,8 @@ function CalcDetailOverlay({
     OWC: { title: "OWC Calculations", icon: "\u267B\uFE0F", color: "#10b981" },
     STP: { title: "STP Calculations", icon: "\uD83C\uDFED", color: "#06b6d4" },
     DFP: { title: "Pump Head & Flow Rate Calculation", icon: "\uD83D\uDD27", color: "#06b6d4" },
-    FFP: { title: "Fire Pump Head Calculation", icon: "\uD83D\uDE92", color: "#dc2626" },
-    FTK: { title: "Fire Tank Size Estimation", icon: "\uD83D\uDEA8", color: "#dc2626" },
-    FJD: { title: "Jockey & Drencher Pump", icon: "\uD83D\uDD27", color: "#dc2626" },
-    FTB: { title: "Terrace Fire Booster Pump", icon: "\uD83C\uDFD7\uFE0F", color: "#dc2626" },
+    FFS: { title: "Fire Fighting System — Complete Design Package", icon: "\uD83D\uDD25", color: "#dc2626" },
+    EBR: { title: "Electrical Bus Riser System", icon: "\u26A1", color: "#eab308" },
     RWH: { title: "Rainwater Harvesting & Tank Sizing", icon: "\uD83C\uDF27\uFE0F", color: "#3b82f6" },
     SWD: { title: "Storm Water Drainage Calculator", icon: "\u{1F30A}", color: "#3b82f6" },
     DD_CB: { title: "Cable Sizing & Voltage Drop Calculation", icon: "\u26A1", color: "#d97706" },
@@ -619,7 +611,7 @@ function CalcDetailOverlay({
           { label: "Sizing Output", bg: "#ffe4e6", bd: "#f43f5e", icon: "\u26A1" },
           { label: "Dashboard", bg: "#d1fae5", bd: "#10b981", icon: "\uD83D\uDCCA" },
         ]
-      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomFFP || isCustomFTK || isCustomFJD || isCustomFTB || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP
+      : isCustomOWC || isCustomSTP || isCustomDFP || isCustomFFS || isCustomEBR || isCustomRWH || isCustomSWD || isCustomDDCB || isCustomDDPIP
       ? [
           { label: "Entry", bg: "#dbeafe", bd: "#3b82f6", icon: "\uD83D\uDCE5" },
           { label: "Database", bg: "#ede9fe", bd: "#8b5cf6", icon: "\uD83D\uDDC3" },
@@ -829,21 +821,13 @@ function CalcDetailOverlay({
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
               <DomesticFlushingPumpCalcSVG />
             </div>
-          ) : isCustomFFP ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
-              <FirePumpHeadCalcSVG />
+          ) : isCustomFFS ? (
+            <div style={{ minWidth: "2400px", padding: "10px 0", zoom }}>
+              <FireFightingSystemCalcSVG />
             </div>
-          ) : isCustomFTK ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
-              <FireTankCalcSVG />
-            </div>
-          ) : isCustomFJD ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
-              <FireJockeyDrencherCalcSVG />
-            </div>
-          ) : isCustomFTB ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>
-              <TerraceBoosterCalcSVG />
+          ) : isCustomEBR ? (
+            <div style={{ minWidth: "2400px", padding: "10px 0", zoom }}>
+              <ElectricalBusRiserCalcSVG />
             </div>
           ) : isCustomRWH ? (
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom }}>

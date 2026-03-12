@@ -5,10 +5,8 @@ import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
 import { OWCCalcSVG } from "./owc-calc";
 import { STPCalcSVG } from "./stp-calc";
-import { FirePumpHeadCalcSVG } from "./fire-pump-head-calc";
-import { FireTankCalcSVG } from "./fire-tank-calc";
-import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
-import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
+import { FireFightingSystemCalcSVG } from "./fire-fighting-system-comprehensive";
+import { ElectricalBusRiserCalcSVG } from "./electrical-bus-riser-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { DomesticFlushingPumpCalcSVG } from "./domestic-flushing-pump-calc";
@@ -1588,21 +1586,13 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
             <div style={{ minWidth: "1600px", padding: "10px 0" }}>
               <DomesticFlushingPumpCalcSVG />
             </div>
-          ) : calcId === "FFP" ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
-              <FirePumpHeadCalcSVG />
+          ) : calcId === "FFS" ? (
+            <div style={{ minWidth: "2400px", padding: "10px 0" }}>
+              <FireFightingSystemCalcSVG />
             </div>
-          ) : calcId === "FTK" ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
-              <FireTankCalcSVG />
-            </div>
-          ) : calcId === "FJD" ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
-              <FireJockeyDrencherCalcSVG />
-            </div>
-          ) : calcId === "FTB" ? (
-            <div style={{ minWidth: "1600px", padding: "10px 0" }}>
-              <TerraceBoosterCalcSVG />
+          ) : calcId === "EBR" ? (
+            <div style={{ minWidth: "2400px", padding: "10px 0" }}>
+              <ElectricalBusRiserCalcSVG />
             </div>
           ) : calcId === "RWH" ? (
             <div style={{ minWidth: "1600px", padding: "10px 0" }}>

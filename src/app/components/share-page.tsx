@@ -26,10 +26,8 @@ import { WaterDemandCalcSVG } from "./water-demand-calc";
 import { ElectricalLoadCalcSVG } from "./electrical-load-calc";
 import { OWCCalcSVG } from "./owc-calc";
 import { STPCalcSVG } from "./stp-calc";
-import { FirePumpHeadCalcSVG } from "./fire-pump-head-calc";
-import { FireTankCalcSVG } from "./fire-tank-calc";
-import { FireJockeyDrencherCalcSVG } from "./fire-jockey-drencher-calc";
-import { TerraceBoosterCalcSVG } from "./terrace-booster-calc";
+import { FireFightingSystemCalcSVG } from "./fire-fighting-system-comprehensive";
+import { ElectricalBusRiserCalcSVG } from "./electrical-bus-riser-calc";
 import { RWHCalcSVG } from "./rwh-calc";
 import { SWDCalcSVG } from "./swd-calc";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
@@ -70,10 +68,8 @@ const CALC_COMPONENTS: Record<string, React.FC> = {
   OWC: OWCCalcSVG,
   STP: STPCalcSVG,
   DFP: DomesticFlushingPumpCalcSVG,
-  FFP: FirePumpHeadCalcSVG,
-  FTK: FireTankCalcSVG,
-  FJD: FireJockeyDrencherCalcSVG,
-  FTB: TerraceBoosterCalcSVG,
+  FFS: FireFightingSystemCalcSVG,
+  EBR: ElectricalBusRiserCalcSVG,
   RWH: RWHCalcSVG,
   SWD: SWDCalcSVG,
   DD_CB: CableSizingCalcSVG,
