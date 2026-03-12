@@ -391,6 +391,49 @@ const CGAP = 40;
 const PX = 120;
 const PY = 36;
 
+// ── Fixed X-positions for parallel track nodes (rows 1–9) ──
+// Prevents centering-based horizontal shifts across rows
+const TRACK_FIXED_X: Record<string, number> = {
+  // Track A — Architect Drawing Coordination (left lane)
+  DD_P2:    70,
+  DD_ADL:   70,
+  DD_AML:   70,
+  DD_ARC:   70,
+  DD_RCV:   70,
+  DD_CK1C:  20,
+  DD_CK1B:  268,
+  DD_D1:    144,
+  DD_REQ1:  390,
+  DD_D1F:   144,
+  DD_D1U:   144,
+  DD_REQ1B: 390,
+  // Track B — MEP Deliverables (center lane)
+  DD_TB:    620,
+  DD_TB1:   620,
+  DD_TB2:   620,
+  DD_TB3:   620,
+  DD_TB4:   620,
+  DD_TB5:   620,
+  // Track C — Drawing Check (right lane)
+  DD_DWC:   930,
+  DD_DWC1:  930,
+  DD_DWCD:  930,
+  DD_DWCR:  1170,
+};
+
+// Track lane metadata for background rendering
+const TRACK_LANES = [
+  { label: "TRACK A: Architect Drawings", color: CL.violet.bd, x: 6,   w: 614 },
+  { label: "TRACK B: MEP Deliverables",   color: CL.teal.bd,   x: 608, w: 240 },
+  { label: "TRACK C: Drawing Check",       color: CL.green.bd,  x: 918, w: 480 },
+];
+
+// Fan-out target IDs (DD_INIT → these)
+const FANOUT_TARGETS = ["DD_P2", "DD_TB", "DD_DWC"];
+// Fan-in: Track B & C endpoints whose merge connections are handled by DrawParallelTracks
+// (Track A merge connections D1F→MRG, D1U→MRG render via normal DrawConn)
+const FANIN_TRACK_BC = ["DD_TB5", "DD_DWCD"];
+
 // Note annotations
 interface Ann { pid: string; nid: string; dx: number; dy: number }
 const ANNS: Ann[] = [
@@ -412,16 +455,25 @@ function computeLayout() {
   const rowY: number[] = [];
   const maxC = Math.max(...GRID.map((r) => r.length));
   const maxW = maxC * NW + (maxC - 1) * CGAP;
+  // Ensure SVG width accommodates parallel tracks (rightmost fixed-X node)
+  const minW = 1170 + NW + PX;
+  const finalMaxW = Math.max(maxW, minW - PX * 2);
   let y = PY;
   for (let ri = 0; ri < GRID.length; ri++) {
     rowY.push(y);
     const row = GRID[ri];
     const rw = row.length * NW + (row.length - 1) * CGAP;
-    const sx = PX + (maxW - rw) / 2;
+    const sx = PX + (finalMaxW - rw) / 2;
     row.forEach((id, i) => { pos[id] = { x: sx + i * (NW + CGAP), y }; });
     y += SERVICE_ROW_INDICES.has(ri) ? SVC_ROW_GAP : RGAP;
   }
-  return { pos, rowY, H: y + 60, W: maxW + PX * 2 };
+  // Override x-positions for parallel track nodes
+  for (const [id, fixedX] of Object.entries(TRACK_FIXED_X)) {
+    if (pos[id]) {
+      pos[id] = { x: fixedX, y: pos[id].y };
+    }
+  }
+  return { pos, rowY, H: y + 60, W: finalMaxW + PX * 2 };
 }
 
 // =====================================================================
@@ -621,6 +673,120 @@ function DrawServiceTree({ pos }: { pos: Record<string, { x: number; y: number }
       <line x1={leftCx} y1={fanInBarY} x2={rightCx} y2={fanInBarY} stroke={color} strokeWidth={1.6} />
       <line x1={svcmCx} y1={fanInBarY} x2={svcmCx} y2={svcmTop}
         stroke={color} strokeWidth={1.6} markerEnd="url(#dd-ma)" />
+    </g>
+  );
+}
+
+// =====================================================================
+// PARALLEL TRACKS — Fan-out, Lane Backgrounds, Fan-in
+// =====================================================================
+function DrawParallelTracks({ pos }: {
+  pos: Record<string, { x: number; y: number }>;
+}) {
+  const initP = pos["DD_INIT"];
+  const mrgP = pos["DD_MRG"];
+  if (!initP || !mrgP) return null;
+
+  const color = CL.arrow;
+  const initBot = initP.y + NH;
+  const initCx = initP.x + NW / 2;
+  const mrgTop = mrgP.y;
+  const mrgCx = mrgP.x + NW / 2;
+
+  // Fan-out targets
+  const targets = FANOUT_TARGETS.map((id) => ({
+    id,
+    cx: pos[id] ? pos[id].x + NW / 2 : 0,
+    top: pos[id] ? pos[id].y : 0,
+  })).filter((t) => t.top > 0);
+  if (targets.length === 0) return null;
+
+  const fanOutBarY = initBot + (targets[0].top - initBot) / 2;
+  const leftCx = Math.min(...targets.map((t) => t.cx));
+  const rightCx = Math.max(...targets.map((t) => t.cx));
+
+  // Fan-in sources — Track B and C endpoints (Track A routes normally via DrawConn)
+  const trackBEnd = pos["DD_TB5"];
+  const trackCEnd = pos["DD_DWCD"];
+
+  const fanInSources = [trackBEnd, trackCEnd].filter(Boolean);
+  const fanInBarY = mrgTop - (RGAP * 0.4);
+  const fanInLeftCx = Math.min(...fanInSources.map((s) => s!.x + NW / 2));
+  const fanInRightCx = Math.max(...fanInSources.map((s) => s!.x + NW / 2));
+
+  // Lane backgrounds
+  const laneTop = targets[0].top - 20;
+  const laneBot = fanInBarY + 10;
+
+  return (
+    <g>
+      {/* Track lane backgrounds */}
+      {TRACK_LANES.map((lane, i) => (
+        <g key={`lane-${i}`}>
+          <rect
+            x={lane.x} y={laneTop - 8}
+            width={lane.w} height={laneBot - laneTop + 16}
+            rx={10} fill={`${lane.color}06`}
+            stroke={`${lane.color}18`} strokeWidth={1.2} strokeDasharray="10,6"
+          />
+          <text
+            x={lane.x + lane.w / 2} y={laneTop + 6}
+            textAnchor="middle" fill={lane.color} fontSize={8} fontWeight={700}
+            opacity={0.45} letterSpacing={0.6}
+          >
+            {lane.label}
+          </text>
+        </g>
+      ))}
+
+      {/* Fan-out: DD_INIT → 3 track headers */}
+      <line x1={initCx} y1={initBot} x2={initCx} y2={fanOutBarY}
+        stroke={color} strokeWidth={1.6} />
+      <line x1={leftCx} y1={fanOutBarY} x2={rightCx} y2={fanOutBarY}
+        stroke={color} strokeWidth={1.6} />
+      {targets.map((t) => (
+        <line key={`fo-${t.id}`}
+          x1={t.cx} y1={fanOutBarY} x2={t.cx} y2={t.top}
+          stroke={color} strokeWidth={1.6} markerEnd="url(#dd-ma)"
+        />
+      ))}
+      {/* Fan-out labels */}
+      {targets.map((t) => {
+        const lbl = t.id === "DD_P2" ? "Track A" : t.id === "DD_TB" ? "Track B" : "Track C";
+        const tw = lbl.length * 5.5 + 8;
+        return (
+          <g key={`fol-${t.id}`}>
+            <rect x={t.cx - tw / 2} y={fanOutBarY - 14} width={tw} height={14} rx={3} fill="#fff" opacity={0.92} />
+            <text x={t.cx} y={fanOutBarY - 4} textAnchor="middle" fill="#475569" fontSize={8} fontWeight={600}>{lbl}</text>
+          </g>
+        );
+      })}
+
+      {/* Fan-in: Track B & C endpoints → bar → DD_MRG */}
+      {/* Track B: TB5 → bar (long vertical drop within its lane) */}
+      {trackBEnd && (
+        <line x1={trackBEnd.x + NW / 2} y1={trackBEnd.y + NH}
+          x2={trackBEnd.x + NW / 2} y2={fanInBarY}
+          stroke={color} strokeWidth={1.6} />
+      )}
+      {/* Track C: DWCD → bar (yes path drops within its lane) */}
+      {trackCEnd && (
+        <line x1={trackCEnd.x + NW / 2} y1={trackCEnd.y + nodeH(NM["DD_DWCD"])}
+          x2={trackCEnd.x + NW / 2} y2={fanInBarY}
+          stroke={color} strokeWidth={1.6} />
+      )}
+      {/* Horizontal fan-in bar (spans from leftmost source to rightmost, including MRG center) */}
+      <line x1={Math.min(fanInLeftCx, mrgCx)} y1={fanInBarY}
+        x2={Math.max(fanInRightCx, mrgCx)} y2={fanInBarY}
+        stroke={color} strokeWidth={1.6} />
+      {/* Bar → MRG */}
+      <line x1={mrgCx} y1={fanInBarY} x2={mrgCx} y2={mrgTop}
+        stroke={color} strokeWidth={1.6} markerEnd="url(#dd-ma)" />
+      {/* Merge label */}
+      <g>
+        <rect x={mrgCx - 28} y={fanInBarY - 14} width={56} height={14} rx={3} fill="#fff" opacity={0.92} />
+        <text x={mrgCx} y={fanInBarY - 4} textAnchor="middle" fill="#475569" fontSize={8} fontWeight={600}>Merge</text>
+      </g>
     </g>
   );
 }
@@ -1189,6 +1355,14 @@ export function DetailedDesignStageChart() {
     skipConns.add(`DD_P4->${id}`);
     skipConns.add(`${id}->DD_SVCM`);
   });
+  // Parallel tracks fan-out (DD_INIT → 3 track headers) handled by DrawParallelTracks
+  FANOUT_TARGETS.forEach((id) => {
+    skipConns.add(`DD_INIT->${id}`);
+  });
+  // Parallel tracks fan-in for Track B & C (long vertical drops handled by DrawParallelTracks)
+  FANIN_TRACK_BC.forEach((id) => {
+    skipConns.add(`${id}->DD_MRG`);
+  });
 
   return (
     <>
@@ -1223,6 +1397,9 @@ export function DetailedDesignStageChart() {
             </g>
           );
         })}
+
+        {/* Parallel tracks: fan-out, lane backgrounds, fan-in */}
+        <DrawParallelTracks pos={pos} />
 
         {/* Service tree diagram */}
         <DrawServiceTree pos={pos} />
