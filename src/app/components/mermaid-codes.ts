@@ -1128,6 +1128,38 @@ export const CALC_MERMAID_CODES: Record<string, { title: string; code: string }>
     class INIT,DONE terminal
     class P2B,P4A,P4D decision`,
   },
+  FFS: {
+    title: "Fire Fighting System — Hydraulic Dashboard",
+    code: `flowchart TD
+    INIT([🟢 Fire Fighting System<br/>Hydraulic Calculation])
+    P1[/PHASE 1: Water Storage Inputs/]
+    P1A[Hazard Class: Ordinary II<br/>Density: 12.2 L/min/m²]
+    P2[/PHASE 2: Hydraulic Constants/]
+    P2A[C=120, Cd=0.62, g=9.81<br/>Pr=3.5 Bar, Safety=1.20]
+    P3[/PHASE 3: Calculation Stack/]
+    P3A[Q = Density × Area<br/>Hf via Hazen-Williams]
+    P3B[TDH = Hs + Hf + Pr + 20%]
+    P4[/PHASE 4: Multi-Zone/]
+    P4A[High Zone: 250m<br/>Low Zone: 180m]
+    P5[/PHASE 5: Pressure Profile/]
+    P5A{P > 7 Bar?}
+    P5B[Orifice Required]
+    P6[/PHASE 6: Tank Sizing/]
+    P6A[Total = 510 KL]
+    P7[/PHASE 7: Pump BOM/]
+    P7A[Total Load: 381 kW]
+    P8([📥 Design Package])
+    INIT --> P1 --> P1A --> P2 --> P2A --> P3 --> P3A --> P3B --> P4 --> P4A --> P5 --> P5A
+    P5A -->|Yes| P5B --> P6
+    P5A -->|No| P6
+    P6 --> P6A --> P7 --> P7A --> P8
+    DONE([🏁 Complete])
+    P8 --> DONE
+    classDef terminal fill:#059669,stroke:#34d399,stroke-width:2.5px,color:#ffffff
+    classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e
+    class INIT,DONE terminal
+    class P5A decision`,
+  },
   DD_CB: {
     title: "Cable Sizing & Voltage Drop Calculation",
     code: `flowchart TD
