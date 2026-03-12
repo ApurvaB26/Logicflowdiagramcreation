@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { CableSizingCalcSVG } from "./cable-sizing-calc";
 import { PipeSizingCalcSVG } from "./pipe-sizing-calc";
 import { PRVCalcSVG } from "./prv-calc";
+import { EarthingCalcSVG } from "./earthing-calc";
 import { CALC_MERMAID_CODES } from "./mermaid-codes";
 import { copyToClipboard } from "./clipboard-utils";
 
@@ -814,17 +815,7 @@ const DD_CALC_FLOWS: Record<string, CalcFlow> = {
     ],
     connections: [{ from: "S1", to: "S2" }, { from: "S2", to: "S3" }, { from: "S3", to: "S4" }, { from: "S4", to: "S5" }],
   },
-  DD_ERT: {
-    title: "Earthing Design",
-    icon: "\u26A1", color: "#f59e0b", accentBg: "#fef3c7",
-    steps: [
-      { id: "E1", label: "Input: Soil Resistivity", sub: "Site survey data (\u03C1 \u03A9\u00B7m)", type: "input" },
-      { id: "E2", label: "Earth Electrode Sizing", sub: "IS 3043 pipe/plate electrode calc", type: "formula" },
-      { id: "E3", label: "Earth Pit Design", sub: "Depth + backfill + maintenance access", type: "process" },
-      { id: "E4", label: "Output: Earthing Layout", sub: "Electrode locations + conductor routing", type: "output" },
-    ],
-    connections: [{ from: "E1", to: "E2" }, { from: "E2", to: "E3" }, { from: "E3", to: "E4" }],
-  },
+  // DD_ERT: now renders via full custom EarthingCalcSVG component
   DD_LTN: {
     title: "Lightning Protection",
     icon: "\u26A1", color: "#f59e0b", accentBg: "#fef3c7",
@@ -1043,6 +1034,54 @@ function CalcDetailOverlay({ calcId, onClose }: { calcId: string; onClose: () =>
           <div className="overflow-auto flex-1">
             <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
               <PipeSizingCalcSVG />
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // ── Full custom SVG for DD_ERT (Short Circuit & Earthing Design) ──
+  if (calcId === "DD_ERT") {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+          transition={{ type: "spring", damping: 28, stiffness: 300 }}
+          className="absolute rounded-xl shadow-2xl overflow-hidden flex flex-col"
+          style={{ top: "1vh", left: "1vw", right: "1vw", bottom: "1vh", backgroundColor: "#fff", border: "3px solid #d97706" }}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-6 py-4 shrink-0" style={{ backgroundColor: "#d97706" }}>
+            <div className="flex items-center gap-3">
+              <span style={{ fontSize: 24 }}>{"\u26A1"}</span>
+              <div>
+                <h2 className="text-white" style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Short Circuit & Earthing Design</h2>
+                <p className="text-white" style={{ fontSize: 12, opacity: 0.75, margin: 0 }}>Fault Level {"→"} Cable Impedance {"→"} Panel Withstand {"→"} Adiabatic Sizing {"→"} Earth Pit</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {CALC_MERMAID_CODES[calcId] && (
+                <button onClick={handleCopyMermaid}
+                  className="flex items-center gap-1.5 rounded-full hover:opacity-80 transition-opacity px-3"
+                  style={{ height: 36, backgroundColor: mermaidCopied ? "rgba(16, 185, 129, 0.3)" : "rgba(255,255,255,0.2)", color: "#fff", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer" }}
+                  title="Copy Mermaid.js code">
+                  {mermaidCopied ? "✓ Copied!" : "📋 Mermaid"}
+                </button>
+              )}
+              <button onClick={onClose}
+                className="flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                style={{ width: 36, height: 36, backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "none", cursor: "pointer" }}>
+                <span className="text-xl">&times;</span>
+              </button>
+            </div>
+          </div>
+          <div className="overflow-auto flex-1">
+            <div style={{ minWidth: "1600px", padding: "10px 0", zoom: 0.48 }}>
+              <EarthingCalcSVG />
             </div>
           </div>
         </motion.div>
