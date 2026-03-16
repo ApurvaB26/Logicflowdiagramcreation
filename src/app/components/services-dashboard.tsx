@@ -98,7 +98,7 @@ const SERVICES: Service[] = [
       { id: "OWC", title: "OWC Calculations", description: "Waste generation, bin sizing, garbage room & OWC capacity (CPHEEO/NBC)", status: "ready", stage: "concept" },
       { id: "STP", title: "STP Calculations", description: "Sewage generation (80/100 rule), STP sizing, area & treated water reuse", status: "ready", stage: "concept" },
       { id: "DFP", title: "Pump Head & Flow Rate Calculation", description: "Input gathering, flow rate Q by system type, head & pressure loss analysis, pump sizing & procurement schedule", status: "ready", stage: "concept" },
-      { id: "P3E", title: "External Sewer & Storm Calculations", description: "Storm water flow, sewer pipe sizing, STP capacity & rainwater harvesting", status: "coming-soon", stage: "concept" },
+      { id: "P3E", title: "External Sewer Calculations", description: "Sewer pipe sizing, STP capacity & rainwater harvesting", status: "coming-soon", stage: "concept" },
       { id: "RWH", title: "Rainwater Harvesting & Tank Sizing", description: "Catchment runoff, downcomer sizing, velocity guard & NBC 2016 tank sizing", status: "ready", stage: "concept" },
       { id: "SWD", title: "Storm Water Drainage Calculator", description: "Rational method runoff, Manning's equation, velocity monitoring & pipe sizing", status: "ready", stage: "concept" },
       // ── Detailed Design Stage ──
@@ -199,7 +199,7 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
     ],
   },
   P3E: {
-    title: "External Sewer & Storm Calculations",
+    title: "External Sewer Calculations",
     icon: "\uD83C\uDF27\uFE0F",
     color: "#0891b2",
     accentBg: "#cffafe",
@@ -213,7 +213,7 @@ const GENERIC_FLOWS: Record<string, CalcFlow> = {
       { id: "SW7", label: "Sewer Pipe Sizing", sub: "Flow Velocity Check + Min Gradient", type: "formula" },
       { id: "SW8", label: "STP Capacity", sub: "Peak Sewage Flow \u2192 STP Plant Sizing", type: "process" },
       { id: "SW9", label: "Rainwater Harvesting Check", sub: "NBC / Local Body Mandate \u2192 RWH Tank Size", type: "decision" },
-      { id: "SW10", label: "Output: Storm & Sewer Summary", sub: "Drain Sizes + STP + RWH \u2192 Space Matrix", type: "output" },
+      { id: "SW10", label: "Output: Sewer Summary", sub: "Drain Sizes + STP + RWH \u2192 Space Matrix", type: "output" },
     ],
     connections: [
       { from: "SW1", to: "SW2" }, { from: "SW2", to: "SW3" }, { from: "SW3", to: "SW4" },

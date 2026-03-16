@@ -134,7 +134,7 @@ const NODES: CNode[] = [
     ["P3B"],
     CL.amber),
   svc("SVC_P", "Plumbing", "\uD83D\uDCA7 Calculations",
-    ["Water Demand Calc", "OWC Calculations", "STP Calculations", "Pump Head & Flow", "Ext. Sewer & Storm", "RWH Calculator", "SWD Calculator"],
+    ["Water Demand Calc", "OWC Calculations", "STP Calculations", "Pump Head & Flow", "Ext. Sewer", "RWH Calculator", "SWD Calculator"],
     ["P3A", "OWC", "STP", "DFP", "P3E", "RWH", "SWD"],
     CL.blue),
   svc("SVC_H", "HVAC", "\u2744\uFE0F Calculations",
@@ -1081,7 +1081,7 @@ const CALC_FLOWS: Record<string, CalcFlow> = {
     ],
   },
   P3E: {
-    title: "External Storm & Sewer Water Calculation",
+    title: "External Sewer Calculations",
     icon: "🌧️",
     color: "#0891b2",
     accentBg: "#cffafe",
@@ -1095,7 +1095,7 @@ const CALC_FLOWS: Record<string, CalcFlow> = {
       { id: "SW7", label: "Sewer Pipe Sizing", sub: "Flow Velocity Check + Min Gradient", type: "formula" },
       { id: "SW8", label: "STP Capacity", sub: "Peak Sewage Flow → STP Plant Sizing", type: "process" },
       { id: "SW9", label: "Rainwater Harvesting Check", sub: "NBC / Local Body Mandate → RWH Tank Size", type: "decision" },
-      { id: "SW10", label: "Output: Storm & Sewer Summary", sub: "Drain Sizes + STP + RWH → Space Matrix", type: "output" },
+      { id: "SW10", label: "Output: Sewer Summary", sub: "Drain Sizes + STP + RWH → Space Matrix", type: "output" },
     ],
     connections: [
       { from: "SW1", to: "SW2" }, { from: "SW2", to: "SW3" }, { from: "SW3", to: "SW4" },

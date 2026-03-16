@@ -118,7 +118,7 @@ Floating: ShareModal overlay + FeedbackQRPanel (React portal)
 - OWC: OWC Calculations — Waste generation, bin sizing, garbage room & OWC capacity (CPHEEO/NBC) [READY]
 - STP: STP Calculations — Sewage generation (80/100 rule), STP sizing, area & treated water reuse [READY]
 - DFP: Domestic & Flushing Pump Calculations — Pump head, flow rate & pump selection
-- P3E: External Sewer & Storm Calculations — Storm water flow, sewer pipe sizing, STP capacity & RWH
+- P3E: External Sewer Calculations — Sewer pipe sizing, STP capacity & RWH
 - RWH: Rainwater Harvesting & Tank Sizing — Catchment runoff, downcomer sizing, velocity guard & NBC 2016 tank sizing [READY]
 - SWD: Storm Water Drainage Calculator — Rational method runoff, Manning's equation, velocity monitoring & pipe sizing [READY]
 
@@ -419,8 +419,8 @@ Each coming-soon calculation has a `CalcFlow` definition with steps and connecti
 ### DFP — Domestic & Flushing Pump
 Steps: Input (Building Height & Demand) → Static Head → Friction & Minor Losses → TDH → Flow Rate → Pump Selection → Output: Pump Schedule
 
-### P3E — External Sewer & Storm
-Steps: Site Data → Rainfall Intensity → Runoff Coefficient → Storm Water Flow (Q=C×I×A/360) → Drain Sizing (Manning's) → Sewer Load → Sewer Pipe Sizing → STP Capacity → RWH Check → Output
+### P3E — External Sewer
+Steps: Site Data → Sewer Load → Sewer Pipe Sizing → STP Capacity → RWH Check → Output
 
 ### P3D — Heat Load
 Steps: Area + Location → Climate Data → Sensible Heat → Latent Heat → Total Cooling Load → TR Calculation (÷3024) → Equipment Sizing → Output
