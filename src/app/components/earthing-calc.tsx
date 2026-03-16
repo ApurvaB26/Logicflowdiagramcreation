@@ -719,8 +719,7 @@ export function EarthingCalcSVG() {
       <text x={CX} y={6102} textAnchor="middle" fill={C.slate.tx} fontSize={11} fontWeight={700}>🔗 Cross-Reference — Related Calculations</text>
       {[
         "Electrical: Cable Sizing (DD_CB) → feeds cable R/X data for §6 | Bus Riser (EBR) → panel hierarchy",
-        "Electrical: Load Calc (P3B) → TR kVA & DG kVA source data | Panel Schedule → breaker ratings",
-        "Lightning: LP Design (DD_LTN) → shared earth pit system | IS 3043 Clause 12 — combined earthing",
+        "Electrical: Load Calc (P3B) → TR kVA & DG kVA source data | IS 3043 Clause 12 — combined earthing",
       ].map((s, i) => (
         <text key={i} x={CX} y={6120 + i * 14} textAnchor="middle" fill={C.slate.tx} fontSize={9}>{s}</text>
       ))}

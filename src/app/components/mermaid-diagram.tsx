@@ -183,7 +183,7 @@ const schematicNodes: FlowNode[] = [
   bp("SCH_A4", "Structural Coordination", "Beam/Column Clearance", C.blue, 2),
   bp("SCH_B1", "PHASE 2: System Design", "Schematic Development", C.green, 2, true),
   bp("SCH_B2", "HVAC System Layout", "AHU/FCU/Chiller Routing", C.green, 2),
-  bp("SCH_B3", "Electrical SLD Design", "Panel Schedules & Circuits", C.green, 2),
+  bp("SCH_B3", "Electrical Design", "Cable Sizing & Earthing", C.green, 2),
   bp("SCH_B4", "Plumbing Riser Design", "Stack & Riser Diagrams", C.green, 2),
   bp("SCH_B5", "Fire Protection Layout", "Sprinkler & Hydrant Zones", C.green, 2),
   bp("SCH_C1", "PHASE 3: Integration", "Cross-Discipline Check", C.purple, 2, true),

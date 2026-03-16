@@ -264,7 +264,7 @@ export const DETAILED_DESIGN_MERMAID = `flowchart TD
     P4[/PART 4: Detailed Calculations<br/>Service-wise Detailed Design Calcs/]
 
     %% Service tree fan-out
-    P4EL[⚡ Electrical<br/>Cable Sizing · Panel Schedule · SLD · Earthing · Lightning · Bus Bar]
+    P4EL[⚡ Electrical<br/>Cable Sizing · SC & Earthing Design]
     P4PL[💧 Plumbing<br/>Pipe Sizing · Riser Diagrams · Drainage · Pump Selection · Vent · Meter]
     P4HV[🌀 HVAC<br/>Duct Sizing · Equipment Selection · VAV/FCU · BMS · Smoke Mgmt]
     P4FF[🔥 Firefighting<br/>Sprinkler Hydraulic · Hydrant Layout · Detection · PA/VA · Smoke Exhaust]

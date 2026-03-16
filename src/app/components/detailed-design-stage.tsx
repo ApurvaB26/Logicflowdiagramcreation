@@ -128,8 +128,8 @@ const NODES: DNode[] = [
   // ── PART 4: DETAILED CALCULATIONS ──
   hdr("DD_P4", "PART 4: Detailed Calculations", "Service-wise Detailed Engineering Calculations", CL.purple),
   svc("DD_SVC_E", "Electrical", "\u26A1 Detailed Calcs",
-    ["Cable Sizing", "Panel Schedules", "SLD Diagrams", "SC & Earthing Design", "Lightning Protection", "Bus Bar Sizing"],
-    ["DD_CB", "DD_PNL", "DD_SLD", "DD_ERT", "DD_LTN", "DD_BUS"],
+    ["Cable Sizing", "SC & Earthing Design"],
+    ["DD_CB", "DD_ERT"],
     CL.amber),
   svc("DD_SVC_P", "Plumbing", "\uD83D\uDCA7 Detailed Calcs",
     ["Transfer Pipe Sizing", "PRV Calculations"],
@@ -958,53 +958,7 @@ const DD_CALC_FLOWS: Record<string, CalcFlow> = {
     ],
     connections: [{ from: "C1", to: "C2" }, { from: "C2", to: "C3" }, { from: "C3", to: "C4" }, { from: "C4", to: "C5" }, { from: "C5", to: "C6" }],
   },
-  DD_PNL: {
-    title: "Panel Schedule Design",
-    icon: "\uD83D\uDCCB", color: "#f59e0b", accentBg: "#fef3c7",
-    steps: [
-      { id: "P1", label: "Input: Circuit List", sub: "All circuits per panel per floor", type: "input" },
-      { id: "P2", label: "Load Balancing", sub: "R-Y-B phase distribution", type: "process" },
-      { id: "P3", label: "Breaker Selection", sub: "MCB/MCCB rating per circuit", type: "process" },
-      { id: "P4", label: "Output: Panel Schedule", sub: "Complete panel schedule drawing", type: "output" },
-    ],
-    connections: [{ from: "P1", to: "P2" }, { from: "P2", to: "P3" }, { from: "P3", to: "P4" }],
-  },
-  DD_SLD: {
-    title: "SLD (Single Line Diagram)",
-    icon: "\u26A1", color: "#f59e0b", accentBg: "#fef3c7",
-    steps: [
-      { id: "S1", label: "Input: Transformer Data", sub: "kVA rating + incoming voltage", type: "input" },
-      { id: "S2", label: "Main Bus Selection", sub: "Bus bar rating from total load", type: "process" },
-      { id: "S3", label: "Outgoing Feeder Design", sub: "Circuit breaker + cable per feeder", type: "formula" },
-      { id: "S4", label: "Protection Coordination", sub: "Relay settings + discrimination", type: "process" },
-      { id: "S5", label: "Output: SLD Drawing", sub: "Complete single line diagram", type: "output" },
-    ],
-    connections: [{ from: "S1", to: "S2" }, { from: "S2", to: "S3" }, { from: "S3", to: "S4" }, { from: "S4", to: "S5" }],
-  },
   // DD_ERT: now renders via full custom EarthingCalcSVG component
-  DD_LTN: {
-    title: "Lightning Protection",
-    icon: "\u26A1", color: "#f59e0b", accentBg: "#fef3c7",
-    steps: [
-      { id: "L1", label: "Input: Building Geometry", sub: "Height + footprint + location", type: "input" },
-      { id: "L2", label: "Risk Assessment", sub: "IS/IEC 62305 risk calculation", type: "formula" },
-      { id: "L3", label: "Protection Level", sub: "LPL I/II/III/IV selection", type: "decision" },
-      { id: "L4", label: "Air Terminal Design", sub: "Rolling sphere / mesh method", type: "process" },
-      { id: "L5", label: "Output: LP Layout", sub: "Air terminals + down conductors + earth", type: "output" },
-    ],
-    connections: [{ from: "L1", to: "L2" }, { from: "L2", to: "L3" }, { from: "L3", to: "L4" }, { from: "L4", to: "L5" }],
-  },
-  DD_BUS: {
-    title: "Bus Bar Sizing",
-    icon: "\u26A1", color: "#f59e0b", accentBg: "#fef3c7",
-    steps: [
-      { id: "B1", label: "Input: Total Load", sub: "Max demand at bus bar section", type: "input" },
-      { id: "B2", label: "Current Rating Calc", sub: "I = kVA / (V \u00D7 \u221A3)", type: "formula" },
-      { id: "B3", label: "Bus Bar Selection", sub: "Cu/Al size from manufacturer tables", type: "process" },
-      { id: "B4", label: "Output: Bus Bar Schedule", sub: "Size + material + rating \u2192 SLD", type: "output" },
-    ],
-    connections: [{ from: "B1", to: "B2" }, { from: "B2", to: "B3" }, { from: "B3", to: "B4" }],
-  },
   DD_PIP: {
     title: "Transfer Pipe Sizing",
     icon: "\uD83D\uDCA7", color: "#2563eb", accentBg: "#dbeafe",

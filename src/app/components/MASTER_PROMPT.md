@@ -104,11 +104,7 @@ Floating: ShareModal overlay + FeedbackQRPanel (React portal)
 
 **Detailed Design Stage:**
 - DD_CB: Cable Sizing Calculation — IS 3961/IEC 60502 current rating, voltage drop & short circuit withstand
-- DD_PNL: Panel Schedule Design — R-Y-B phase balancing, MCB/MCCB selection per circuit
-- DD_SLD: SLD (Single Line Diagram) — Transformer to outgoing feeders, protection coordination
-- DD_ERT: Earthing Design — IS 3043 electrode sizing, soil resistivity, earth pit layout
-- DD_LTN: Lightning Protection — IS/IEC 62305 risk assessment, rolling sphere & mesh method
-- DD_BUS: Bus Bar Sizing — Max demand current rating, Cu/Al selection from tables
+- DD_ERT: Short Circuit & Earthing Design — Fault level analysis, adiabatic conductor sizing, earth pit resistance per IS 3043 / IEC 60909
 
 **Tender Stage:**
 - T_BOQ_EL: Electrical BOQ — Cable schedule, panel/DB, earthing/LP, switchgear & lighting quantities
@@ -277,7 +273,7 @@ When service cards (SVC_E, SVC_P, SVC_H, SVC_F) appear in a row:
 1. **Initiation**: DD_INIT
 2. **Architect Drawing Coordination**: Auto-generate drawing list → Auto-mail → Architect shares plans → MEP checks → Critical/Beneficial checklist (parallel) → Critical complete? (reject) → Full list complete? → User proceed anyway? (reject)
 3. **Detailed Input Data**: Floor-wise area → Equipment schedules → Load data → Fire safety → Shaft locations
-4. **Detailed Calculations**: 4 service cards: Electrical[DD_CB,DD_PNL,DD_SLD,DD_ERT,DD_LTN,DD_BUS], Plumbing[DD_PIP,DD_RSR,DD_DRN,DD_PMP,DD_VNT,DD_WMT], HVAC[DD_DCT,DD_EQP,DD_VAV,DD_BMS,DD_SMK], Firefighting[DD_SPR,DD_HYD,DD_DET,DD_PAV,DD_SMX] → merge → Format
+4. **Detailed Calculations**: 4 service cards: Electrical[DD_CB,DD_ERT], Plumbing[DD_PIP,DD_RSR,DD_DRN,DD_PMP,DD_VNT,DD_WMT], HVAC[DD_DCT,DD_EQP,DD_VAV,DD_BMS,DD_SMK], Firefighting[DD_SPR,DD_HYD,DD_DET,DD_PAV,DD_SMX] → merge → Format
 5. **Drawing Production**: 5 parallel drawings (Electrical, Plumbing, HVAC, Firefighting, Plantroom) → All Floor Layouts → Compiled
 6. **Drawing Verification**: Checklist → Complete? (reject loop)
 7. **MEP Review**: parallel: Reviews + Policy DB → Service Review → QC Checklist → QC Passed? (reject loop)
